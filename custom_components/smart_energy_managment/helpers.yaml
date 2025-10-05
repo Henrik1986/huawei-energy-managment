@@ -10,3 +10,7 @@ input_text:
     icon: mdi:solar-power
     pattern: "sensor.*"
     initial: ""
+
+
+
+
