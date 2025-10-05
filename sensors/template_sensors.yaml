@@ -1,5 +1,4 @@
 template:
-  # Battery-adjusted solar production
   - sensor:
       - name: "Solar Power (with efficiency loss)"
         unique_id: input_power_with_efficiency_loss_kW
@@ -18,8 +17,7 @@ template:
               {{ (inpower * 0.98 / 1000) | round(2) }}
           {% endif %}
 
-  # House Power
-  - sensor:
+
       - name: "House Power"
         unique_id: house_power
         unit_of_measurement: "kW"
