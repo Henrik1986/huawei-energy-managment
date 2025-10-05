@@ -1,6 +1,6 @@
 sensor:
   - platform: integration
     name: "house_power_tot"
-    source: sensor.house_power_excl_ev
+    source: sensor.house_power
     round: 2
     method: trapezoidal
