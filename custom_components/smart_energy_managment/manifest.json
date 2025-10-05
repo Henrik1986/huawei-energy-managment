@@ -1,0 +1,9 @@
+{
+  "domain": "smart_energy_managment",
+  "name": "huawei-energy-managment",
+  "version": "1.0.0",
+  "documentation": "https://github.com/Henrik1986/huawei-energy-managment",
+  "dependencies": [],
+  "codeowners": ["@Henrik1986"],
+  "requirements": []
+}
