@@ -1,0 +1,21 @@
+- platform: sql
+  queries:
+    - name: "Energy Avg Day"
+      query: >
+        SELECT AVG(e_kwh)/5.0 AS avg_kwh_per_hour
+        FROM (
+            SELECT
+                ( 
+                  MAX(CASE WHEN strftime('%H', datetime(start_ts, 'unixepoch', 'localtime'))='15' THEN sum ELSE 0 END)
+                  - 
+                  MAX(CASE WHEN strftime('%H', datetime(start_ts, 'unixepoch', 'localtime'))='10' THEN sum ELSE 0 END)
+                ) AS e_kwh
+            FROM statistics
+            INNER JOIN statistics_meta
+                ON statistics.metadata_id = statistics_meta.id
+            WHERE statistics_meta.statistic_id = 'sensor.energy_total_excl_ev'
+              AND datetime(start_ts, 'unixepoch') >= datetime('now','-3 day')
+            GROUP BY strftime('%Y-%m-%d', datetime(start_ts, 'unixepoch','localtime'))
+        )
+      column: avg_kwh_per_hour
+      unit_of_measurement: "kWh/h"
