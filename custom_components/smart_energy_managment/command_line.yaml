@@ -1,0 +1,12 @@
+- sensor:
+    scan_interval: 3610
+    name: "Solar Forecast West"
+    command: >
+      curl -s 'https://api.forecast.solar/estimate/{{ states("input_number.solar_lat") }}/{{ states("input_number.solar_lon") }}/{{ states("input_number.solar_dec") }}/{{ states("input_number.solar_az") }}/{{ states("input_number.solar_kwp") }}?time=iso8601' \
+      -H 'accept: text/csv' \
+      -H 'X-Delimiter: |' \
+      -H 'X-Separator: ;' \
+      | jq --raw-input '{ west: [(inputs | split(";")) | {label: .[0], date: .[1], values: .[2] | gsub("[\\r]"; "") | tonumber } ] | group_by(.label) | map({ key: (.[0].label), value: [.[] ] }) | from_entries }'
+    value_template: "OK"
+    json_attributes:
+      - west
