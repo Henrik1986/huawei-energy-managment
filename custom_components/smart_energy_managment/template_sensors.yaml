@@ -20,8 +20,8 @@ template:
 
   # House Power (excl. EV)
   - sensor:
-      - name: "House Power (excl. EV)"
-        unique_id: house_power_excl_ev
+      - name: "House Power"
+        unique_id: house_power
         unit_of_measurement: "kW"
         state: >
           {% set net_power = states('sensor.power_meter_active_power') | float(0) %}
