@@ -4,9 +4,3 @@ input_text:
     icon: mdi:car-electric
     pattern: "sensor.*"
     initial: ""
-
-  solar_sensor:
-    name: "Solar Production Sensor"
-    icon: mdi:solar-power
-    pattern: "sensor.*"
-    initial: ""
