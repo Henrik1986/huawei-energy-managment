@@ -1,0 +1,6 @@
+sensor:
+  - platform: integration
+    name: "Energy Total (excl. EV)"
+    source: sensor.house_power_excl_ev
+    round: 2
+    method: trapezoidal
