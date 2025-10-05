@@ -18,7 +18,7 @@ template:
               {{ (inpower * 0.98 / 1000) | round(2) }}
           {% endif %}
 
-  # House Power (excl. EV)
+  # House Power
   - sensor:
       - name: "House Power"
         unique_id: house_power
