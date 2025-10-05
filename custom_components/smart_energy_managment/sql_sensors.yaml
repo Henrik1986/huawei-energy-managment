@@ -12,7 +12,7 @@
         FROM statistics
         INNER JOIN statistics_meta
             ON statistics.metadata_id = statistics_meta.id
-        WHERE statistics_meta.statistic_id = 'sensor.house_power'
+        WHERE statistics_meta.statistic_id = 'sensor.house_power_tot'
           AND datetime(start_ts, 'unixepoch') >= datetime('now','-3 day')
         GROUP BY strftime('%Y-%m-%d', datetime(start_ts, 'unixepoch','localtime'))
     )
@@ -33,7 +33,7 @@
         FROM statistics
         INNER JOIN statistics_meta
             ON statistics.metadata_id = statistics_meta.id
-        WHERE statistics_meta.statistic_id = 'sensor.house_power'
+        WHERE statistics_meta.statistic_id = 'sensor.house_power_tot'
           AND datetime(start_ts, 'unixepoch') >= datetime('now','-3 day')
         GROUP BY strftime('%Y-%m-%d', datetime(start_ts, 'unixepoch','localtime'))
     )
@@ -54,7 +54,7 @@
         FROM statistics
         INNER JOIN statistics_meta
             ON statistics.metadata_id = statistics_meta.id
-        WHERE statistics_meta.statistic_id = 'sensor.house_power'
+        WHERE statistics_meta.statistic_id = 'sensor.house_power_tot'
           AND datetime(start_ts, 'unixepoch') >= datetime('now','-3 day')
         GROUP BY strftime('%Y-%m-%d', datetime(start_ts, 'unixepoch','localtime'))
     )
@@ -83,7 +83,7 @@
         FROM statistics
         INNER JOIN statistics_meta
             ON statistics.metadata_id = statistics_meta.id
-        WHERE statistics_meta.statistic_id = 'sensor.house_power'
+        WHERE statistics_meta.statistic_id = 'sensor.house_power_tot'
           AND datetime(start_ts, 'unixepoch') >= datetime('now','-3 day')
         GROUP BY strftime('%Y-%m-%d', datetime(start_ts, 'unixepoch','localtime'))
     )
