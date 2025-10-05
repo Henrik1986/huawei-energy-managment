@@ -1,10 +1,5 @@
-# Huawei-energy-managment
+# Smart energy-managment
 HACS package for Home Assistant to optimize your Huawei battery and solar panels. Control charging based on prices, battery state, and solar forecast to maximize self-consumption.
-
-# Smart Home Power
-
-A Home Assistant custom component for calculating house power consumption,
-optionally excluding EV charging and including solar production.
 
 ## Installation
 
