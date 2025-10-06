@@ -1,5 +1,5 @@
 sql:
-  - name: "Energy Avg Morning"
+  - name: "sem_energy_avg_morning"
     query: >
       SELECT AVG(e_kwh)/5.0 AS avg_kwh_per_hour
       FROM (
@@ -19,7 +19,7 @@ sql:
     column: avg_kwh_per_hour
     unit_of_measurement: "kWh/h"
 
-  - name: "Energy Avg Day"
+  - name: "sem_energy_avg_day"
     query: >
       SELECT AVG(e_kwh)/5.0 AS avg_kwh_per_hour
       FROM (
@@ -40,7 +40,7 @@ sql:
     unit_of_measurement: "kWh/h"
 
 
-  - name: "Energy Avg Evening"
+  - name: "sem_energy_avg_evening"
     query: >
       SELECT AVG(e_kwh)/7.0 AS avg_kwh_per_hour
       FROM (
@@ -61,7 +61,7 @@ sql:
     unit_of_measurement: "kWh/h"
 
 
-  - name: "Energy Avg Night"
+  - name: "sem_energy_avg_night"
     query: >
       SELECT AVG(e_kwh)/3.0 AS avg_kwh_per_hour
       FROM (
