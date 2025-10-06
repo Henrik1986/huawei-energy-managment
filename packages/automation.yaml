@@ -3,7 +3,7 @@ automation:
     mode: single
     trigger:
       - platform: state
-        entity_id: sem_binary_sensor.nordpool_tomorrow_prices_available
+        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
         from: "off"
         to: "on"
     action:
