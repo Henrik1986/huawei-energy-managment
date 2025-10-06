@@ -133,8 +133,8 @@ template:
           Price in cents: false
 
 # CHOOSES OFFICIAL OR INOFFICIAL NORDPOOL SENSOR
-      - name: "SEM Nordpool Sensor ID"
-        unique_id: sem_nordpool_sensor_id
+      - name: "sem_nordpool_sensor_id"
+        unique_id: "sem_nordpool_sensor_id"
         state: >
           {%- if is_state('input_boolean.sem_use_official_nordpool', 'on') -%}
             sensor.sem_nordpool_sensor_official
@@ -146,9 +146,9 @@ template:
 #FINDS CHARING WINDOW 1A
   - trigger:
     - trigger: state
-      entity_id: input_button.update_battery_cheapest_charge
+      entity_id: input_button.sem_update_battery_cheapest_charge
     sensor:
-    - name: "battery_charge_window_cheapest_1a"
+    - name: "sem_battery_charge_window_cheapest_1a"
       state: >
         {%- set duration = states('sensor.sem_battery_dynamic_charge_time') | float(0) %}
         {%- set duration_quarters = (duration * 4) | int %}
@@ -184,9 +184,9 @@ template:
 #FINDS CHARING WINDOW 1B
   - trigger:
     - trigger: state
-      entity_id: input_button.update_battery_cheapest_charge
+      entity_id: input_button.sem_update_battery_cheapest_charge
     sensor:
-    - name: "battery_charge_window_cheapest_1b"
+    - name: "sem_battery_charge_window_cheapest_1b"
       state: >
         {%- set duration = states('sensor.sem_battery_dynamic_charge_time') | float(0) %}
         {%- set numberOfSequentialQuarters = (duration * 4) | int %}
@@ -226,9 +226,9 @@ template:
 #FINDS CHARING WINDOW 2
   - trigger:
     - trigger: state
-      entity_id: input_button.update_battery_cheapest_charge
+      entity_id: input_button.sem_update_battery_cheapest_charge
     sensor:
-    - name: "battery_charge_window_cheapest_2"
+    - name: "sem_battery_charge_window_cheapest_2"
       state: >
         {%- set duration = states('sensor.sem_battery_dynamic_charge_time') | float(0) %}
         {%- set numberOfSequentialQuarters = (duration * 4) | int %}
@@ -269,3 +269,9 @@ template:
           Ingen giltigt intervall hittades
         {%- endif %}
 
+#CHECKS IF ELECTRIC PRICES ARE AVALIBLE
+  - binary_sensor:
+        - name: "sem_nordpool_tomorrow_prices_available"
+          unique_id: "sem_nordpool_tomorrow_prices_available"
+          state: >
+            {{ state_attr('sensor.YOUR_NORDPOOL_SENSOR', 'tomorrow_valid') == true }}
