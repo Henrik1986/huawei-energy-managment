@@ -18,6 +18,7 @@ template:
           {% else %}
               {{ (inpower * 0.98 / 1000) | round(2) }}
           {% endif %}
+      
 
 
       - name: "House Power"
@@ -44,6 +45,16 @@ template:
 
           {{ [house_power, 0] | max | round(2) }}
 
+# CHOOSES OFFICIAL OR INOFFICIAL NORDPOOL SENSOR
+      - name: "sem_nordpool_sensor_id"
+        unique_id: "sem_nordpool_sensor_id"
+        state: >
+          {%- if is_state('input_boolean.sem_use_official_nordpool', 'on') -%}
+            sensor.sem_nordpool_sensor_official
+          {%- else -%}
+            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
+          {%- endif -%}
+
 #CALCULATES CHARING TIME FROM 0-100%
       - name: "sem_battery_dynamic_charge_time"
         unit_of_measurement: "h"
@@ -54,6 +65,7 @@ template:
           {%- set charge_power_kw = charge_power_w / 1000 -%}
           {%- set required_hours = (capacity / charge_power_kw) | round(1) -%}
           {{ required_hours }}
+        
 
 # BUILDS A NORDPOOL SENSOR WITH THE OFFICIAL INTEGRATION
   - triggers:
@@ -130,16 +142,6 @@ template:
             {{ (current[0].price/1000) if current else 'unavailable' }}
           Additional costs current hour: 0
           Price in cents: false
-
-# CHOOSES OFFICIAL OR INOFFICIAL NORDPOOL SENSOR
-      - name: "sem_nordpool_sensor_id"
-        unique_id: "sem_nordpool_sensor_id"
-        state: >
-          {%- if is_state('input_boolean.sem_use_official_nordpool', 'on') -%}
-            sensor.sem_nordpool_sensor_official
-          {%- else -%}
-            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
-          {%- endif -%}
 
 
 #FINDS CHARING WINDOW 1A
