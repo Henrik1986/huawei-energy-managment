@@ -19,20 +19,21 @@ template:
 
 
       - name: "House Power"
-        unique_id: house_power
+        unique_id: sem_house_power
         unit_of_measurement: "kW"
         state: >
-          {% set net_power = states('sensor.power_meter_active_power') | float(0) %}
+          {# SENSOR FROM HUAWEI INTEGRATION #}
+          {% set net_power = states('sensor.power_meter_active_power') | float(0) %} 
           {% set import = -net_power if net_power < 0 else 0 %}
           {% set export = net_power if net_power > 0 else 0 %}
 
-          {% set ev_sensor_id = states('input_text.ev_sensor') %}
+          {% set ev_sensor_id = states('input_text.sem_ev_sensor') %}
           {% set ev_raw = states(ev_sensor_id) | float(0) if ev_sensor_id else 0 %}
           {% set ev = ev_raw / 1000 if ev_raw > 100 else ev_raw %}
 
-          {# Use solar sensor from above #}
-          {% set solar = states('sensor.input_power_with_efficiency_loss_kW') | float(0) %}
+          {% set solar = states('sensor.sem_input_power_with_efficiency_loss_kW') | float(0) %}
 
+          {# SENSOR FROM HUAWEI INTEGRATION #}
           {% set batt = states('sensor.batteries_charge_discharge_power') | float(0) %}
           {% set batt_out = -batt if batt < 0 else 0 %}
           {% set batt_in = batt if batt > 0 else 0 %}
