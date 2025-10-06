@@ -11,3 +11,5 @@ command_line:
       value_template: "OK"
       json_attributes:
         - west
+
+
