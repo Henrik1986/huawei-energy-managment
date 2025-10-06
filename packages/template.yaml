@@ -56,7 +56,6 @@ template:
           {{ required_hours }}
 
 # BUILDS A NORDPOOL SENSOR WITH THE OFFICIAL INTEGRATION
-template:
   - triggers:
       - trigger: time_pattern
         minutes: /15
