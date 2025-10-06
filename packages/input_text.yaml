@@ -22,7 +22,7 @@ input_text:
     description: "Enter the area code for the official Nordpool sensor (e.g., SE4)."
 
 
-  nordpool_sensor:
-    name: "Nordpool sensor"
+  sem_nordpool_sensor_inofficial:
+    name: "Nordpool sensor inofficial"
     initial: "sensor.nordpool_kwh_se4_sek_1_10_0"
     max: 100
