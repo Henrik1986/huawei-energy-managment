@@ -6,6 +6,7 @@ template:
         device_class: power
         state_class: measurement
         state: >-
+          {# SENSOR FROM HUAWEI INTEGRATION #}
           {% set inverter_rating = 10000 %}  {# W #}
           {% set inpower = states('sensor.inverter_input_power') | float(0) %} 
 
