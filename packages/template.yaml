@@ -7,7 +7,7 @@ template:
         state_class: measurement
         state: >-
           {% set inverter_rating = 10000 %}  {# W #}
-          {% set inpower = states('sensor.inverter_input_power') | float(0) %}
+          {% set inpower = states('sensor.inverter_input_power') | float(0) %} 
 
           {% if inpower < (inverter_rating * 0.1) %}
               {{ (inpower * 0.90 / 1000) | round(2) }}
