@@ -9,6 +9,7 @@ template:
           {# SENSOR FROM HUAWEI INTEGRATION #}
           {% set inverter_rating = 10000 %}  {# W #}
           {% set inpower = states('sensor.inverter_input_power') | float(0) %} 
+          {# SENSOR FROM HUAWEI INTEGRATION #}
 
           {% if inpower < (inverter_rating * 0.1) %}
               {{ (inpower * 0.90 / 1000) | round(2) }}
@@ -142,7 +143,7 @@ template:
           {%- endif -%}
 
 
-#FINDS CHARINGWINDOW 1A
+#FINDS CHARING WINDOW 1A
   - trigger:
     - trigger: state
       entity_id: input_button.update_battery_cheapest_charge
@@ -180,7 +181,7 @@ template:
           unavailable
         {%- endif %}
 
-#FINDS CHARINGWINDOW 1B
+#FINDS CHARING WINDOW 1B
   - trigger:
     - trigger: state
       entity_id: input_button.update_battery_cheapest_charge
@@ -222,7 +223,7 @@ template:
           Inget lämpligt intervall hittades.
         {%- endif %}
 
-#FINDS CHARINGWINDOW 2
+#FINDS CHARING WINDOW 2
   - trigger:
     - trigger: state
       entity_id: input_button.update_battery_cheapest_charge
