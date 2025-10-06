@@ -274,4 +274,4 @@ template:
         - name: "sem_nordpool_tomorrow_prices_available"
           unique_id: "sem_nordpool_tomorrow_prices_available"
           state: >
-            {{ state_attr('sensor.YOUR_NORDPOOL_SENSOR', 'tomorrow_valid') == true }}
+            {{ state_attr('sensor.sem_nordpool_sensor_id', 'tomorrow_valid') == true }}
