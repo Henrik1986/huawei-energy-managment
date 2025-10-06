@@ -1,0 +1,28 @@
+input_text:
+  ev_sensor:
+    name: "EV Charger Sensor"
+    icon: mdi:car-electric
+    pattern: "sensor.*"
+    initial: ""
+    
+  sem_nordpool_config_entry_official:
+    name: "SEM Nordpool Config Entry (Official)"
+    icon: mdi:account-key
+    initial: ""
+    max: 100
+    mode: text
+    description: "Enter your Nordpool config entry here. Only used for the official Nordpool integration."
+
+  sem_nordpool_area_official:
+    name: "SEM Nordpool Area (Official)"
+    icon: mdi:map-marker
+    initial: "SE4"
+    max: 10
+    mode: text
+    description: "Enter the area code for the official Nordpool sensor (e.g., SE4)."
+
+
+  nordpool_sensor:
+    name: "Nordpool sensor"
+    initial: "sensor.nordpool_kwh_se4_sek_1_10_0"
+    max: 100
