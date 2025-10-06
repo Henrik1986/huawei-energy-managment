@@ -1,5 +1,5 @@
 input_number:
-  battery_total_capacity_kwh:
+  sem_battery_total_capacity_kwh:
     name: "Battery total capacity (kWh)"
     min: 0
     max: 50
