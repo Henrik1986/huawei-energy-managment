@@ -1,6 +1,6 @@
 template:
   - sensor:
-      - name: "Solar Power (with efficiency loss)"
+      - name: "sem_input_power_with_efficiency_loss_kW"
         unique_id: sem_input_power_with_efficiency_loss_kW
         unit_of_measurement: "kW"
         device_class: power
@@ -21,7 +21,7 @@ template:
       
 
 
-      - name: "House Power"
+      - name: "sem_house_power"
         unique_id: sem_house_power
         unit_of_measurement: "kW"
         state: >
@@ -93,7 +93,7 @@ template:
           currency: SEK
         response_variable: tomorrow_price
     sensor:
-      - name: "SEM Nordpool Sensor (Official)"
+      - name: "sem_nordpool_sensor_official"
         unique_id: sem_nordpool_sensor_official
         unit_of_measurement: "SEK/kWh"
         device_class: monetary
