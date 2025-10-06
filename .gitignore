@@ -1,18 +1,4 @@
-# Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
-*$py.class
-
-# macOS
 .DS_Store
-
-# Windows
-Thumbs.db
-
-# Home Assistant
-.homeassistant/
-.secrets.yaml
 *.log
-
-# VSCode
-.vscode/
+*.tmp
