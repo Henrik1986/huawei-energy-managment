@@ -46,7 +46,7 @@ template:
       - name: "sem_battery_dynamic_charge_time"
         unit_of_measurement: "h"
         state: >
-          {%- set capacity = states('input_number.battery_total_capacity_kwh') | float(0) -%}
+          {%- set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) -%}
           {%- set charge_power_w = states('number.batteries_maximum_charging_power') | float(0) -%}
           {%- set charge_power_kw = charge_power_w / 1000 -%}
           {%- set required_hours = (capacity / charge_power_kw) | round(1) -%}
