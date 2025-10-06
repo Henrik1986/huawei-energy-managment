@@ -1,12 +1,4 @@
 input_number:
-  sem_battery_total_capacity_kwh:
-    name: "Battery total capacity (kWh)"
-    min: 0
-    max: 50
-    step: 0.1
-    unit_of_measurement: "kWh"
-    mode: box
-    initial: 14
 
   sem_battery_total_capacity_kwh:
     name: "Battery – Total Capacity"
