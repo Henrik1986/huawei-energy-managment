@@ -1,7 +1,7 @@
 template:
   - sensor:
       - name: "Solar Power (with efficiency loss)"
-        unique_id: input_power_with_efficiency_loss_kW
+        unique_id: sem_input_power_with_efficiency_loss_kW
         unit_of_measurement: "kW"
         device_class: power
         state_class: measurement
