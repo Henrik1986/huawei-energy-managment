@@ -7,7 +7,23 @@ input_number:
     unit_of_measurement: "kWh"
     mode: box
     initial: 14
-  
+
+  sem_battery_total_capacity_kwh:
+    name: "Battery – Total Capacity"
+    min: 0
+    max: 100
+    step: 0.1
+    mode: box
+    unit_of_measurement: "kWh"
+
+  sem_battery_price_limit_supercheap:
+    name: "Battery – Price Limit (Supercheap)"
+    min: 0
+    max: 5
+    step: 0.01
+    mode: box
+    unit_of_measurement: "SEK/kWh"
+
   sem_solar_lat:
     name: "Solar Latitude"
     initial: 59.33
