@@ -51,6 +51,87 @@ template:
           {%- set required_hours = (capacity / charge_power_kw) | round(1) -%}
           {{ required_hours }}
 
+
+template:
+  - triggers:
+      - trigger: time_pattern
+        minutes: /15
+      - trigger: homeassistant
+        event: start
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_use_official_nordpool
+        state: "on"
+    actions:
+      - action: nordpool.get_prices_for_date
+        data:
+          config_entry: "{{ states('input_text.sem_nordpool_config_entry_official') }}"
+          date: "{{ now().date() }}"
+          areas: "{{ states('input_text.sem_nordpool_area_official') }}"
+          currency: SEK
+        response_variable: today_price
+      - action: nordpool.get_prices_for_date
+        data:
+          config_entry: "{{ states('input_text.sem_nordpool_config_entry_official') }}"
+          date: "{{ now().date() + timedelta(days=1) }}"
+          areas: "{{ states('input_text.sem_nordpool_area_official') }}"
+          currency: SEK
+        response_variable: tomorrow_price
+
+    sensor:
+      - name: "SEM Nordpool Sensor (Official)"
+        unique_id: sem_nordpool_sensor_official
+        unit_of_measurement: "SEK/kWh"
+        device_class: monetary
+        state: >
+          {% set area = states('input_text.sem_nordpool_area_official') %}
+          {% set current = today_price[area] | selectattr('start','<=', now()) | selectattr('end','>', now()) | list %}
+          {{ (current[0].price/1000) if current else 'unavailable' }}
+        attributes:
+          Average: >
+            {{ (today_price[area] | map(attribute='price') | map('float') | sum / (today_price[area] | length) / 1000) | round(2) }}
+          Off peak 1: >
+            {{ (today_price[area][0:8] | map(attribute='price') | map('float') | sum / 8 / 1000) | round(2) }}
+          Off peak 2: >
+            {{ (today_price[area][20:24] | map(attribute='price') | map('float') | sum / 4 / 1000) | round(2) }}
+          Peak: >
+            {{ (today_price[area][8:20] | map(attribute='price') | map('float') | sum / 12 / 1000) | round(2) }}
+          Min: >
+            {{ (today_price[area] | map(attribute='price') | map('float') | min / 1000) | round(2) }}
+          Max: >
+            {{ (today_price[area] | map(attribute='price') | map('float') | max / 1000) | round(2) }}
+          Mean: >
+            {{ (today_price[area] | map(attribute='price') | map('float') | sum / (today_price[area] | length) / 1000) | round(2) }}
+          Unit: kWh
+          Currency: SEK
+          Country: Sweden
+          Region: "{{ area }}"
+          Low price: >
+            {{ (today_price[area] | map(attribute='price') | map('float') | min / 1000) <
+               (today_price[area] | map(attribute='price') | map('float') | sum / (today_price[area] | length) / 1000) }}
+          Price percent to average: >
+            {% set avg = (today_price[area] | map(attribute='price') | map('float') | sum / (today_price[area] | length)) %}
+            {% set current = today_price[area] | selectattr('start','<=', now()) | selectattr('end','>', now()) | list %}
+            {{ ((current[0].price / avg) | round(2)) if current else 'unavailable' }}
+          Today: >
+            {{ today_price[area] | map(attribute='price') | map('float') | map('multiply', 0.001) | list }}
+          Tomorrow: >
+            {{ tomorrow_price[area] | map(attribute='price') | map('float') | map('multiply', 0.001) | list if tomorrow_price is defined else [] }}
+          Tomorrow valid: >
+            {{ tomorrow_price is defined }}
+          Raw today: >
+            {{ today_price[area] }}
+          Raw tomorrow: >
+            {{ tomorrow_price[area] if tomorrow_price is defined else [] }}
+          Current price: >
+            {% set current = today_price[area] | selectattr('start','<=', now()) | selectattr('end','>', now()) | list %}
+            {{ (current[0].price/1000) if current else 'unavailable' }}
+          Additional costs current hour: 0
+          Price in cents: false
+
+
+
+
   - trigger:
     - trigger: state
       entity_id: input_button.update_battery_cheapest_charge
