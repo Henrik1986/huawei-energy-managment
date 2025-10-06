@@ -1,15 +1,3 @@
-input_text:
-  ev_sensor:
-    name: "EV Charger Sensor"
-    icon: mdi:car-electric
-    pattern: "sensor.*"
-    initial: ""
-
-  nordpool_sensor:
-    name: "Nordpool sensor"
-    initial: "sensor.nordpool_kwh_se4_sek_1_10_0"
-    max: 100
-
 input_number:
   battery_total_capacity_kwh:
     name: "Battery total capacity (kWh)"
