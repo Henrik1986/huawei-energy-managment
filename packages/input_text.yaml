@@ -1,5 +1,5 @@
 input_text:
-  ev_sensor:
+  sem_ev_sensor:
     name: "EV Charger Sensor"
     icon: mdi:car-electric
     pattern: "sensor.*"
@@ -20,7 +20,6 @@ input_text:
     max: 10
     mode: text
     description: "Enter the area code for the official Nordpool sensor (e.g., SE4)."
-
 
   sem_nordpool_sensor_inofficial:
     name: "Nordpool sensor inofficial"
