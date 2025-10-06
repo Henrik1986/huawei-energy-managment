@@ -1,0 +1,8 @@
+{
+  "name": "Huawei Battery Control",
+  "content_in_root": false,
+  "filename": "README.md",
+  "render_readme": true,
+  "domains": ["homeassistant"],
+  "country": "SE"
+}
