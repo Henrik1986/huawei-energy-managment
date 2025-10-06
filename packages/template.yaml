@@ -130,6 +130,25 @@ template:
           Price in cents: false
 
 
+      
+      - name: "SEM Nordpool Active Sensor"
+        unique_id: sem_nordpool_active_sensor
+        unit_of_measurement: "SEK/kWh"
+        device_class: monetary
+        state: >
+          {% if is_state('input_boolean.sem_use_official_nordpool', 'on') %}
+            {{ states('sensor.sem_nordpool_sensor_official') }}
+          {% else %}
+            {{ states('sensor.sem_nordpool_sensor_inofficial') }}
+          {% endif %}
+        attributes:
+          source: >
+            {% if is_state('input_boolean.sem_use_official_nordpool', 'on') %}
+              official
+            {% else %}
+              inofficial
+            {% endif %}
+
 
 
   - trigger:
