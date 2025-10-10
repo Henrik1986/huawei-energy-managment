@@ -14,10 +14,10 @@ Installera följande integrationer från HACS
 - Layout-card
 - Stack-In-Card
 
-### Step 4
+### Steg 4
 Skapa en ny vy och klicka på prickarna uppe till höger. Välj redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
 
-
-## Sensors
+### Steg 5
+Lägg till följande rad i din configuration fil. Observera inhoppet och att det ska ligga direkt under Home Assistant 
 
 
