@@ -1,24 +1,36 @@
-de# Smart energy-managment
+Smart Energy Managment
 HACS package for Home Assistant to optimize your Huawei battery and solar panels. Control charging based on prices, battery state, and solar forecast to maximize self-consumption.
 
 ## Installation
 ### Steg 1
-Installera och Huawei integrationen och konfigurera 
+Installera och konfigurera Huawei integrationen. 
 
 ### Steg 2
-Installera SMHI integrationen och konfiguerar det utifrån din position. ä
+Installera och konfigurera SMHI integrationen. 
 
 ### Steg 3
-Installera följande integrationer från HACS
+Installera integrationer från HACS
 - Apexcharts-card
 - Layout-card
 - Stack-In-Card
 
 ### Steg 4
-Lägg till följande rad i din configuration fil. Observera inhoppet och att det ska ligga direkt under Home Assistant 
+Lägg till nedanstående rad i din configuration fil. 
+
+Note
+Observera indenteringen och att det ligger direkt under Home Assistant 
 
 #### Steg 5
-Ladda ner innehållet i mappen package och ladda upp innehpllet i en mapp som du också ger namnet package. Lägg mappen i den huvudmapp. 
+Skapa en mapp som du döper till package.
 
-### Steg 4
+### Steg 6
+Ladda upp innehållet från mappen package till din mapp med samma namn. 
+
+### Steg 7
 Skapa en ny vy och klicka på prickarna uppe till höger. Välj redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
+
+### Steg 8
+Starta om Home Assistant 
+
+### Steg 9
+Klicka in på din nya vy och starta konfigurationen genom att klicka på ....
