@@ -6,11 +6,16 @@ HACS package for Home Assistant to optimize your Huawei battery and solar panels
 Installera och Huawei integrationen och konfigurera 
 
 ### Steg 2
-Installera följande integrationer fråb HACS
-- 
+Installera SMHI integrationen och konfiguerar det utifrån din position. ä
 
-### Step 3
-Lägg till en ny vy och klicka på prickarna uppe till höger. Välj sen redigera i yaml. Här klistrar du in innehållet som finns i filen admin_vy.yaml
+### Steg 3
+Installera följande integrationer från HACS
+- Apexcharts-card
+- Layout-card
+- Stack-In-Card
+
+### Step 4
+Skapa en ny vy och klicka på prickarna uppe till höger. Välj redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
 
 
 ## Sensors
