@@ -27,6 +27,11 @@ Installera integrationer från HACS
 ### Steg 4
 Lägg till nedanstående rad i din configuration fil. 
 
+```yml
+homeassistant:
+  packages: !include_dir_named packages
+```
+
 Note
 Observera indenteringen och att det ligger direkt under Home Assistant 
 
