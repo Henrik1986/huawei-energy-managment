@@ -11,6 +11,8 @@ Bilden ovan visar adminvyn via Home Assistant
 ### Steg 1
 Installera och konfigurera [Huawei Solar Integration](https://github.com/wlcrs/huawei_solar)
 
+<a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=https%3A%2F%2Fgithub.com%2Fwlcrs%2Fhuawei_solar" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
+
 ### Steg 2
 Installera och konfigurera [SMHI integrationen]((https://www.home-assistant.io/integrations/smhi/))
 
