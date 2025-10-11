@@ -16,6 +16,8 @@ Installera och konfigurera [Huawei Solar Integration](https://github.com/wlcrs/h
 ### Steg 2
 Installera och konfigurera [SMHI integrationen]((https://www.home-assistant.io/integrations/smhi/))
 
+<a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=https%3A%2F%2Fwww.home-assistant.io%2Fintegrations%2Fsmhi%2F" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
+
 ### Steg 3
 Installera integrationer från HACS
 - Apexcharts-card
