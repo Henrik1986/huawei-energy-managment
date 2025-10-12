@@ -49,4 +49,7 @@ Starta om Home Assistant
 Klicka in på din nya vy och starta konfigurationen genom att klicka på Inställningar
 
 ## Uppdateringar
-Då det inte är en integration utan ett packet av yaml-filer kommer uppdateringar inte automatiskt till din enhet. Uppdateringar kommer att laddas upp här och du behöver ersätta filerna i din setup varje gång. Din setup kommer inte att påverkas, men om det har förändrats något kommer jag att skriva ut detta i varje realse. 
+Då detta inte är en integration utan ett packet av yaml-filer kommer uppdateringar inte automatiskt till Home Assistant. Uppdateringar kommer att laddas upp här och du behöver ersätta filerna i din setup varje gång. Skulle några ändringar gjorts som du behöver ta hänsyn till kommer jag att skriva ut dessa vid varje ny realase.
+
+## Framtida funktioner
+Då jag underhåller koden kommer nya uppdateringar att skickas ut med jämna mellanrum, men önska gärna en funktion här på Github. 
