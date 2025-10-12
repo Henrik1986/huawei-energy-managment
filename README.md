@@ -16,9 +16,9 @@ Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/in
 <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=smhi" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
 
 ### Steg 3
-Installera integrationer från HACS
-- Apexcharts-card (för att kunna visa grfen)
-- Layout-card (flera kort i adminvyn kräver detta tillägg).
+Installera följande integrationer från HACS för att kunna visa energivyn
+- Apexcharts-card 
+- Layout-card
 - Vertical-stack-in-card
 
 Har du inte HACS? 
@@ -32,16 +32,16 @@ homeassistant:
   packages: !include_dir_named packages
 ```
 > [!IMPORTANT]
-Observera indenteringen och att det ligger direkt under Home Assistant 
+> Observera indenteringen och direkt under Home Assistant. 
 
 ### Steg 5
-Skapa en mapp på din Home Assistant som du döper till package.
+Skapa en mapp på samma ställe som du hittar din configuration.yaml. Döp mappen till packages. 
 
 ### Steg 6
-Ladda upp innehållet från mappen package på Github till din mapp på din setup med samma namn. 
+Ladda upp innehållet från mappen package på Github till mappen du precis skapade. 
 
 ### Steg 7
-Skapa en ny vy och klicka på penna upp till höger och klicka sen på pluset. Klicka sen på de tre prickarna i rutan du fick och och välj redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
+Skapa en ny vy i Home Assistant genom att klicka på penna upp till höger och klicka sen på pluset. I rutan du fick upp ska du nu klicka på de tre prickarna upp till höger och välja redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
 
 ### Steg 8
 Starta om Home Assistant 
@@ -49,8 +49,11 @@ Starta om Home Assistant
 ### Steg 9
 Klicka in på din nya vy och starta konfigurationen genom att klicka på Inställningar
 
-## Uppdateringar
+> [!NOTE]
+> Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. 
+
+## Uppdateringar :loudspeaker:
 Då detta inte är en integration utan ett packet av yaml-filer kommer uppdateringar inte automatiskt till Home Assistant. Uppdateringar kommer att laddas upp här och du behöver ersätta filerna i din setup varje gång. Skulle några ändringar gjorts som du behöver ta hänsyn till kommer jag att skriva ut dessa vid varje ny realase.
 
-## Framtida funktioner
+## Framtida funktioner :raising_hand:
 Då jag underhåller koden kommer nya uppdateringar att skickas ut med jämna mellanrum, men önska gärna en funktion här på Github. 
