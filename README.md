@@ -19,6 +19,7 @@ Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/in
 Installera integrationer från HACS
 - Apexcharts-card (för att kunna visa grfen)
 - Layout-card (flera kort i adminvyn kräver detta tillägg).
+- Vertical-stack-in-card
 
 Har du inte HACS? 
 Följ instruktionerna [här](https://www.hacs.xyz/docs/use/configuration/basic/)
