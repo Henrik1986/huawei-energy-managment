@@ -4,9 +4,6 @@ HACS package for Home Assistant to optimize your Huawei battery and solar panels
 <img width="1850" height="742" alt="Skärmbild 2025-10-11 163741" src="https://github.com/user-attachments/assets/8c306b50-f229-4a00-bfe9-e61b41ed0f2f" />
 Bilden ovan visar adminvyn via Home Assistant
 
-> [!IMPORTANT]
-> You have du adjust the code to your setup.
-
 ## Installation
 ### Steg 1
 Installera och konfigurera [Huawei Solar Integration](https://github.com/wlcrs/huawei_solar)
@@ -14,38 +11,39 @@ Installera och konfigurera [Huawei Solar Integration](https://github.com/wlcrs/h
 <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=huawei_solar" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
 
 ### Steg 2
-Installera och konfigurera [SMHI integrationen]((https://www.home-assistant.io/integrations/smhi/))
+Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
 
 <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=smhi" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
 
 ### Steg 3
 Installera integrationer från HACS
-- Apexcharts-card
-- Layout-card
-- Stack-In-Card
+- Apexcharts-card (för att kunna visa grfen)
+- Layout-card (flera kort i adminvyn kräver detta tillägg).
+
+Har du inte HACS? 
+Följ instruktuineran [här](https://www.hacs.xyz/docs/use/configuration/basic/)
 
 ### Steg 4
-Lägg till nedanstående rad i din configuration fil. 
+Lägg till nedanstående rad i configuration.yaml. 
 
 ```yml
 homeassistant:
   packages: !include_dir_named packages
 ```
-
-Note
+> [!IMPORTANT]
 Observera indenteringen och att det ligger direkt under Home Assistant 
 
 #### Steg 5
-Skapa en mapp som du döper till package.
+Skapa en mapp på din Home Assistant som du döper till package.
 
 ### Steg 6
-Ladda upp innehållet från mappen package till din mapp med samma namn. 
+Ladda upp innehållet från mappen package på Github till din mapp på din setup med samma namn. 
 
 ### Steg 7
-Skapa en ny vy och klicka på prickarna uppe till höger. Välj redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
+Skapa en ny vy och klicka på penna upp till höger och klicka sen på pluset. Klicka sen på de tre prickarna i rutan du fick och och välj redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
 
 ### Steg 8
 Starta om Home Assistant 
 
 ### Steg 9
-Klicka in på din nya vy och starta konfigurationen genom att klicka på ....
+Klicka in på din nya vy och starta konfigurationen genom att klicka på Inställningar
