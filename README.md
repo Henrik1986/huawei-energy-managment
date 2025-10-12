@@ -40,17 +40,17 @@ homeassistant:
 > [!IMPORTANT]
 > Note the indentation — it should be placed directly under Home Assistant.
 
-### Steg 5
-Skapa en mapp på samma ställe som du hittar din configuration.yaml. Döp mappen till packages. 
+### Step 5
+Create a folder in the same location as your configuration.yaml file and name it packages.
 
-### Steg 6
-Ladda upp innehållet från mappen package på Github till mappen du precis skapade. 
+### Step 6
+Upload the contents from the package folder on GitHub to the folder you just created.
 
-### Steg 7
-Skapa en ny vy i Home Assistant genom att klicka på penna upp till höger och klicka sen på pluset. I rutan du fick upp ska du nu klicka på de tre prickarna upp till höger och välja redigera i yaml. Klistra in innehållet som finns i filen admin_vy.yaml
+### Step 7
+Create a new view in Home Assistant by clicking the pencil icon in the top right, then click the plus (+). In the dialog that appears, click the three dots in the top right and choose Edit in YAML. Paste the contents from the admin_vy.yaml file.
 
-### Steg 8
-Starta om Home Assistant 
+### Step 8
+Restart Home Assistant.
 
 ### Steg 9
 Klicka in på din nya vy och starta konfigurationen genom att klicka på Inställningar
