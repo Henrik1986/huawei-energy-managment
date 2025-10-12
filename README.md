@@ -53,7 +53,10 @@ Klicka in på din nya vy och starta konfigurationen genom att klicka på Instäl
 > Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. 
 
 ## Uppdateringar :loudspeaker:
-Då detta inte är en integration utan ett packet av yaml-filer kommer uppdateringar inte automatiskt till Home Assistant. Uppdateringar kommer att laddas upp här och du behöver ersätta filerna i din setup varje gång. Skulle några ändringar gjorts som du behöver ta hänsyn till kommer jag att skriva ut dessa vid varje ny realase.
+Detta är ingen integration och därför kommer inga uppdateringar automatiskt till Home Assitant. För att få information om en ny realse är det lättast att "följa" min repo. För att uppdatera din kod gör du om steg 6 och startar om Home Assistant. I varje realse står det vilka nya funktioner som finns, men även vilka uppdateringar som gjort och om några ändringar behövs göras. 
 
 ## Framtida funktioner :raising_hand:
-Då jag underhåller koden kommer nya uppdateringar att skickas ut med jämna mellanrum, men önska gärna en funktion här på Github. 
+Önska gärna nya funktioner här på Github under discussion. 
+
+## Problem :bangbang:
+Upptäcker du något problem är jag tacksam om du rapporterar det här på Github under issues.
