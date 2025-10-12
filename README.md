@@ -21,7 +21,7 @@ Installera integrationer från HACS
 - Layout-card (flera kort i adminvyn kräver detta tillägg).
 
 Har du inte HACS? 
-Följ instruktuineran [här](https://www.hacs.xyz/docs/use/configuration/basic/)
+Följ instruktionerna [här](https://www.hacs.xyz/docs/use/configuration/basic/)
 
 ### Steg 4
 Lägg till nedanstående rad i configuration.yaml. 
@@ -33,7 +33,7 @@ homeassistant:
 > [!IMPORTANT]
 Observera indenteringen och att det ligger direkt under Home Assistant 
 
-#### Steg 5
+### Steg 5
 Skapa en mapp på din Home Assistant som du döper till package.
 
 ### Steg 6
@@ -47,3 +47,6 @@ Starta om Home Assistant
 
 ### Steg 9
 Klicka in på din nya vy och starta konfigurationen genom att klicka på Inställningar
+
+## Uppdateringar
+Då det inte är en integration utan ett packet av yaml-filer kommer uppdateringar inte automatiskt till din enhet. Uppdateringar kommer att laddas upp här och du behöver ersätta filerna i din setup varje gång. Din setup kommer inte att påverkas, men om det har förändrats något kommer jag att skriva ut detta i varje realse. 
