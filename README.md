@@ -8,38 +8,37 @@ The package also:
 - Sells battery surplus when it’s economically profitable
 
 <img width="1850" height="742" alt="Skärmbild 2025-10-11 163741" src="https://github.com/user-attachments/assets/8c306b50-f229-4a00-bfe9-e61b41ed0f2f" />
-
-
-## Installation
-### Steg 1
-Installera och konfigurera [Huawei Solar Integration](https://github.com/wlcrs/huawei_solar)
-
-<a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=huawei_solar" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
 View in Home Assistant.
 
-### Steg 2
-Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
+## Installation
+### Step 1
+Install and configure [Huawei Solar Integration](https://github.com/wlcrs/huawei_solar)
+
+<a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=huawei_solar" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
+
+### Step 2
+Install and configure [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
 
 <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=smhi" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
 
-### Steg 3
-Installera följande integrationer från HACS för att kunna visa energivyn
+### Step 3
+Install the following integrations from HACS (to enable the view)
 - Apexcharts-card 
 - Layout-card
 - Vertical-stack-in-card
 
-Har du inte HACS? 
-Följ instruktionerna [här](https://www.hacs.xyz/docs/use/configuration/basic/)
+Don’t have HACS?
+Follow the instructions [here](https://www.hacs.xyz/docs/use/configuration/basic/)
 
-### Steg 4
-Lägg till nedanstående rad i configuration.yaml. 
+### Step 4
+Add the following line to your configuration.yaml.
 
 ```yml
 homeassistant:
   packages: !include_dir_named packages
 ```
 > [!IMPORTANT]
-> Observera indenteringen och direkt under Home Assistant. 
+> Note the indentation — it should be placed directly under Home Assistant.
 
 ### Steg 5
 Skapa en mapp på samma ställe som du hittar din configuration.yaml. Döp mappen till packages. 
