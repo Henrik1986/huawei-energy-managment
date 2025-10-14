@@ -1,4 +1,0 @@
-input_button:
-  sem_update_battery_cheapest_charge:
-    name: "Update Battery Cheapest Charge"
-    icon: mdi:flash

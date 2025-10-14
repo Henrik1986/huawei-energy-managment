@@ -1,6 +1,0 @@
-input_boolean:
-  sem_use_official_nordpool:
-    name: "Use Official Nordpool Sensor"
-    icon: mdi:check-circle-outline
-    initial: true
-    description: "Enable this if you use the official Nordpool sensor. If disabled, the official automation will not run."

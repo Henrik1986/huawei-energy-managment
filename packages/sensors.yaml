@@ -1,6 +1,0 @@
-sensor:
-  - platform: integration
-    name: "sem_house_power_tot"
-    source: sensor.sem_house_power
-    round: 2
-    method: trapezoidal
