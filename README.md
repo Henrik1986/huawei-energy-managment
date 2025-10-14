@@ -79,8 +79,7 @@ Starta om Home Assistant och nu kan du starta konfigurationen genom att klicka p
 Paketet kommer att uppdateras automatiskt en gång i veckan. Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Det du manuellt behöver uppdatera är din "konfigurationsvy". Om detta är nödvändigt kommer även detta stå i realsen. 
 
 > [!NOTE]
-> Kontrollera din setup via utvecklarvyn innan du startar om.
-För att uppdateringarna ska bli tillgängliga hos dig krävs en omstart av Home Assistant. 
+> För att nya funktioner ska bli tillgängliga hos dig krävs en omstart av Home Assistant. 
 
 ## Framtida funktioner :raising_hand:
 Har du idéer på nya funktioner? Lämna gärna dina förslag på GitHub under ”Discussions”.
