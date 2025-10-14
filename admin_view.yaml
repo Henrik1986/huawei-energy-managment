@@ -1,0 +1,1328 @@
+type: sidebar
+path: ""
+cards:
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_setting_view
+        state: "off"
+    card:
+      type: energy-distribution
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_setting_view
+        state: "off"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: custom:vertical-stack-in-card
+          cards:
+            - type: heading
+              icon: mdi:chart-areaspline
+              heading: Spotpris 48h
+              heading_style: title
+            - type: custom:apexcharts-card
+              update_interval: 5 min
+              graph_span: 48h
+              cache: false
+              span:
+                start: day
+                offset: +0H
+              header:
+                title: Spotpris 48h ink moms
+                show: false
+                show_states: false
+                colorize_states: true
+              hours_12: false
+              stacked: false
+              experimental:
+                color_threshold: true
+              yaxis:
+                - id: spotpris
+                  opposite: false
+                  show: true
+                  decimals: 1
+                  min: 0
+                  apex_config:
+                    title:
+                      text: Elpris (SEK/kWh)
+                - id: solar_power
+                  opposite: true
+                  show: false
+                - id: charge/expensive
+                  opposite: true
+                  show: false
+              apex_config:
+                chart:
+                  height: 255
+                  animations:
+                    enabled: true
+                    easing: easeinout
+                    speed: 800
+                    animateGradually:
+                      enabled: true
+                      delay: 150
+                legend:
+                  show: true
+                  floating: false
+                  offsetY: 5
+                  position: bottom
+                  fontSize: 10px
+                tooltip:
+                  enabled: false
+                xaxis:
+                  labels:
+                    show: true
+                    rotate: 0
+                    rotateAlways: true
+                    logarithmic: false
+                stroke:
+                  width: 1
+                plotOptions:
+                  candlestick:
+                    colors:
+                      upward: "#00B746"
+                      downward: "#EF403C"
+                    wick:
+                      useFillColor: true
+              all_series_config:
+                show:
+                  legend_value: false
+                  datalabels: false
+                  in_brush: false
+                float_precision: 3
+                invert: false
+                fill_raw: last
+              now:
+                show: true
+                label: NU
+                color: red
+              series:
+                - entity: sensor.solar_forecast_west
+                  yaxis_id: solar_power
+                  data_generator: |
+                    return entity.attributes.west.watts.map((entry) => {
+                      return [new Date(entry.date), entry.values / 1000]; // Konvertera till kWh
+                    });
+                  name: Solel
+                  type: area
+                  color: orange
+                  opacity: 0.7
+                  stroke_width: 3
+                  color_threshold:
+                    - value: 0
+                      color: "#fff9c4"
+                    - value: 5
+                      color: "#ffeb3b"
+                    - value: 15
+                      color: "#fbc02d"
+                - entity: sensor.nordpool_kwh_se4_sek_1_10_0
+                  yaxis_id: spotpris
+                  type: area
+                  name: Idag
+                  opacity: 0.7
+                  color: grey
+                  extend_to: false
+                  data_generator: >
+                    const data = entity.attributes.raw_today.map((start, index)
+                    => {
+                      return [new Date(start["start"]).getTime(), start["value"]];
+                    });
+
+                    const last = entity.attributes.raw_today.slice(-1)[0];
+
+                    const lastTime = new Date(last["start"]).getTime();
+
+                    data.push([lastTime + 3600000, last["value"]]); // 
+
+                    return data;
+                  color_threshold:
+                    - value: -1
+                      color: 1E90FF
+                    - value: 0.5
+                      color: "008000"
+                    - value: 1
+                      color: DAA520
+                    - value: 2
+                      color: FF0000
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: true
+                    in_brush: false
+                    in_legend: false
+                - entity: sensor.nordpool_kwh_se4_sek_1_10_0
+                  yaxis_id: spotpris
+                  name: Imorgon
+                  type: area
+                  opacity: 0.7
+                  color: grey
+                  data_generator: >
+                    const data = entity.attributes.raw_tomorrow.map((start,
+                    index) => {
+                      return [new Date(start["start"]).getTime(), start["value"]];
+                    });
+
+                    const last = entity.attributes.raw_tomorrow.slice(-1)[0];
+                    const lastTime = new Date(last["start"]).getTime();
+
+                    data.push([lastTime + 3600000, last["value"]]);
+
+                    return data;
+                  color_threshold:
+                    - value: -1
+                      color: 1E90FF
+                    - value: 0.5
+                      color: "008000"
+                    - value: 1
+                      color: DAA520
+                    - value: 2
+                      color: FF0000
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: true
+                    in_brush: false
+                    in_legend: false
+                - entity: sensor.sem_battery_charge_window_cheapest_1a
+                  yaxis_id: charge/expensive
+                  name: Laddningsfönster 1
+                  opacity: 0.7
+                  color: "#00406c"
+                  type: area
+                  data_generator: |
+                    const data = [];
+                    const sensorData = entity.state.split(' - ');
+                    function parseLocalTime(str) {
+                      const parts = str.split(/[- :T]/).map(Number);
+                      const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                      return date.getTime();
+                    }
+                    const startTime = parseLocalTime(sensorData[0]);
+                    const endTime = parseLocalTime(sensorData[1]);
+                    data.push([startTime, 3]);
+                    data.push([startTime, 3]);
+                    data.push([endTime, 3]);
+                    data.push([endTime, 0]);
+                    return data;
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: false
+                    in_brush: false
+                    in_legend: true
+                - entity: sensor.sem_battery_charge_window_cheapest_2
+                  yaxis_id: charge/expensive
+                  name: Laddningsfönster 2
+                  opacity: 0.7
+                  color: "#00406c"
+                  type: area
+                  data_generator: |
+                    const data = [];
+                    const sensorData = entity.state.split(' - ');
+                    function parseLocalTime(str) {
+                      const parts = str.split(/[- :T]/).map(Number);
+                      const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                      return date.getTime();
+                    }
+                    const startTime = parseLocalTime(sensorData[0]);
+                    const endTime = parseLocalTime(sensorData[1]);
+                    data.push([startTime, 3]);
+                    data.push([startTime, 3]);
+                    data.push([endTime, 3]);
+                    data.push([endTime, 0]);
+                    return data;
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: false
+                    in_brush: false
+                    in_legend: true
+    grid_options:
+      columns: full
+      rows: 1
+  - type: custom:vertical-stack-in-card
+    cards:
+      - type: heading
+        icon: mdi:view-dashboard
+        heading_style: title
+        heading: Översikt
+      - type: custom:vertical-stack-in-card
+        cards:
+          - type: custom:vertical-stack-in-card
+            horizontal: true
+            cards:
+              - clock_style: analog
+                clock_size: small
+                show_seconds: true
+                no_background: false
+                border: false
+                ticks: hour
+                type: clock
+              - show_current: false
+                show_forecast: true
+                type: weather-forecast
+                entity: weather.smhi_klagshamn
+                forecast_type: daily
+                name: Klagshamn
+                forecast_slots: 3
+        view_layout:
+          position: sidebar
+      - type: tile
+        entity: sensor.sem_battery_mode
+        features_position: bottom
+        vertical: false
+        hide_state: false
+        icon: mdi:auto-mode
+        name: Arbetsläge
+        tap_action:
+          action: none
+        color: indigo
+      - features:
+          - type: trend-graph
+        type: tile
+        entity: sensor.batteries_state_of_capacity
+        features_position: inline
+        vertical: false
+        name: Laddning
+        tap_action:
+          action: none
+        icon: mdi:home-battery
+        show_entity_picture: false
+        hide_state: false
+        color: indigo
+      - features:
+          - type: trend-graph
+        type: tile
+        entity: sensor.batteries_charge_discharge_power
+        features_position: inline
+        vertical: false
+        name: Batteri
+        icon: mdi:battery-charging-100
+        tap_action:
+          action: none
+        icon_tap_action:
+          action: none
+        color: indigo
+      - features:
+          - type: trend-graph
+        type: tile
+        entity: sensor.power_meter_active_power
+        features_position: inline
+        vertical: false
+        name: Elmätare
+        tap_action:
+          action: none
+        icon_tap_action:
+          action: none
+        color: red
+      - features:
+          - type: trend-graph
+        type: tile
+        features_position: inline
+        vertical: false
+        entity: sensor.input_power_with_efficiency_loss_kw
+        name: Solceller
+        icon: mdi:solar-panel
+        color: primary
+        tap_action:
+          action: none
+        icon_tap_action:
+          action: none
+    view_layout:
+      position: sidebar
+  - type: conditional
+    conditions: []
+    card:
+      type: conditional
+      conditions:
+        - condition: state
+          entity: sensor.sem_battery_charging_interval_next
+          state: "2"
+      card:
+        type: custom:vertical-stack-in-card
+        cards:
+          - type: heading
+            icon: mdi:battery-clock-outline
+            heading: Nästa laddning
+            heading_style: title
+          - type: markdown
+            content: |2
+                {% set interval = states('sensor.sem_battery_charge_window_cheapest_2') %}
+                {% set energy = states('sensor.sem_battery_charge_energy_2_1b') %}
+                {% if ' - ' in interval %}
+                  {% set start_str, end_str = interval.split(' - ') %}
+                  {% set start_time = start_str | as_datetime %}
+                  {% set end_time = end_str | as_datetime %}
+                  {% set supercheap = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') %}
+                  🕛Klockan: {{ start_time.strftime('%H:%M') }} - {{ end_time.strftime('%H:%M') }}  
+                  🔋Beräknad laddning: {{ energy }} kWh
+                  💰Extra superbillig laddning: {{ supercheap }} kWh
+                  {% if is_state('input_boolean.sem_interval_2', 'on') %} ✅Status: Laddar {% else %} 💤Status: Inaktiv {% endif %}
+                {% else %}
+                  Ingen tid tillgänglig  
+                {% endif %}
+    grid_options:
+      columns: 12
+      rows: 1
+    view_layout:
+      position: sidebar
+  - type: conditional
+    conditions: []
+    card:
+      type: conditional
+      conditions:
+        - condition: state
+          entity: sensor.sem_battery_charging_interval_next
+          state: "1"
+      card:
+        type: custom:vertical-stack-in-card
+        cards:
+          - type: heading
+            icon: mdi:battery-clock-outline
+            heading: Nästa laddning
+            heading_style: title
+          - type: markdown
+            content: >-
+              {% set interval =
+              states('sensor.sem_battery_charge_window_cheapest_1a') %}
+                {% set energy = states('sensor.sem_battery_charge_energy_1a_2') %}
+                {% if ' - ' in interval %}
+                  {% set start_str, end_str = interval.split(' - ') %}
+                  {% set start_time = start_str | as_datetime %}
+                  {% set end_time = end_str | as_datetime %}
+                  {% set supercheap = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') %}
+                  🕐Klockan: {{ start_time.strftime('%H:%M') }} - {{ end_time.strftime('%H:%M') }}</b> 
+                  🔋Beräknad laddning: {{ energy }} kWh
+                  💰Extra superbillig laddning: {{ supercheap }} kWh
+                  {% if is_state('input_boolean.sem_interval_1a', 'on') %} ✅Status: Laddar {% else %} 💤Status: Inaktiv {% endif %}
+                {% else %}
+                  Ingen tid tillgänglig  
+                {% endif %}
+    view_layout:
+      position: sidebar
+  - type: tile
+    entity: input_boolean.sem_setting_view
+    features_position: bottom
+    vertical: false
+    name: Inställningar
+    icon: mdi:cog
+    tap_action:
+      action: toggle
+    grid_options:
+      columns: 12
+      rows: 1
+    hide_state: true
+    color: indigo
+    view_layout:
+      position: sidebar
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_step_0
+        state: "off"
+      - condition: state
+        entity: input_boolean.sem_setting_view
+        state: "on"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: heading
+          icon: ""
+          heading_style: title
+          heading: Inställningar
+        - square: false
+          type: grid
+          cards:
+            - type: markdown
+              content: "******"
+              text_only: true
+            - type: picture-elements
+              elements: []
+              image: /api/image/serve/e83b35c09064e00c5f35034371a70519/512x512
+              style:
+                top: 5%
+                left: 5%
+                width: 3%
+        - type: markdown
+          content: >+
+            Innan du börjar konfigurationen behöver du säkerställa att Huaewi
+            Integrationen är installerad och nödvändiga enheter finns i ditt
+            system. 
+
+            https://github.com/wlcrs/huawei_solar
+
+
+            {# Lista över entiteter att kontrollera #}
+
+            {% set e1 = 'sensor.batteries_state_of_capacity' %}
+
+            {% set e2 = 'input_number.sem_batteries_end_of_discharge_soc' %}
+
+            {% set e3 = 'sensor.inverter_input_power' %}
+
+            {% set e4 = 'sensor.power_meter_active_power' %}
+
+            {% set e5 = 'sensor.batteries_charge_discharge_power' %}
+
+            {% set e6 = 'select.batteries_working_mode' %}
+
+
+            {# Hämta states #}
+
+            {% set s1 = states(e1) %}
+
+            {% set s2 = states(e2) %}
+
+            {% set s3 = states(e3) %}
+
+            {% set s4 = states(e4) %}
+
+            {% set s5 = states(e5) %}
+
+            {% set s6 = states(e6) %}
+
+
+            {# Definiera vad som räknas som otillgängligt #}
+
+            {% set bad = ['unknown', 'unavailable', '', None] %}
+
+
+            {# Räkna antal otillgängliga utan append() #}
+
+            {% set cnt = ((s1 in bad) | int) + ((s2 in bad) | int) + ((s3 in
+            bad) | int) + ((s4 in bad) | int) + ((s5 in bad) | int) + ((s6 in
+            bad) | int) %}
+
+
+            {# Utdatat: endast otillgängliga enheter #}
+
+            {% if cnt == 0 %}
+
+            ✅ Allt ser bra ut!
+
+            {% else %}
+
+            ❌ Enheter saknas! ({{ cnt }})
+
+            {% if s1 in bad %}- {{ e1 }} {% endif %}
+
+            {% if s2 in bad %}- {{ e2 }} {% endif %}
+
+            {% if s3 in bad %}- {{ e3 }} {% endif %}
+
+            {% if s4 in bad %}- {{ e4 }} {% endif %}
+
+            {% if s5 in bad %}- {{ e5 }} {% endif %}
+
+            {% if s6 in bad %}- {{ e6 }} {% endif %}
+
+            {% endif %}
+
+
+            **⚠️ VARNING!**
+
+            Detta är ett hobbyprojekt – använd på eget ansvar. Ingen garanti för
+            funktion eller tillförlitlighet.
+
+        - square: false
+          type: grid
+          cards:
+            - type: tile
+              entity: input_boolean.manual_update_packages
+              features_position: bottom
+              vertical: true
+              name: Uppdatera
+              icon: mdi:update
+              hide_state: true
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              color: indigo
+            - type: tile
+              entity: input_boolean.sem_fast_choice
+              features_position: bottom
+              vertical: true
+              icon: mdi:format-list-bulleted
+              hide_state: true
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              color: indigo
+            - type: tile
+              entity: input_boolean.sem_step_0
+              features_position: bottom
+              vertical: true
+              hide_state: true
+              icon: mdi:arrow-right
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              color: disabled
+              name: Starta konfigurationen
+          columns: 3
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_fast_choice
+              state: "on"
+          card:
+            type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: ""
+                heading_style: title
+                heading: Snabbval
+              - features:
+                  - type: toggle
+                type: tile
+                entity: input_boolean.manual_charge
+                features_position: inline
+                vertical: false
+                name: Ladda nu
+                icon: mdi:power-plug-battery
+                hide_state: true
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+                color: green
+              - features:
+                  - type: numeric-input
+                    style: buttons
+                type: tile
+                features_position: inline
+                vertical: false
+                entity: input_number.extra_1
+                name: Extra (kl 9-16)
+                icon: mdi:battery-plus
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+              - features:
+                  - type: numeric-input
+                    style: buttons
+                type: tile
+                features_position: inline
+                vertical: false
+                entity: input_number.extra_2
+                name: Extra (kl 23-05)
+                icon: mdi:battery-plus
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+    grid_options:
+      columns: 12
+      rows: auto
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_step_0
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_1
+        state: "off"
+      - condition: state
+        entity: input_boolean.sem_step_2
+        state: "off"
+      - condition: state
+        entity: input_boolean.sem_step_3
+        state: "off"
+      - condition: state
+        entity: input_boolean.sem_setting_view
+        state: "on"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: heading
+          icon: ""
+          heading_style: title
+          heading: Generell information
+        - type: heading
+          icon: ""
+          heading: Nordpool
+          heading_style: subtitle
+        - features:
+            - type: toggle
+          type: tile
+          entity: input_boolean.sem_use_official_nordpool
+          features_position: inline
+          vertical: false
+          icon_tap_action:
+            action: none
+          tap_action:
+            action: none
+          name: Officiella
+          hide_state: true
+          color: green
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_use_official_nordpool
+              state: "on"
+          card:
+            type: vertical-stack
+            cards:
+              - type: entities
+                entities:
+                  - entity: input_text.sem_nordpool_config_entry_official
+                    name: Din NordPool-konfiguration
+                  - entity: input_text.sem_nordpool_area_official
+                    name: Ditt elområde
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Fyll i dina uppgifter från den officiella Nordpool
+                  integrationen. 
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_use_official_nordpool
+              state: "off"
+          card:
+            type: markdown
+            content: >-
+              **ℹ️Information**
+
+              Om du använder den officiella Nordpool-integrationen ska du
+              aktivera reglaget – annars lämna det avstängt.
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_use_official_nordpool
+              state: "off"
+          card:
+            type: vertical-stack
+            cards:
+              - type: entities
+                entities:
+                  - entity: input_text.sem_nordpool_sensor_inofficial
+                    name: Din inofficiella Nordpool sensor
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Fyll i namnet på sensorn från den inofficiella Nordpool
+                  integrationen (custom component). Observera att din sensor
+                  måste vara i **SEK/kWh**. Om den inte är det kan du skapa en
+                  via integrationen.
+        - type: heading
+          icon: ""
+          heading: Laddbox
+          heading_style: subtitle
+        - type: entities
+          entities:
+            - entity: input_text.sem_ev_sensor
+              icon: mdi:ev-plug-type2
+              name: Laddbox
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Ange namnet på sensorn som mäter effekten på din laddbox. Om du inte
+            har någon laddbox, lämna fältet tomt.
+        - square: false
+          type: grid
+          cards:
+            - type: tile
+              entity: input_boolean.sem_step_0
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-left
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Tillbaka
+              color: disabled
+            - type: tile
+              entity: input_boolean.sem_step_1
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-right
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Fortsätt
+              color: disabled
+          columns: 2
+        - type: markdown
+          content: |
+            <center> 1 av 4 </center>
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_step_0
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_1
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_2
+        state: "off"
+      - condition: state
+        entity: input_boolean.sem_step_3
+        state: "off"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: heading
+          icon: mdi:solar-power-variant
+          heading_style: title
+          heading: Solceller
+        - type: heading
+          icon: ""
+          heading: Din plats
+          heading_style: subtitle
+        - type: entities
+          entities:
+            - entity: input_number.sem_solar_lat
+              name: Latitud
+              icon: mdi:earth
+            - entity: input_number.sem_solar_lon
+              icon: mdi:earth
+              name: Longitud
+        - type: markdown
+          content: |-
+            **ℹ️Information**
+            Latitud: söder= -90 och norr= 90.
+            Longitud: väst= -180 och öst= 180. 
+            https://www.gps-coordinates.net/ 
+        - type: heading
+          icon: ""
+          heading: "Din installation "
+          heading_style: subtitle
+        - type: entities
+          entities:
+            - entity: input_number.sem_solar_dec
+              name: Lutning
+              icon: mdi:angle-acute
+            - entity: input_number.sem_solar_az
+              name: Riktning
+              icon: mdi:compass
+            - entity: input_number.sem_solar_kwp
+              name: Kapacitet
+              icon: mdi:solar-panel
+        - type: markdown
+          content: |-
+            **ℹ️Information**
+            Lutning: 0 = horizontalt, 90 = vertikalt (i relation till marken)
+            Riktning: -180 = norr, -90 = öst, 0 = syd, 90 = väst, 180 = norr
+            Kapacitet: Total installerad kapacitet
+        - type: heading
+          icon: ""
+          heading: "Dämpingsfaktor "
+          heading_style: subtitle
+        - type: entities
+          entities:
+            - entity: input_number.sem_solar_damping_morning
+              icon: mdi:weather-sunset-up
+              name: Morgon
+            - entity: input_number.sem_solar_damping_evening
+              icon: mdi:weather-sunset-down
+              name: Kväll
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Upplever du att batteriet laddas för lite då kan du behöver höja
+            dämpingsfaktorn och sänka om batteriet laddas för mycket. Ett bra
+            startvärde är 0.6 
+        - type: markdown
+          content: >-
+            **⚠️ VARNING!**
+
+            Det publika API:et tillåter max 12 anrop per rullande timme. I denna
+            setup görs endast ett anrop per timme.
+        - square: false
+          type: grid
+          cards:
+            - type: tile
+              entity: input_boolean.sem_step_1
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-left
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Tillbaka
+              color: disabled
+            - type: tile
+              entity: input_boolean.sem_step_2
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-right
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Fortsätt
+              color: disabled
+          columns: 2
+        - type: markdown
+          content: |
+            <center> 2 av 4 </center>
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_step_0
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_1
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_2
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_3
+        state: "off"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: heading
+          icon: ""
+          heading_style: title
+          heading: Smart styrning 1/2
+        - type: heading
+          icon: ""
+          heading_style: subtitle
+          heading: Batteri och laddning
+        - type: tile
+          entity: input_number.sem_battery_total_capacity_kwh
+          features_position: inline
+          vertical: false
+          name: Total kapacitet
+          icon: mdi:battery
+          hide_state: true
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+          features:
+            - type: numeric-input
+              style: buttons
+        - features:
+            - type: numeric-input
+              style: buttons
+          type: tile
+          entity: input_number.sem_max_charge_power_window_1
+          features_position: inline
+          vertical: false
+          name: Effekt (9-16)
+          icon: mdi:battery-positive
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+          hide_state: true
+        - features:
+            - type: numeric-input
+              style: buttons
+          type: tile
+          entity: input_number.sem_max_charge_power_window_2
+          features_position: inline
+          vertical: false
+          name: Effekt (23-05)
+          icon: mdi:battery-positive
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+          hide_state: true
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Ange din totala lagringskapacitet och den maximala tillåtna effekten
+            för varje tidsintervall.
+        - features:
+            - type: numeric-input
+              style: buttons
+          type: tile
+          entity: input_number.sem_price_limit_supercheap
+          features_position: inline
+          vertical: false
+          name: Superbillig el
+          icon: mdi:chart-areaspline-variant
+          hide_state: true
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Ange gränsen för vad som räknas som **superbillig el**. Detta värde
+            används för att ladda batteriet extra när elpriset är väldigt lågt. 
+        - type: heading
+          icon: ""
+          heading_style: subtitle
+          heading: Sälja
+        - features:
+            - type: toggle
+          type: tile
+          features_position: inline
+          vertical: false
+          entity: input_boolean.sem_discharge_high_prices
+          name: Sälj batteriöverskott
+          icon: mdi:transmission-tower-export
+          tap_action:
+            action: toggle
+          icon_tap_action:
+            action: toggle
+          color: green
+          hide_state: true
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_discharge_high_prices
+              state: "on"
+          card:
+            type: custom:vertical-stack-in-card
+            cards:
+              - features:
+                  - type: numeric-input
+                    style: buttons
+                type: tile
+                entity: input_number.sem_expensive_electricity
+                features_position: inline
+                vertical: false
+                name: Säljgräns
+                icon: mdi:finance
+                hide_state: true
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+              - features:
+                  - type: numeric-input
+                    style: buttons
+                type: tile
+                entity: input_number.sem_battery_charge_price
+                features_position: inline
+                vertical: false
+                name: Laddgräns
+                icon: mdi:finance
+                hide_state: true
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  **Säljgräns** anger hur högt elpriset måste vara för att
+                  batteriet ska sälja sitt överskott. **Laddgräns** anger
+                  elprisnivån för nästa laddning. Båda villkoren måste uppfyllas
+                  för att batteriet ska sälja överskott.
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_discharge_high_prices
+              state: "off"
+          card:
+            type: markdown
+            content: >-
+              **ℹ️Information**
+
+              Aktivera **sälj batteriöverskott** om du vill sälja batteriets
+              överskott. 
+        - square: false
+          type: grid
+          cards:
+            - type: tile
+              entity: input_boolean.sem_step_2
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-left
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Tillbaka
+              color: disabled
+            - type: tile
+              entity: input_boolean.sem_step_3
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-right
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Fortsätt
+              color: disabled
+          columns: 2
+        - type: markdown
+          content: |
+            <center> 3 av 4 </center>
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_step_0
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_1
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_2
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_3
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_4
+        state: "off"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: heading
+          icon: ""
+          heading_style: title
+          heading: Smart styrning 2/2
+        - type: heading
+          icon: ""
+          heading: Export av solöverskottet
+          heading_style: subtitle
+        - type: tile
+          entity: input_boolean.sem_export_limit_active
+          features_position: inline
+          vertical: false
+          name: Begränsa export
+          icon: mdi:transmission-tower-export
+          hide_state: true
+          color: green
+          tap_action:
+            action: toggle
+          icon_tap_action:
+            action: toggle
+          features:
+            - type: toggle
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Aktivera reglaget om du vill att export av solel automatiskt ska
+            stoppas när elpriset är 0 eller lägre.
+        - type: heading
+          icon: ""
+          heading_style: subtitle
+          heading: Laddbox och elbil
+        - type: entities
+          entities:
+            - entity: input_text.sem_ev_sensor
+              icon: mdi:ev-plug-type2
+              name: Laddbox
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Ange namnet på sensorn som mäter effekten på din laddbox. Om du inte
+            har någon laddbox, lämna fältet tomt.  
+        - features:
+            - type: toggle
+          type: tile
+          entity: input_boolean.sem_ev_charging_protection_enabled
+          features_position: inline
+          vertical: false
+          icon: mdi:ev-plug-type2
+          color: green
+          hide_state: true
+          name: Urladdningskydd
+          tap_action:
+            action: toggle
+          icon_tap_action:
+            action: toggle
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_ev_charging_protection_enabled
+              state: "off"
+          card:
+            type: custom:vertical-stack-in-card
+            cards:
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Aktivera **urladdningskydd** om du inte vill att batteriet ska
+                  ladda elbilen.
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_ev_charging_protection_enabled
+              state: "on"
+          card:
+            type: custom:vertical-stack-in-card
+            cards:
+              - type: entities
+                entities:
+                  - entity: input_text.sem_ev_sensor_state
+                    name: Laddboxsensor
+                  - entity: input_text.sem_ev_charging_state
+                    name: Laddningsläge
+                    icon: mdi:format-list-bulleted-square
+                  - entity: input_number.sem_battery_discharge_power_ev_limit
+                    name: Urladdningseffekt
+                    icon: mdi:battery-negative
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  I **laddboxsensor** anger du vilken sensor som övervakar
+                  laddboxens aktuella läge. Under **laddningsläge** fyller du i
+                  det läge som motsvarar när laddboxen faktiskt laddar bilen.
+                  Slutligen anger du under **urladdningseffekt** den effekt (kW)
+                  som batteriet ska återgå till efter att elbilen är
+                  färdigladdad.
+        - square: false
+          type: grid
+          cards:
+            - type: tile
+              entity: input_boolean.sem_step_3
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-left
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Tillbaka
+              color: disabled
+            - type: tile
+              entity: input_boolean.sem_step_4
+              features_position: bottom
+              vertical: false
+              hide_state: true
+              icon: mdi:arrow-right
+              tap_action:
+                action: toggle
+              icon_tap_action:
+                action: toggle
+              name: Fortsätt
+              color: disabled
+          columns: 2
+        - type: markdown
+          content: |
+            <center> 4 av 4 </center>
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_step_0
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_1
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_2
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_3
+        state: "on"
+      - condition: state
+        entity: input_boolean.sem_step_4
+        state: "on"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: heading
+          icon: mdi:firework
+          heading_style: title
+          heading: "Konfigurationen är klar! "
+        - type: markdown
+          content: >-
+            **Är det första gången du konfiguerarar systemet?** 
+
+            Då behöver systemet **minst sju dagar** att lära sig dina
+            energimönster. Under denna tid kan du ladda systemet manuellt via
+            knappen inställningar i hemvyn. Det är bra att du laddar manuellt då
+            det kommer att bidra till en bättre från den sjunde dagen.  
+
+
+            **Ändra dina inställningar**
+
+            Detta gör du genom att klicka på inställningar i hemvyn. Ändringar
+            startar **INTE** om systemets inlärningsprocess på sju dagar. 
+        - type: tile
+          entity: input_boolean.sem_step_5
+          features_position: bottom
+          vertical: true
+          hide_state: true
+          icon: mdi:arrow-right
+          tap_action:
+            action: toggle
+          icon_tap_action:
+            action: toggle
+          name: Avsluta konfigurationen
+          color: disabled
+title: Smart Energy Management
+icon: mdi:view-dashboard
+badges:
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: sensor.nordpool_kwh_se4_sek_1_10_0
+    name: "Elpris "
+    tap_action:
+      action: none
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    visibility:
+      - condition: state
+        entity: input_boolean.sem_export_limit_active
+        state: "on"
+    entity: input_boolean.sem_max_export_active
+    name: Begränsar solexport
+    icon: mdi:solar-power-variant
+    tap_action:
+      action: none
+    color: green
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    visibility:
+      - condition: state
+        entity: input_boolean.sem_discharge_high_prices
+        state: "on"
+    entity: input_boolean.sem_discharge
+    name: Säljer batteriöverskott
+    icon: mdi:battery-negative
+    tap_action:
+      action: none
+    color: green
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    visibility:
+      - condition: state
+        entity: input_boolean.sem_ev_charging_protection_enabled
+        state: "on"
+    entity: input_boolean.sem_ev_charging_protection_status
+    name: Skydd vid elbilsladdning
+    icon: mdi:ev-plug-type2
+    color: green
+    tap_action:
+      action: none
