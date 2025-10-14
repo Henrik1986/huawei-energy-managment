@@ -52,6 +52,9 @@ Ladda upp innehållet från mappen Setup från min GitHub till mappen sem.
 ### Steg 7
 Starta om Home Assistant
 
+> [!IMPORTANT]
+> Kontrollera din setup via utvecklarvyn innan du startar om.
+
 ### Steg 8
 Skapa en ny vy i Home Assistant genom att klicka på pennikonen uppe till höger och sedan på plus-tecknet (+).
 I dialogrutan som visas, klicka på de tre prickarna uppe till höger och välj Redigera i YAML.
@@ -66,11 +69,18 @@ Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är 
 ### Steg 10
 Starta om Home Assistant och nu kan du starta konfigurationen genom att klicka på inställningar och välja Starta konfigurationen. 
 
+> [!IMPORTANT]
+> Kontrollera din setup via utvecklarvyn innan du startar om.
+
 > [!NOTE]
 > Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
 
 ## Uppdateringar :loudspeaker:
 Paketet kommer att uppdateras automatiskt en gång i veckan. Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Det du manuellt behöver uppdatera är din "konfigurationsvy". Om detta är nödvändigt kommer även detta stå i realsen. 
+
+> [!NOTE]
+> Kontrollera din setup via utvecklarvyn innan du startar om.
+För att uppdateringarna ska bli tillgängliga hos dig krävs en omstart av Home Assistant. 
 
 ## Framtida funktioner :raising_hand:
 Har du idéer på nya funktioner? Lämna gärna dina förslag på GitHub under ”Discussions”.
