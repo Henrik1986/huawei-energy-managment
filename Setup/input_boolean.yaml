@@ -3,3 +3,6 @@ input_boolean:
   manual_update_packages:
     name: Uppdatera paket manuellt
     initial: off
+
+  sem_setting_view:
+    name: "Setting view"
