@@ -44,28 +44,30 @@ homeassistant:
 Skapa en mapp på samma plats som din configuration.yaml-fil och namnge den packages.
 
 ### Steg 6
-Ladda upp innehållet från package-mappen på GitHub till mappen du just skapade.
+Skapa en mapp i mappen packages och namge den sem.
+
+### Steg 6
+Ladda upp innehållet från mappen Setup från min GitHub till mappen sem. 
 
 ### Steg 7
+Starta om Home Assistant
+
+### Steg 8
 Skapa en ny vy i Home Assistant genom att klicka på pennikonen uppe till höger och sedan på plus-tecknet (+).
 I dialogrutan som visas, klicka på de tre prickarna uppe till höger och välj Redigera i YAML.
 Klistra sedan in innehållet från filen admin_vy.yaml.
 
-### Steg 8
-Starta om Home Assistant
-
 ### Steg 9
-Klicka in på din nya vy och starta konfigurationen genom att klicka på Inställningar
+Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut) och klicka på inställningar. Välj därefter snabbval och klicka på Uppdatera paket. Nu laddas paket hem till din enhet. Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapp, men paketet uppdateras automatiskt en gång i veckan. 
+
+### Steg 10
+Starta om Home Assistant och nu kan du starta konfigurationen genom att klicka på inställningar och välja Starta konfigurationen. 
 
 > [!NOTE]
 > Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
 
 ## Uppdateringar :loudspeaker:
-Detta är ingen officiell integration, vilket innebär att uppdateringar inte kommer automatiskt till Home Assistant. För att hålla dig uppdaterad om nya versioner är det enklast att ”följa” mitt repository. I varje ny realse kommer det framgå vilka filer du behöver uppdatera eller lägga till. 
-
-Varje release innehåller information om:
-- Nya funktioner
-- Hur du uppdaterar paketet
+Paketet kommer att uppdateras automatiskt en gång i veckan. Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. 
 
 ## Framtida funktioner :raising_hand:
 Har du idéer på nya funktioner? Lämna gärna dina förslag på GitHub under ”Discussions”.
