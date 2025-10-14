@@ -70,7 +70,7 @@ Starta om Home Assistant och nu kan du starta konfigurationen genom att klicka p
 > Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
 
 ## Uppdateringar :loudspeaker:
-Paketet kommer att uppdateras automatiskt en gång i veckan. Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. 
+Paketet kommer att uppdateras automatiskt en gång i veckan. Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Det du manuellt behöver uppdatera är din "konfigurationsvy". Om detta är nödvändigt kommer även detta stå i realsen. 
 
 ## Framtida funktioner :raising_hand:
 Har du idéer på nya funktioner? Lämna gärna dina förslag på GitHub under ”Discussions”.
