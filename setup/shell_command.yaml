@@ -1,0 +1,11 @@
+shell_command:
+  update_packages_from_github: >
+    bash -c "
+      cd /config && \
+      mkdir -p /config/packages/TEST && \
+      curl -L -o repo.zip https://github.com/Henrik1986/huawei-energy-managment/archive/refs/heads/main.zip && \
+      unzip -o repo.zip -d /config/tmp_repo && \
+      cp -r /config/tmp_repo/huawei-energy-managment-main/* /config/packages/TEST && \
+      rm repo.zip && \
+      rm -rf /config/tmp_repo
+    "
