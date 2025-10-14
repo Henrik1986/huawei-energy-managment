@@ -1,0 +1,5 @@
+input_boolean:
+
+  manual_update_packages:
+    name: Uppdatera paket manuellt
+    initial: off
