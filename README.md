@@ -56,7 +56,7 @@ Restart Home Assistant.
 Klicka in på din nya vy och starta konfigurationen genom att klicka på Inställningar
 
 > [!NOTE]
-> Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. 
+> Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
 
 ## Uppdateringar :loudspeaker:
 Detta är ingen integration och därför kommer inga uppdateringar automatiskt till Home Assitant. För att få information om en ny realse är det lättast att "följa" min repo. För att uppdatera din kod gör du om steg 6 och startar om Home Assistant. I varje realse står det vilka nya funktioner som finns, men även vilka uppdateringar som gjort och om några ändringar behövs göras. 
@@ -64,7 +64,10 @@ Detta är ingen integration och därför kommer inga uppdateringar automatiskt t
 ## Framtida funktioner :raising_hand:
 Önska gärna nya funktioner här på Github under discussion. 
 
-<a href="https://www.buymeacoffee.com/gbraad" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
-
 ## Problem :bug:
 Upptäcker du något problem är jag tacksam om du rapporterar det här på Github under issues.
+
+## Stötta mitt arbete 🚀
+Gillar du paket får du gärna stötta det. Detta bidrar till att jag kan fortsätta med att justera paketet, men även lägga till nya funktioner. 
+
+<a href="https://www.buymeacoffee.com/gbraad" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
