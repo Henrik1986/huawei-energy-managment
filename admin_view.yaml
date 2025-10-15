@@ -445,13 +445,25 @@ cards:
                 top: 5%
                 left: 5%
                 width: 3%
+        - type: entities
+          entities:
+            - entity: input_text.user_access_code
         - type: markdown
           content: >+
-            Innan du börjar konfigurationen behöver du säkerställa att Huaewi
-            Integrationen är installerad och nödvändiga enheter finns i ditt
-            system. 
+            {% set user_code = states('input_text.user_access_code') | trim %}
 
-            https://github.com/wlcrs/huawei_solar
+            {% set codes_raw = states('sensor.sem_sys_state') %}
+
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+
+            {% if user_code in codes_list %}
+              **AnvändarID**
+              ✅ Gilltlig kod!
+            {% else %}
+              **AnvändarID**
+              ❌ Ogiltlig kod!
+            {% endif %}
+
 
 
             {# Lista över entiteter att kontrollera #}
@@ -500,9 +512,13 @@ cards:
 
             {% if cnt == 0 %}
 
+            **Huawei integrationen:**
+
             ✅ Allt ser bra ut!
 
             {% else %}
+
+            **Huawei integrationen:**
 
             ❌ Enheter saknas! ({{ cnt }})
 
@@ -523,8 +539,7 @@ cards:
 
             **⚠️ VARNING!**
 
-            Detta är ett hobbyprojekt – använd på eget ansvar. Ingen garanti för
-            funktion eller tillförlitlighet.
+            Detta är ett hobbyprojekt – använd på eget ansvar. 
 
         - square: false
           type: grid
@@ -921,7 +936,7 @@ cards:
           entity: input_number.sem_max_charge_power_window_1
           features_position: inline
           vertical: false
-          name: Effekt (9-16)
+          name: Laddningseffekt (9-16)
           icon: mdi:battery-positive
           tap_action:
             action: none
@@ -935,7 +950,7 @@ cards:
           entity: input_number.sem_max_charge_power_window_2
           features_position: inline
           vertical: false
-          name: Effekt (23-05)
+          name: Laddningseffekt (23-05)
           icon: mdi:battery-positive
           tap_action:
             action: none
