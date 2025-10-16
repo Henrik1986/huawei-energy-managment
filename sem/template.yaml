@@ -1111,7 +1111,7 @@ template:
             {%- endif %}
           {%- endif %}
   
-  # WEATHER FORCECAST 
+  # WEATHER FORCECAST
   - trigger:
       - trigger: time_pattern
         minutes: "/5"
@@ -1119,23 +1119,20 @@ template:
         event: start
     action:
       - variables:
-          weather_entity: "{{ states('input_text.weather_sensor') }}"
+          weather_entity: "{{ states('input_text.sem_weather_sensor') }}"
       - action: weather.get_forecasts
-        target:
-          entity_id: "{{weather_entity}}"
         data:
           type: daily
+        target:
+          entity_id: "{{weather_entity}}"
         response_variable: weather_home_daily
     sensor:
       - name: "sem_weather_forecasts"
         state: "{{ states(weather_entity) }}"
         attributes:
-          forecast: >
-            {% if forecast_data and weather_entity in forecast_data %}
-              {{ forecast_data[weather_entity].forecast }}
-            {% else %}
-              []
-            {% endif %}
+          forecast: "{{ weather_home_daily[weather_entity].forecast }}"
+        
+
 
 #CHECKS IF ELECTRIC PRICES ARE AVALIBLE
   - binary_sensor:
