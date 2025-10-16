@@ -1,5 +1,5 @@
 automation:
-- alias: Update packages from GitHub
+  - alias: Update packages from GitHub
     triggers:
       - trigger: template
         value_template: >
@@ -9,7 +9,7 @@ automation:
         to: 'on'
     actions:
       - action: shell_command.update_packages_from_github
-      - delay: 00:00:05
+      - delay: "00:00:05"
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.manual_update_packages
