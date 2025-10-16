@@ -6,12 +6,18 @@ cards:
       - condition: state
         entity: input_boolean.sem_setting_view
         state: "off"
+      - condition: state
+        entity: input_boolean.sem_fast_choice
+        state: "off"
     card:
       type: energy-distribution
   - type: conditional
     conditions:
       - condition: state
         entity: input_boolean.sem_setting_view
+        state: "off"
+      - condition: state
+        entity: input_boolean.sem_fast_choice
         state: "off"
     card:
       type: custom:vertical-stack-in-card
@@ -409,12 +415,25 @@ cards:
     name: Inställningar
     icon: mdi:cog
     tap_action:
-      action: toggle
+      action: perform-action
+      perform_action: input_boolean.toggle
+      target:
+        entity_id: input_boolean.sem_fast_choice
     grid_options:
       columns: 12
       rows: 1
     hide_state: true
     color: indigo
+    hold_action:
+      action: perform-action
+      perform_action: input_boolean.toggle
+      target:
+        entity_id: input_boolean.sem_setting_view
+    icon_tap_action:
+      action: perform-action
+      perform_action: input_boolean.toggle
+      target:
+        entity_id: input_boolean.sem_fast_choice
     view_layout:
       position: sidebar
   - type: conditional
@@ -431,7 +450,7 @@ cards:
         - type: heading
           icon: ""
           heading_style: title
-          heading: Inställningar
+          heading: Konfiguration
         - square: false
           type: grid
           cards:
@@ -549,18 +568,7 @@ cards:
               features_position: bottom
               vertical: true
               name: Uppdatera
-              icon: mdi:update
-              hide_state: true
-              tap_action:
-                action: toggle
-              icon_tap_action:
-                action: toggle
-              color: indigo
-            - type: tile
-              entity: input_boolean.sem_fast_choice
-              features_position: bottom
-              vertical: true
-              icon: mdi:format-list-bulleted
+              icon: mdi:cloud-download
               hide_state: true
               tap_action:
                 action: toggle
@@ -579,59 +587,7 @@ cards:
                 action: toggle
               color: disabled
               name: Starta konfigurationen
-          columns: 3
-        - type: conditional
-          conditions:
-            - condition: state
-              entity: input_boolean.sem_fast_choice
-              state: "on"
-          card:
-            type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: ""
-                heading_style: title
-                heading: Snabbval
-              - features:
-                  - type: toggle
-                type: tile
-                entity: input_boolean.manual_charge
-                features_position: inline
-                vertical: false
-                name: Ladda nu
-                icon: mdi:power-plug-battery
-                hide_state: true
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-                color: green
-              - features:
-                  - type: numeric-input
-                    style: buttons
-                type: tile
-                features_position: inline
-                vertical: false
-                entity: input_number.extra_1
-                name: Extra (kl 9-16)
-                icon: mdi:battery-plus
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-              - features:
-                  - type: numeric-input
-                    style: buttons
-                type: tile
-                features_position: inline
-                vertical: false
-                entity: input_number.extra_2
-                name: Extra (kl 23-05)
-                icon: mdi:battery-plus
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
+          columns: 2
     grid_options:
       columns: 12
       rows: auto
@@ -649,9 +605,6 @@ cards:
       - condition: state
         entity: input_boolean.sem_step_3
         state: "off"
-      - condition: state
-        entity: input_boolean.sem_setting_view
-        state: "on"
     card:
       type: custom:vertical-stack-in-card
       cards:
@@ -673,9 +626,15 @@ cards:
             action: none
           tap_action:
             action: none
-          name: Officiella
+          name: Officiella integrationen
           hide_state: true
           color: green
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Aktivera reglaget om du använder den officiella integrationen –
+            annars lämna det avstängt.
         - type: conditional
           conditions:
             - condition: state
@@ -690,24 +649,6 @@ cards:
                     name: Din NordPool-konfiguration
                   - entity: input_text.sem_nordpool_area_official
                     name: Ditt elområde
-              - type: markdown
-                content: >-
-                  **ℹ️Information**
-
-                  Fyll i dina uppgifter från den officiella Nordpool
-                  integrationen. 
-        - type: conditional
-          conditions:
-            - condition: state
-              entity: input_boolean.sem_use_official_nordpool
-              state: "off"
-          card:
-            type: markdown
-            content: >-
-              **ℹ️Information**
-
-              Om du använder den officiella Nordpool-integrationen ska du
-              aktivera reglaget – annars lämna det avstängt.
         - type: conditional
           conditions:
             - condition: state
@@ -720,29 +661,47 @@ cards:
                 entities:
                   - entity: input_text.sem_nordpool_sensor_inofficial
                     name: Din inofficiella Nordpool sensor
-              - type: markdown
-                content: >-
-                  **ℹ️Information**
-
-                  Fyll i namnet på sensorn från den inofficiella Nordpool
-                  integrationen (custom component). Observera att din sensor
-                  måste vara i **SEK/kWh**. Om den inte är det kan du skapa en
-                  via integrationen.
         - type: heading
           icon: ""
-          heading: Laddbox
           heading_style: subtitle
+          heading: Huawei batteri ID
         - type: entities
           entities:
-            - entity: input_text.sem_ev_sensor
-              icon: mdi:ev-plug-type2
-              name: Laddbox
+            - entity: input_text.sem_device_id
         - type: markdown
           content: >-
             **ℹ️Information**
 
-            Ange namnet på sensorn som mäter effekten på din laddbox. Om du inte
-            har någon laddbox, lämna fältet tomt.
+            Ditt Huawei device_id: 
+
+            Utvecklarverktyg -> Åtgärder -> Klicka på åtgärd -> Skriv huawei ->
+            Välj forcible charge -> Klicka på gå till UI-läge -> Välj Batteries
+            i rullgardinen på raden battery -> Klicka på gå till YAML-läge 
+        - type: entities
+          entities:
+            - entity: input_text.sem_device_id_inverter
+        - type: heading
+          icon: ""
+          heading_style: subtitle
+          heading: Huawei inverter ID
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Ditt Huawei device_id: 
+
+            Utvecklarverktyg -> Åtgärder -> Klicka på åtgärd -> Skriv huawei ->
+            Välj limit the power fed to grid -> Klicka på gå till UI-läge ->
+            Välj Inverter i rullgardinen på raden inverter -> Klicka på gå till
+            YAML-läge 
+        - type: heading
+          heading_style: subtitle
+          heading: Väderprognos
+        - type: entities
+          entities:
+            - entity: input_text.sem_weather_sensor
+              name: Din SMHI sensor
+              icon: mdi:weather-partly-cloudy
         - square: false
           type: grid
           cards:
@@ -937,7 +896,7 @@ cards:
           features_position: inline
           vertical: false
           name: Laddningseffekt (9-16)
-          icon: mdi:battery-positive
+          icon: mdi:flash
           tap_action:
             action: none
           icon_tap_action:
@@ -951,7 +910,7 @@ cards:
           features_position: inline
           vertical: false
           name: Laddningseffekt (23-05)
-          icon: mdi:battery-positive
+          icon: mdi:flash
           tap_action:
             action: none
           icon_tap_action:
@@ -1013,6 +972,34 @@ cards:
                   - type: numeric-input
                     style: buttons
                 type: tile
+                entity: input_number.sem_max_export_power
+                features_position: inline
+                vertical: false
+                name: Urladdningseffekt
+                icon: mdi:flash
+                hide_state: true
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+              - features:
+                  - type: numeric-input
+                    style: buttons
+                type: tile
+                entity: input_number.sem_battery_discharge_power_ev_limit
+                features_position: inline
+                vertical: false
+                name: Återställning effekt
+                icon: mdi:flash
+                hide_state: true
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+              - features:
+                  - type: numeric-input
+                    style: buttons
+                type: tile
                 entity: input_number.sem_expensive_electricity
                 features_position: inline
                 vertical: false
@@ -1041,10 +1028,13 @@ cards:
                 content: >-
                   **ℹ️Information**
 
-                  **Säljgräns** anger hur högt elpriset måste vara för att
-                  batteriet ska sälja sitt överskott. **Laddgräns** anger
-                  elprisnivån för nästa laddning. Båda villkoren måste uppfyllas
-                  för att batteriet ska sälja överskott.
+                  **Urladdningseffekt** styr vilken effekt batteriet ska kunna
+                  exportera el. **Återställning effekt** anger vilken effekt
+                  batteriet ska återgå till efter export. **Säljgräns** anger
+                  hur högt elpriset måste vara för att batteriet ska sälja sitt
+                  överskott. **Laddgräns** anger elprisnivån för nästa laddning.
+                  Båda villkoren måste uppfyllas för att batteriet ska sälja
+                  överskott.
         - type: conditional
           conditions:
             - condition: state
@@ -1194,9 +1184,20 @@ cards:
                   - entity: input_text.sem_ev_charging_state
                     name: Laddningsläge
                     icon: mdi:format-list-bulleted-square
-                  - entity: input_number.sem_battery_discharge_power_ev_limit
-                    name: Urladdningseffekt
-                    icon: mdi:battery-negative
+              - type: tile
+                entity: input_number.sem_battery_discharge_power_ev_limit
+                features_position: inline
+                vertical: false
+                name: Urladdningseffekt
+                icon: mdi:flash
+                hide_state: true
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+                features:
+                  - type: numeric-input
+                    style: buttons
               - type: markdown
                 content: >-
                   **ℹ️Information**
@@ -1206,7 +1207,8 @@ cards:
                   det läge som motsvarar när laddboxen faktiskt laddar bilen.
                   Slutligen anger du under **urladdningseffekt** den effekt (kW)
                   som batteriet ska återgå till efter att elbilen är
-                  färdigladdad.
+                  färdigladdad (värdet används även för återställning efter
+                  export av el)
         - square: false
           type: grid
           cards:
@@ -1288,6 +1290,93 @@ cards:
             action: toggle
           name: Avsluta konfigurationen
           color: disabled
+  - type: conditional
+    conditions:
+      - condition: state
+        entity: input_boolean.sem_fast_choice
+        state: "on"
+    card:
+      type: custom:vertical-stack-in-card
+      cards:
+        - type: heading
+          icon: mdi:cog
+          heading_style: title
+          heading: Inställningar
+        - features:
+            - type: toggle
+          type: tile
+          entity: input_boolean.sem_manual_charge
+          features_position: inline
+          vertical: false
+          name: Ladda nu
+          icon: mdi:power-plug-battery
+          hide_state: true
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+          color: green
+        - type: tile
+          entity: input_number.sem_manual_charge_duration
+          features_position: inline
+          vertical: false
+          name: Välj laddtid
+          icon: mdi:battery-clock
+          hide_state: true
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+          features:
+            - type: numeric-input
+              style: buttons
+        - type: tile
+          entity: timer.sem_manual_charge_time
+          features_position: bottom
+          vertical: false
+          name: Tid kvar
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+        - type: markdown
+          content: |-
+            **ℹ️Information**
+            Välj hur länge du vill ladda på **välj laddtid**
+        - features:
+            - type: numeric-input
+              style: buttons
+          type: tile
+          features_position: inline
+          vertical: false
+          entity: input_number.extra_1
+          name: Extra (kl 9-16)
+          icon: mdi:battery-plus
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+          hide_state: true
+        - features:
+            - type: numeric-input
+              style: buttons
+          type: tile
+          features_position: inline
+          vertical: false
+          entity: input_number.extra_2
+          name: Extra (kl 23-05)
+          icon: mdi:battery-plus
+          tap_action:
+            action: none
+          icon_tap_action:
+            action: none
+          hide_state: true
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Alternativen **extra** ger dig möjlighet till att lägga till extra
+            kWh på ett laddningstillfälle.
 title: Smart Energy Management
 icon: mdi:view-dashboard
 badges:
@@ -1341,3 +1430,14 @@ badges:
     color: green
     tap_action:
       action: none
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: timer.sem_manual_charge_time
+    name: Manuell laddning
+    visibility:
+      - condition: state
+        entity: input_boolean.sem_manual_charge
+        state: "on"
+    color: green
