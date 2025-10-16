@@ -1,0 +1,3 @@
+timer:
+  sem_manual_charge_time:
+    duration: "01:00:00"
