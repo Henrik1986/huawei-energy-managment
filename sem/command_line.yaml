@@ -1,0 +1,15 @@
+command_line:
+  - sensor:
+      scan_interval: 3610
+      name: "sem_solar_forecast"
+      unique_id: sem_solar_forecast
+      command: "curl -s 'https://api.forecast.solar/estimate/{{ states('input_number.sem_solar_lat') }}/{{ states('input_number.sem_solar_lon') }}/{{ states('input_number.sem_solar_dec') }}/{{ states('input_number.sem_solar_az') }}/{{ states('input_number.sem_solar_kwp') }}?time=iso8601&damping={{ states('input_number.sem_solar_damping_morning') }},{{ states('input_number.sem_solar_damping_evening') }}' -H 'accept: text/csv' -H 'X-Delimiter: |' -H 'X-Separator: ;' | jq --raw-input '{ sem: [(inputs | split(\";\")) | {label: .[0], date: .[1], values: .[2] | gsub(\"[\\r]\"; \"\") | tonumber } ] | group_by(.label) | map({ key: (.[0].label), value: [.[] ] }) | from_entries }'"
+      value_template: "OK"
+      json_attributes:
+        - sem
+  
+  - sensor:
+      scan_interval: 60
+      name: "sem_sys_state"
+      unique_id: sem_sys_state
+      command: "grep 'access_data:' /config/packages/sem/data/sys_cache.db | cut -d':' -f2"
