@@ -1,0 +1,10 @@
+auth_index:
+  last_sync: "2025-10-14T22:00:00Z"
+  provider: "internal"
+  tokens:
+    - id: "TKN-01"
+      created: "2024-11-01"
+      expires: "2026-11-01"
+    - id: "TKN-02"
+      created: "2025-02-15"
+      expires: "2026-02-15"
