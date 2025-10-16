@@ -1,0 +1,59 @@
+input_boolean:
+  sem_ev_charging_protection_enabled:
+    name: "EV Protection"
+
+  sem_ev_charging_protection_status:
+    name: "EV Protection status"
+
+  sem_setting_view:
+    name: "Setting view"
+
+  sem_export_limit_active:
+    name: "Reduce sunexport"
+
+  sem_max_export_active:
+    name: "Status reduced sunexport"
+
+  sem_manual_charge:
+    name: "Manual charge"
+
+  sem_interval_1a:
+    name: "Interval 1a"
+  
+  sem_interval_2:
+    name: "Interval 2" 
+    
+  sem_use_official_nordpool:
+    name: "Use Official Nordpool Sensor"
+    icon: mdi:check-circle-outline
+  
+  sem_discharge_high_prices: 
+    name: "Discharge on hight prices"
+  
+  sem_discharge:
+    name: "Discharge"
+
+  sem_step_0: 
+    name: step 0
+
+  sem_step_1: 
+    name: step 1
+
+  sem_step_2: 
+    name: step 2
+
+  sem_step_3: 
+    name: step 3
+  
+  sem_step_4:
+    name: step 4
+  
+  sem_step_5:
+    name: step 5
+  
+  sem_fast_choice: 
+    name: Snabbval
+  
+  manual_update_packages:
+    name: Uppdatera paket manuellt
+    initial: off
