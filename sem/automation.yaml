@@ -722,7 +722,7 @@ automation:
             - input_boolean.sem_setting_view
             - input_boolean.sem_fast_choice
 
-- alias: Update packages from GitHub
+  - alias: Update packages from GitHub
     triggers:
       - trigger: template
         value_template: >
