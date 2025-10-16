@@ -6,3 +6,6 @@ input_boolean:
 
   sem_setting_view:
     name: "Setting view"
+
+  sem_step_0: 
+    name: step 0
