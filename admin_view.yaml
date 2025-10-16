@@ -466,10 +466,11 @@ cards:
                 width: 3%
         - type: entities
           entities:
-            - entity: input_text.user_access_code
+            - entity: input_text.sem_user_access_code
         - type: markdown
           content: >+
-            {% set user_code = states('input_text.user_access_code') | trim %}
+            {% set user_code = states('input_text.sem_user_access_code') | trim
+            %}
 
             {% set codes_raw = states('sensor.sem_sys_state') %}
 
