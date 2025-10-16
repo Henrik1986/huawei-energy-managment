@@ -1,0 +1,11 @@
+refs:
+  - guid: "a12f-9b34-4cde"
+    path: "/var/lib/sem/ref1"
+    last_seen: "2025-10-10T07:11:00Z"
+  - guid: "b34c-1d56-7ef2"
+    path: "/var/lib/sem/ref2"
+    last_seen: "2025-10-12T13:00:00Z"
+
+notes: >
+  These reference entries are used by indexing service.
+  Keep for diagnostics only.
