@@ -1111,7 +1111,7 @@ template:
             {%- endif %}
           {%- endif %}
   
-  # WEATHER FORCECAST
+  # WEATHER FORCECAST 
   - trigger:
       - trigger: time_pattern
         minutes: "/5"
@@ -1124,23 +1124,8 @@ template:
         target:
           entity_id: "{{weather_entity}}"
         data:
-          type: hourly
-        response_variable: weather_home_hourly
-      - action: weather.get_forecasts
-        target:
-          entity_id: "{{weather_entity}}"
-        data:
           type: daily
         response_variable: weather_home_daily
-#    action:
-#      - variables:
-#          weather_entity: "{{ states('input_text.weather_sensor') }}"
-#      - action: weather.get_forecasts
-#        data:
-#          type: daily
-#       target:
-#          entity_id: "{{ weather_entity }}"
-#        response_variable: forecast_data
     sensor:
       - name: "sem_weather_forecasts"
         state: "{{ states(weather_entity) }}"
