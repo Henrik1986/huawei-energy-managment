@@ -1,0 +1,159 @@
+input_number:
+  sem_max_export_power: 
+    name: Max effekt att sälja (kW)
+    min: 0
+    max: 10
+    step: 0.1
+    unit_of_measurement: kW
+    mode: box
+
+  sem_battery_discharge_power_ev_limit:
+    name: "Max laddningseffekt efter laddning av Elbil"
+    min: 0
+    max: 10
+    step: 0.1
+    mode: box
+    unit_of_measurement: "kW"
+
+  sem_battery_charge_price:
+    name: "Battery Charge Price Limit"
+    icon: mdi:currency-sek
+    min: 0
+    max: 10
+    step: 0.1
+    unit_of_measurement: "SEK/kWh"
+    mode: box
+
+  sem_expensive_electricity:
+    name: "Expensive Electricity Threshold"
+    icon: mdi:currency-sek
+    min: 0.0
+    max: 10.0
+    step: 0.1
+    unit_of_measurement: "SEK/kWh"
+    mode: box
+  
+  sem_batteries_end_of_discharge_soc:
+    name: "batteries_end_of_discharge_soc"
+    min: 0
+    max: 50
+    step: 1
+    unit_of_measurement: "%"
+    icon: "mdi:battery-alert"
+  
+  sem_battery_total_capacity_kwh:
+    name: "Battery - Total Capacity"
+    min: 0
+    max: 100
+    step: 0.1
+    mode: box
+    unit_of_measurement: "kWh"
+
+  sem_battery_buffer_kwh:
+    name: "Batteribuffert (kWh)"
+    icon: mdi:battery-charging-20
+    unit_of_measurement: "kWh"
+    mode: box
+    min: 0
+    max: 10
+    step: 0.1
+    
+  sem_price_limit_supercheap:
+    name: "Battery - Price Limit (Supercheap)"
+    min: 0
+    max: 5
+    step: 0.01
+    mode: box
+    unit_of_measurement: "SEK/kWh"
+
+  sem_max_charge_power_window_1:
+    name: Max laddningseffekt fönster 1
+    min: 0
+    max: 10
+    step: 0.1
+    mode: slider
+    unit_of_measurement: "kW"
+
+  sem_max_charge_power_window_2:
+    name: Max laddningseffekt fönster 2
+    min: 0
+    max: 10
+    step: 0.1
+    mode: slider
+    unit_of_measurement: "kW"
+
+  sem_solar_lat:
+    name: "Solar Latitude"
+    min: -90
+    max: 90
+    step: 0.0001
+    mode: slider
+    unit_of_measurement: °
+    
+  sem_solar_lon:
+    name: "Solar Longitude"
+    min: -180
+    max: 180
+    step: 0.0001
+    mode: slider
+    unit_of_measurement: °
+    
+  sem_solar_dec:
+    name: "Solar Panel Tilt Angle"
+    min: 0
+    max: 90
+    step: 1
+    mode: slider
+    unit_of_measurement: °
+
+  sem_solar_az:
+    name: "Solar Panel Azimuth"
+    min: -180
+    max: 180
+    step: 1
+    mode: slider
+    unit_of_measurement: °
+    
+  sem_solar_kwp:
+    name: "Installed Panel Capacity (kWp)"
+    min: 0.1
+    max: 100
+    step: 0.01
+    mode: slider
+    unit_of_measurement: "kWp"
+
+  sem_solar_damping_morning:
+    name: "Dämpningsfaktor morgon"
+    min: 0
+    max: 2
+    step: 0.01
+    mode: slider
+
+  sem_solar_damping_evening:
+    name: "Dämpningsfaktor kväll"
+    min: 0
+    max: 2
+    step: 0.01
+    mode: slider
+  
+  extra_1:
+    name: "Extra tillägg 1"
+    min: 0
+    max: 10
+    step: 0.1
+    mode: box
+
+  extra_2:
+    name: "Extra tillägg 2"
+    min: 0
+    max: 10
+    step: 0.1
+    mode: box
+
+  sem_manual_charge_duration:
+    name: Laddtid
+    min: 5
+    max: 180
+    step: 5
+    unit_of_measurement: min
+    mode: box
