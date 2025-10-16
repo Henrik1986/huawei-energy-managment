@@ -1,0 +1,54 @@
+input_text:
+  sem_ev_charging_state: 
+    name: "Laddbox charing state"
+    initial: "Charging"
+
+  sem_ev_sensor_state:
+    name: "Laddbox state"
+    initial: "sensor.wallbox_anders_postmansvag_8b_status_beskrivning"
+
+  sem_ev_sensor:
+    name: "Laddbox effekt"
+    icon: mdi:car-electric
+    initial: "sensor.wallbox_anders_postmansvag_8b_laddningseffekt"
+    
+  sem_nordpool_config_entry_official:
+    name: "SEM Nordpool Config Entry (Official)"
+    icon: mdi:account-key
+    initial: "sensor."
+    max: 100
+    mode: text
+
+  sem_nordpool_area_official:
+    name: "SEM Nordpool Area (Official)"
+    icon: mdi:map-marker
+    initial: "SE"
+    max: 10
+    mode: text
+
+  sem_nordpool_sensor_inofficial:
+    name: "Nordpool sensor inofficial"
+    initial: "sensor.nordpool_kwh_se4_sek_1_10_0"
+    max: 100
+
+  sem_weather_sensor:
+    name: "Vädersensor (SMHI)"
+    icon: mdi:weather-partly-cloudy
+    mode: text
+    initial: "weather.smhi_klagshamn"
+    max: 50
+
+  sem_device_id:
+    name: Huawei Battery Device ID
+    icon: mdi:identifier
+    max: 50
+  
+  sem_device_id_inverter:
+    name: Huawei Inverter Device ID
+    icon: mdi:identifier
+    max: 50
+  
+  sem_user_access_code: 
+    name: AnvändarID
+    icon: mdi:identifier
+    max: 100
