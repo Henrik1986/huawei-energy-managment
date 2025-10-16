@@ -1,23 +1,22 @@
 sql:
   - name: "sem_energy_avg_morning"
     query: >
-      SELECT AVG(e_kwh)/5.0 AS avg_kwh_per_hour
-      FROM (
-          SELECT
-              (
-                MAX(CASE WHEN strftime('%H', datetime(start_ts, 'unixepoch', 'localtime'))='10' THEN sum ELSE NULL END)
-                -
-                MAX(CASE WHEN strftime('%H', datetime(start_ts, 'unixepoch', 'localtime'))='05' THEN sum ELSE NULL END)
-              ) AS e_kwh
-          FROM statistics
-          INNER JOIN statistics_meta
-              ON statistics.metadata_id = statistics_meta.id
-          WHERE statistics_meta.statistic_id = 'sensor.sem_house_power_tot'
-            AND datetime(start_ts, 'unixepoch', 'localtime') < datetime('now','localtime','start of day')
-            AND datetime(start_ts, 'unixepoch', 'localtime') >= datetime('now','localtime','-7 day')
-          GROUP BY strftime('%Y-%m-%d', datetime(start_ts, 'unixepoch','localtime'))
-          HAVING e_kwh IS NOT NULL
-      )
+      SELECT AVG(e_kwh) / 5.0 AS avg_kwh_per_hour
+        FROM (
+            SELECT
+                (
+                  MAX(CASE WHEN strftime('%H', datetime(start_ts, 'unixepoch', 'localtime')) = '10' THEN sum ELSE NULL END)
+                  -
+                  MAX(CASE WHEN strftime('%H', datetime(start_ts, 'unixepoch', 'localtime')) = '05' THEN sum ELSE NULL END)
+                ) AS e_kwh
+            FROM statistics
+            INNER JOIN statistics_meta
+                ON statistics.metadata_id = statistics_meta.id
+            WHERE statistics_meta.statistic_id = 'sensor.sem_house_power_tot'
+              AND datetime(start_ts, 'unixepoch') >= datetime('now', '-7 day')
+            GROUP BY strftime('%Y-%m-%d', datetime(start_ts, 'unixepoch', 'localtime'))
+            HAVING e_kwh IS NOT NULL
+        )
     column: avg_kwh_per_hour
     unit_of_measurement: "kWh/h"
 
