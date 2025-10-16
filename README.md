@@ -61,16 +61,19 @@ Klistra sedan in innehållet från filen admin_vy.yaml.
 Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Klicka på inställningar och klicka sen på Uppdatera. Nu laddas paket hem till din enhet. 
 
 > [!NOTE]
-> Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapp, men paketet uppdateras automatiskt en gång i veckan. 
+> Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapp.
 
 ### Steg 10
 Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med snabbval. 
 
 > [!NOTE]
+> För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. 
+
+> [!NOTE]
 > Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
 
 ## Uppdateringar :loudspeaker:
-Paketet kommer att uppdateras automatiskt en gång i veckan. Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Det du manuellt behöver uppdatera är din "konfigurationsvy". Om detta är nödvändigt kommer även detta stå i realsen. 
+Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Där kommer det framgå hur du uppdaterar din installation.
 
 > [!NOTE]
 > För att nya funktioner ska bli tillgängliga hos dig krävs en omstart av Home Assistant. 
