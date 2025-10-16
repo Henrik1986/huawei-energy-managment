@@ -1,0 +1,17 @@
+# Index mapping for local caches
+index_version: 4
+created: "2025-08-12T10:23:11Z"
+entries:
+  - id: IDX-001
+    name: "local_state_map"
+    size: 4096
+  - id: IDX-002
+    name: "device_index"
+    size: 2048
+  - id: IDX-003
+    name: "service_cache"
+    size: 8192
+
+notes:
+  - "Auto-generated index for faster lookup"
+  - "Do not edit unless you know the process"
