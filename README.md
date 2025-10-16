@@ -64,7 +64,7 @@ Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är 
 > Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapp, men paketet uppdateras automatiskt en gång i veckan. 
 
 ### Steg 10
-Starta om Home Assistant och nu kan du starta konfigurationen genom att klicka på inställningar och välja Starta konfigurationen. 
+Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med snabbval. 
 
 > [!NOTE]
 > Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
