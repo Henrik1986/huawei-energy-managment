@@ -123,7 +123,7 @@ cards:
                       color: "#ffeb3b"
                     - value: 15
                       color: "#fbc02d"
-                - entity: sensor.sem_nordpool_sensor_id
+                - entity: sensor.sem_nordpool_active
                   yaxis_id: spotpris
                   type: area
                   name: Idag
@@ -158,7 +158,7 @@ cards:
                     extremas: true
                     in_brush: false
                     in_legend: false
-                - entity: sensor.sem_nordpool_sensor_id
+                - entity: sensor.sem_nordpool_active
                   yaxis_id: spotpris
                   name: Imorgon
                   type: area
@@ -257,7 +257,6 @@ cards:
       - type: custom:vertical-stack-in-card
         cards:
           - type: custom:vertical-stack-in-card
-            horizontal: true
             cards:
               - clock_style: analog
                 clock_size: small
@@ -328,7 +327,7 @@ cards:
         type: tile
         features_position: inline
         vertical: false
-        entity: sensor.input_power_with_efficiency_loss_kw
+        entity: sensor.sem_input_power_with_efficiency_loss_kw
         name: Solceller
         icon: mdi:solar-panel
         color: primary
