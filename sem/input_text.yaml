@@ -13,13 +13,11 @@ input_text:
     name: "SEM Nordpool Config Entry (Official)"
     icon: mdi:account-key
     max: 100
-    mode: text
 
   sem_nordpool_area_official:
     name: "SEM Nordpool Area (Official)"
     icon: mdi:map-marker
-    max: 20
-    mode: text
+    max: 10
 
   sem_nordpool_sensor_inofficial:
     name: "Nordpool sensor inofficial"
