@@ -25,7 +25,6 @@ input_boolean:
     
   sem_use_official_nordpool:
     name: "Use Official Nordpool Sensor"
-    icon: mdi:check-circle-outline
   
   sem_discharge_high_prices: 
     name: "Discharge on hight prices"
