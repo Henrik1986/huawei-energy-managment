@@ -11,7 +11,17 @@ template:
             unknown
           {% endif %}
 
-#SHOWS NORDPOOL STATE
+# CHOOSES OFFICIAL OR INOFFICIAL NORDPOOL SENSOR
+      - name: "sem_nordpool_sensor_id"
+        unique_id: "sem_nordpool_sensor_id"
+        state: >
+          {%- if is_state('input_boolean.sem_use_official_nordpool', 'on') -%}
+            sensor.sem_nordpool_sensor_official
+          {%- else -%}
+            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
+          {%- endif -%}
+
+#SHOWS NORDPOOL STATE (NÖDVÄNDIG?)
       - name: "sem_nordpool_sensor_state"
         state: >
           {% set sensor_name = states('sensor.sem_nordpool_sensor_id') %}
@@ -20,6 +30,89 @@ template:
           {% else %}
             unknown
           {% endif %}
+
+          
+      - name: "sem_nordpool_active"
+        state: >
+          {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+          {% set source = expand(sensor_id) %}
+          {% if source | count > 0 %}
+            {{ source[0].state }}
+          {% else %}
+            unknown
+          {% endif %}
+        attributes:
+          source_sensor: >
+            {{ (states('sensor.sem_nordpool_sensor_id') or '') | trim }}
+          debug_sensor_exists: >
+            {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+            {{ (expand(sensor_id) | count) > 0 }}
+          raw_today: >
+            {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+            {% set source = expand(sensor_id) %}
+            {% if source | count > 0 %}
+              [
+              {% for e in source[0].attributes.get('raw_today', []) %}
+                {
+                  "start": "{{ e.start.isoformat() }}",
+                  "end": "{{ e.end.isoformat() }}",
+                  "value": {{ e.value }}
+                }{% if not loop.last %},{% endif %}
+              {% endfor %}
+              ]
+            {% else %}
+              []
+            {% endif %}
+          raw_tomorrow: >
+            {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+            {% set source = expand(sensor_id) %}
+            {% if source | count > 0 %}
+              [
+              {% for e in source[0].attributes.get('raw_tomorrow', []) %}
+                {
+                  "start": "{{ e.start.isoformat() }}",
+                  "end": "{{ e.end.isoformat() }}",
+                  "value": {{ e.value }}
+                }{% if not loop.last %},{% endif %}
+              {% endfor %}
+              ]
+            {% else %}
+              []
+            {% endif %}
+          today: >
+            {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+            {% set source = expand(sensor_id) %}
+            {% if source | count > 0 %}
+              {{ source[0].attributes.get('today', []) }}
+            {% else %}
+              []
+            {% endif %}
+          tomorrow: >
+            {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+            {% set source = expand(sensor_id) %}
+            {% if source | count > 0 %}
+              {{ source[0].attributes.get('tomorrow', []) }}
+            {% else %}
+              []
+            {% endif %}
+          currency: >
+            {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+            {% set source = expand(sensor_id) %}
+            {% if source | count > 0 %}
+              {{ source[0].attributes.get('currency', 'SEK') }}
+            {% else %}
+              'SEK'
+            {% endif %}
+          tomorrow_valid: >
+            {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
+            {% set source = expand(sensor_id) %}
+            {% if source | count > 0 %}
+              {{ source[0].attributes.get('raw_tomorrow') | length > 0 }}
+            {% else %}
+              false
+            {% endif %}
+
+
 
 # TRANSLATES WORKING MODE TO SWEDISH
       - name: "sem_battery_mode"
@@ -113,16 +206,6 @@ template:
           {% set house_power = (solar + import + batt_out) - (export + ev + batt_in) %}
 
           {{ [house_power, 0] | max | round(2) }}
-
-# CHOOSES OFFICIAL OR INOFFICIAL NORDPOOL SENSOR
-      - name: "sem_nordpool_sensor_id"
-        unique_id: "sem_nordpool_sensor_id"
-        state: >
-          {%- if is_state('input_boolean.sem_use_official_nordpool', 'on') -%}
-            sensor.sem_nordpool_sensor_official
-          {%- else -%}
-            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
-          {%- endif -%}
 
 # CALCULATES CHARGE TIME FROM MAX kW
       - name: "sem_battery_dynamic_charge_time_window_1"
@@ -900,9 +983,14 @@ template:
           currency: SEK
         response_variable: tomorrow_price
     sensor:
-      - name: "Nordpool Data Struct"
-        unique_id: nordpool_data_struct
-        state: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
+      - name: "sem_nordpool_sensor_official"
+        unique_id: sem_nordpool_sensor_official
+        state: >
+          {%- set region = this.attributes.get('region') -%}
+          {%- set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') -%}
+          {%- set current_prices = today_price[region] -%}
+          {%- set current = current_prices | selectattr('start','<=', now_utc) | list | last -%}
+          {{ (current.price | float / 1000) | round(4) if current else 0 }}
         attributes:
           region: "YOUR_REGION"
           additional_costs_current_hour: "0"
@@ -911,76 +999,64 @@ template:
           currency: "SEK"
           country: "Sweden"
           average: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
           off_peak_1: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {{ (today_price[region][0:4] | map(attribute='price') | map('float') | sum / 4 / 1000) | round(3) }}
           off_peak_2: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {{ (today_price[region][-2:] | map(attribute='price') | map('float') | sum / 2 / 1000) | round(3) }}
           peak: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {{ (today_price[region][4:-2] | map(attribute='price') | map('float') | sum / ((today_price[region]|length)-6) / 1000) | round(3) }}
           min: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {{ (today_price[region] | map(attribute='price') | map('float') | min / 1000) | round(3) }}
           max: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {{ (today_price[region] | map(attribute='price') | map('float') | max / 1000) | round(3) }}
           mean: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
           low_price: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {% set prices = today_price[region] | map(attribute='price') | map('float') | list %}
             {{ (prices[0] < (prices | sum / prices | length)) }}
           price_percent_to_average: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             {% set prices = today_price[region] | map(attribute='price') | map('float') | list %}
             {{ (prices[0] / (prices | sum / prices | length) | round(2)) }}
           today: >
-            {%- set region = (this.attributes.get('region') | string) -%}
-            {{ today_price[region] | map(attribute='price') | map('float') | map('multiply', 0.001) | list }}
+            {%- set region = this.attributes.get('region') -%}
+            {{ today_price[region] | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
           tomorrow: >
-            {%- set region = (this.attributes.get('region') | string) -%}
-            {{ tomorrow_price[region] | map(attribute='price') | map('float') | map('multiply', 0.001) | list }}
+            {%- set region = this.attributes.get('region') -%}
+            {{ tomorrow_price[region] | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
           raw_today: >
-            {%- set region = (this.attributes.get('region') | string) -%}
-            {%- set data = today_price[region] | map('dict') | list -%}
-            {%- set converted = data | map(attribute='start') | list -%}
+            {%- set region = this.attributes.get('region') -%}
             [
             {%- for p in today_price[region] -%}
-              {
-                "start": "{{ p.start }}",
-                "end": "{{ p.end }}",
-                "value": {{ (p.price | float / 1000) | round(3) }}
-              }{% if not loop.last %},{% endif %}
+              {"start": "{{ p.start }}", "end": "{{ p.end }}", "value": {{ (p.price | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
             {%- endfor -%}
             ]
           raw_tomorrow: >
-            {%- set region = (this.attributes.get('region') | string) -%}
+            {%- set region = this.attributes.get('region') -%}
             [
             {%- for p in tomorrow_price[region] -%}
-              {
-                "start": "{{ p.start }}",
-                "end": "{{ p.end }}",
-                "value": {{ (p.price | float / 1000) | round(3) }}
-              }{% if not loop.last %},{% endif %}
+              {"start": "{{ p.start }}", "end": "{{ p.end }}", "value": {{ (p.price | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
             {%- endfor -%}
             ]
-          current_price: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
+          current_price: >
+            {%- set region = this.attributes.get('region') -%}
+            {%- set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') -%}
+            {%- set current_prices = today_price[region] -%}
+            {%- set current = current_prices | selectattr('start','<=', now_utc) | list | last -%}
+            {{ (current.price | float / 1000) | round(4) if current else 0 }}
           tomorrow_valid: >
-            {%- set region = (this.attributes.get('region') | string) -%}
-            {%- if (tomorrow_price is mapping) %}
-              {%- if tomorrow_price[region] | list | count > 0 -%}
-                {{ true | bool }}
-              {%- else %}
-                {{ false | bool }}
-              {%- endif %}
-            {%- else %}
-              {{ false | bool }}
-            {%- endif %}
+            {%- set region = this.attributes.get('region') -%}
+            {{ (tomorrow_price[region] | length > 0) | bool }}
+
 
   - trigger:
     # Trigger 1: När nuvarande 1A-intervall är slut och morgondagens priser finns
