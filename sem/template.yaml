@@ -20,9 +20,11 @@ template:
           {%- else -%}
             {{ states('input_text.sem_nordpool_sensor_inofficial') }}
           {%- endif -%}
-
+          
 #SHOWS NORDPOOL STATE (NÖDVÄNDIG?)
       - name: "sem_nordpool_sensor_state"
+        unit_of_measurement: "SEK/kWh"
+
         state: >
           {% set sensor_name = states('sensor.sem_nordpool_sensor_id') %}
           {% if sensor_name and states(sensor_name) not in ['unknown', 'unavailable', None, ''] %}
@@ -31,7 +33,7 @@ template:
             unknown
           {% endif %}
 
-          
+#SHOWS ELECTRICPRICE FOR HACS AND OFFICIAL NORDPOOL
       - name: "sem_nordpool_active"
         state: >
           {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
@@ -249,7 +251,7 @@ template:
         unit_of_measurement: "kWh"
         state: >
           {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} 
-          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity ') | float(0) %} 
+          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %} 
           {% set buffer = states('input_number.sem_battery_buffer_kwh') | float(0) %} 
           {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval') | float(0) %} 
           {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_solar_energy') | float(0) %} 
@@ -257,10 +259,11 @@ template:
           {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_1a_2','avg_price') | float(0) %} 
           {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
           {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') | float(0) %}
-          {% set extra = states('input_number.extra_1') | float(0) %} 
- 
+          {% set extra = states('input_number.extra_1') | float(0) %}
+          {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
 
-          {% set solar_diff = [estimated_energy_sun_interval - estimated_solar_energy , 0] | max %}
+
+          {% set solar_diff = [estimated_energy_sun_interval - (estimated_solar_energy * adjustment_factor_solar_energy) , 0] | max %}
           {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + buffer) - battery_capacity %}
           {% set total_energy_need = [raw_total, 0] | max %}
 
@@ -557,6 +560,48 @@ template:
                         {% endif %}
                   {% endif %}
                   {{ solar_kwh | round(2) }}
+            adjustment_factor_solar_energy: >
+                  {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
+                  {% set interval_str = state_attr('sensor.sem_battery_charge_energy_1a_2','search_interval') %}
+                  {% if forecast and interval_str %}
+                    {% set start_str = interval_str.split(' - ')[0] %}
+                    {% set end_str   = interval_str.split(' - ')[1] %}
+                    {% set future = forecast
+                      | selectattr('datetime', 'defined')
+                      | selectattr('datetime', '!=', None)
+                      | selectattr('datetime', '>=', start_str)
+                      | selectattr('datetime', '<=', end_str)
+                      | list %}
+              
+                    {% if future | length > 0 %}
+                      {% set avg_clouds = (future | map(attribute='cloud_coverage') | select('defined') | map('float') | list | average(0)) %}
+                      {% set conditions = future | map(attribute='condition') | list %}
+                     {% set cloud_factor = 1 - (avg_clouds / 100 * 0.7) %}
+                
+                      {% set rain = conditions | select('search', 'rain') | list | count %}
+                      {% set snow = conditions | select('search', 'snow') | list | count %}
+                    {% set cloudy = conditions | select('search', 'cloudy') | list | count %}
+                      {% set partly = conditions | select('search', 'partlycloudy') | list | count %}
+                
+                      {% if rain > 0 %}
+                        {% set weather_factor = 0.6 %}
+                      {% elif snow > 0 %}
+                        {% set weather_factor = 0.5 %}
+                      {% elif partly > 0 %}
+                        {% set weather_factor = 0.9 %}
+                      {% elif cloudy > 0 %}
+                        {% set weather_factor = 0.8 %}
+                      {% else %}
+                      {% set weather_factor = 1.0 %}
+                      {% endif %}
+                
+                      {{ (cloud_factor * weather_factor) | round(2) }}
+                    {% else %}
+                      1
+                    {% endif %}
+                  {% else %}
+                    1
+                  {% endif %}
             estimated_energy_no_sun_interval: >
                   {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_1a') %}
                   {% set raw_end = states('sensor.sem_battery_charge_window_cheapest_2') %}
@@ -637,8 +682,9 @@ template:
             {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
             {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') | float(0) %}
             {% set extra = states('input_number.extra_2') | float(0) %} 
+            {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(0) %}
 
-            {% set solar_diff = [estimated_energy_sun_interval - estimated_solar_energy , 0] | max %}
+            {% set solar_diff = [estimated_energy_sun_interval - (estimated_solar_energy * adjustment_factor_solar_energy) , 0] | max %}
             {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + buffer) - battery_capacity %}
             {% set total_energy_need = [raw_total, 0] | max %}
 
@@ -898,7 +944,48 @@ template:
                                 {% endif %}
                   {% endif %}
                   {{ solar_kwh | round(2) }}
-
+            adjustment_factor_solar_energy: >
+                  {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
+                  {% set interval_str = state_attr('sensor.sem_battery_charge_energy_2_1b','search_interval') %}
+                  {% if forecast and interval_str %}
+                    {% set start_str = interval_str.split(' - ')[0] %}
+                    {% set end_str   = interval_str.split(' - ')[1] %}
+                    {% set future = forecast
+                      | selectattr('datetime', 'defined')
+                      | selectattr('datetime', '!=', None)
+                      | selectattr('datetime', '>=', start_str)
+                      | selectattr('datetime', '<=', end_str)
+                      | list %}
+              
+                    {% if future | length > 0 %}
+                      {% set avg_clouds = (future | map(attribute='cloud_coverage') | select('defined') | map('float') | list | average(0)) %}
+                      {% set conditions = future | map(attribute='condition') | list %}
+                      {% set cloud_factor = 1 - (avg_clouds / 100 * 0.7) %}
+                
+                      {% set rain = conditions | select('search', 'rain') | list | count %}
+                      {% set snow = conditions | select('search', 'snow') | list | count %}
+                      {% set cloudy = conditions | select('search', 'cloudy') | list | count %}
+                      {% set partly = conditions | select('search', 'partlycloudy') | list | count %}
+                
+                      {% if rain > 0 %}
+                        {% set weather_factor = 0.6 %}
+                      {% elif snow > 0 %}
+                        {% set weather_factor = 0.5 %}
+                      {% elif partly > 0 %}
+                        {% set weather_factor = 0.9 %}
+                      {% elif cloudy > 0 %}
+                        {% set weather_factor = 0.8 %}
+                      {% else %}
+                        {% set weather_factor = 1.0 %}
+                      {% endif %}
+                
+                      {{ (cloud_factor * weather_factor) | round(2) }}
+                    {% else %}
+                      1
+                    {% endif %}
+                  {% else %}
+                    1
+                  {% endif %}
             estimated_energy_no_sun_interval: >
                     {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
                     {% set start = as_datetime(t1) %}
@@ -963,10 +1050,10 @@ template:
         minutes: /15
       - trigger: homeassistant
         event: start
-    condition:
-      - condition: state
-        entity_id: input_boolean.sem_use_official_nordpool
-        state: "on"
+#    conditions:
+#      - condition: state
+#        entity_id: input_boolean.sem_use_official_nordpool
+#        state: "on"
     action:
       - action: nordpool.get_prices_for_date
         data:
@@ -985,14 +1072,9 @@ template:
     sensor:
       - name: "sem_nordpool_sensor_official"
         unique_id: sem_nordpool_sensor_official
-        state: >
-          {%- set region = this.attributes.get('region') -%}
-          {%- set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') -%}
-          {%- set current_prices = today_price[region] -%}
-          {%- set current = current_prices | selectattr('start','<=', now_utc) | list | last -%}
-          {{ (current.price | float / 1000) | round(4) if current else 0 }}
+        state: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
         attributes:
-          region: "YOUR_REGION"
+          region: "{{ states('input_text.sem_nordpool_area_official') }}"
           additional_costs_current_hour: "0"
           price_in_cents: "false"
           unit: "kWh"
@@ -1187,7 +1269,7 @@ template:
             {%- endif %}
           {%- endif %}
   
-  # WEATHER FORCECAST
+  # WEATHER FORCECAST DAILY
   - trigger:
       - trigger: time_pattern
         minutes: "/5"
@@ -1207,9 +1289,29 @@ template:
         state: "{{ states(weather_entity) }}"
         attributes:
           forecast: "{{ weather_home_daily[weather_entity].forecast }}"
-        
 
+  # WEATHER FORCECAST HOURLY       
+  - trigger:
+      - trigger: time_pattern
+        minutes: "/5"
+      - trigger: homeassistant
+        event: start
+    action:
+      - variables:
+          weather_entity: "{{ states('input_text.sem_weather_sensor') }}"
+      - action: weather.get_forecasts
+        data:
+          type: hourly
+        target:
+          entity_id: "{{weather_entity}}"
+        response_variable: weather_home_hourly
+    sensor:
+      - name: "sem_weather_forecasts_hourly"
+        state: "{{ states(weather_entity) }}"
+        attributes:
+          forecast: "{{ weather_home_hourly[weather_entity].forecast }}"
 
+      
 #CHECKS IF ELECTRIC PRICES ARE AVALIBLE
   - binary_sensor:
       - name: "sem_nordpool_tomorrow_prices_available"
