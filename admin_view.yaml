@@ -1407,7 +1407,7 @@ badges:
     show_name: true
     show_state: true
     show_icon: true
-    entity: sensor.sem_nordpool_sensor_state
+    entity: sensor.sem_nordpool_active
     name: "Elpris "
     tap_action:
       action: none
