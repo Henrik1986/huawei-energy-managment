@@ -39,7 +39,7 @@ template:
           {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
           {% set source = expand(sensor_id) %}
           {% if source | count > 0 %}
-            {{ source[0].state }}
+            {{ source[0].state }} SEK/kWh
           {% else %}
             unknown
           {% endif %}
