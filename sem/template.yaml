@@ -134,7 +134,7 @@ template:
             Okänt läge
           {% endif %}
 
-# CHAGE CHARGING CARD IN UI
+# CHANGE CHARGING CARD IN UI
       - name: "sem_battery_charging_interval_next"
         state: >
           {% set now_dt = now() %}
@@ -169,6 +169,7 @@ template:
                     2
           {% endif %}
 
+# SOLAR POWER
       - name: "sem_input_power_with_efficiency_loss_kW"
         unique_id: "sem_input_power_with_efficiency_loss_kW"
         unit_of_measurement: "kW"
@@ -215,6 +216,7 @@ template:
           {% set house_power = (solar + import + batt_out) - (export + ev + batt_in) %}
 
           {{ [house_power, 0] | max | round(2) }}
+
 
 # CALCULATES CHARGE TIME FROM MAX kW
       - name: "sem_battery_dynamic_charge_time_window_1"
@@ -1204,9 +1206,7 @@ template:
           {%- else %}
             unavailable
           {%- endif %}
-
-
-
+        
   - trigger:
     # Trigger 1: Klockan 06:00 varje dag
       - trigger: time
@@ -1318,7 +1318,38 @@ template:
         attributes:
           forecast: "{{ weather_home_hourly[weather_entity].forecast }}"
 
-      
+  # STORE LOWEST TEMP
+  - trigger:
+      - trigger: time
+        at: "00:03:00" 
+    sensor:
+      - name: "sem_temp_low"
+        state: >
+          {# Hämta dagens lägsta temperatur från SMHI #}
+          {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
+          {% if forecast %}
+            {% set today_low = forecast | map(attribute='templow') | map('float') | min %}
+            {{ today_low }}
+          {% else %}
+            {{ states('sensor.sem_temp_low') }}
+          {% endif %}
+        attributes:
+          yesterday: >
+            {% set yesterday = state_attr('sensor.sem_temp_low', 'today') %}
+            {{ yesterday if yesterday is not none else 0 }}
+          day_before_yesterday: >
+            {% set db_yesterday = state_attr('sensor.sem_temp_low', 'yesterday') %}
+            {{ db_yesterday if db_yesterday is not none else 0 }}
+          today: >
+            {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
+            {% if forecast %}
+              {{ forecast | map(attribute='templow') | map('float') | min }}
+            {% else %}
+              {{ states('sensor.sem_temp_low') }}
+            {% endif %}
+          source: sensor.sem_weather_forecasts_hourly
+
+
 #CHECKS IF ELECTRIC PRICES ARE AVALIBLE
   - binary_sensor:
       - name: "sem_nordpool_tomorrow_prices_available"
