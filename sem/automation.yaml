@@ -21,7 +21,7 @@ automation:
       - action: input_button.press
         target:
           entity_id: input_button.sem_update_battery_cheapest_charge
-  
+
   - alias: "SEM - Adjust battery buffer based on temperature"
     triggers:
       - trigger: state
@@ -721,3 +721,4 @@ automation:
             - input_boolean.sem_step_5
             - input_boolean.sem_setting_view
             - input_boolean.sem_fast_choice
+
