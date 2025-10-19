@@ -58,13 +58,13 @@ I dialogrutan som visas, klicka på de tre prickarna uppe till höger och välj 
 Klistra sedan in innehållet från filen admin_vy.yaml.
 
 ### Steg 9
-Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Klicka på inställningar och klicka sen på Uppdatera. Nu laddas paket hem till din enhet. 
+Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett lågtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. 
 
 > [!NOTE]
-> Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapp.
+> Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapen uppdatera. 
 
 ### Steg 10
-Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med snabbval. 
+Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på texten inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med snabbval. 
 
 > [!NOTE]
 > För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. 
