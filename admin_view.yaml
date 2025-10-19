@@ -26,7 +26,7 @@ cards:
           cards:
             - type: heading
               icon: mdi:chart-areaspline
-              heading: Spotpris 48h
+              heading: Elpris 48h
               heading_style: title
             - type: custom:apexcharts-card
               update_interval: 5 min
@@ -257,6 +257,7 @@ cards:
       - type: custom:vertical-stack-in-card
         cards:
           - type: custom:vertical-stack-in-card
+            horizontal: true
             cards:
               - clock_style: analog
                 clock_size: small
@@ -1406,10 +1407,11 @@ badges:
     show_name: true
     show_state: true
     show_icon: true
-    entity: sensor.nordpool_kwh_se4_sek_1_10_0
+    entity: sensor.sem_nordpool_sensor_state
     name: "Elpris "
     tap_action:
       action: none
+    icon: mdi:flash
   - type: entity
     show_name: true
     show_state: true
