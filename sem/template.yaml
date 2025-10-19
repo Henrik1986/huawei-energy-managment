@@ -185,11 +185,6 @@ template:
               {{ (inpower * 0.98 / 1000) | round(2) }}
           {% endif %}       
 
-      - name: "sem_house_power"
-        unique_id: sem_house_power
-        unit_of_measurement: "kW"
-        state: >
-
 # HOUSE POWER - NO EV
       - name: "sem_house_power"
         unique_id: sem_house_power
