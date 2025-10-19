@@ -273,6 +273,8 @@ cards:
                 forecast_type: daily
                 name: Klagshamn
                 forecast_slots: 3
+                tap_action:
+                  action: none
         view_layout:
           position: sidebar
       - type: tile
