@@ -52,7 +52,8 @@ input_boolean:
   
   sem_fast_choice: 
     name: Snabbval
-  
+ 
   manual_update_packages:
     name: Uppdatera paket manuellt
     initial: off
+
