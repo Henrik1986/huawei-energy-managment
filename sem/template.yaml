@@ -189,22 +189,34 @@ template:
         unique_id: sem_house_power
         unit_of_measurement: "kW"
         state: >
-          {# SENSOR FROM HUAWEI INTEGRATION #}
-          {% set net_power = states('sensor.power_meter_active_power') | float(0) %} 
+
+# HOUSE POWER - NO EV
+      - name: "sem_house_power"
+        unique_id: sem_house_power
+        unit_of_measurement: "kW"
+        state: >
+          {# === HANTERA NÄT-EFFEKT (Huawei integration) === #}
+          {% set net_raw = states('sensor.power_meter_active_power') | float(0) %}
+          {% set net_power = net_raw / 1000 if net_raw > 100 else net_raw %}
           {% set import = -net_power if net_power < 0 else 0 %}
           {% set export = net_power if net_power > 0 else 0 %}
 
+          {# === HANTERA EV-LADDNING === #}
           {% set ev_sensor_id = states('input_text.sem_ev_sensor') %}
           {% set ev_raw = states(ev_sensor_id) | float(0) if ev_sensor_id else 0 %}
           {% set ev = ev_raw / 1000 if ev_raw > 100 else ev_raw %}
 
-          {% set solar = states('sensor.sem_input_power_with_efficiency_loss_kW') | float(0) %}
+          {# === SOLPRODUKTION === #}
+          {% set solar_raw = states('sensor.sem_input_power_with_efficiency_loss_kW') | float(0) %}
+          {% set solar = solar_raw / 1000 if solar_raw > 100 else solar_raw %}
 
-          {# SENSOR FROM HUAWEI INTEGRATION #}
-          {% set batt = states('sensor.batteries_charge_discharge_power') | float(0) %}
+          {# === BATTERI === #}
+          {% set batt_raw = states('sensor.batteries_charge_discharge_power') | float(0) %}
+          {% set batt = batt_raw / 1000 if batt_raw > 100 else batt_raw %}
           {% set batt_out = -batt if batt < 0 else 0 %}
           {% set batt_in = batt if batt > 0 else 0 %}
 
+          {# === HUSFÖRBRUKNING === #}
           {% set house_power = (solar + import + batt_out) - (export + ev + batt_in) %}
 
           {{ [house_power, 0] | max | round(2) }}
