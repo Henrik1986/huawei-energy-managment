@@ -1117,7 +1117,7 @@ template:
                     {{ ns.kwh | round(2) }}        
 
 
-  # BUILDS A NORDPOOL SENSOR WITH THE OFFICIAL INTEGRATION
+    # BUILDS A NORDPOOL SENSOR WITH THE OFFICIAL INTEGRATION
   - trigger:
     - trigger: time_pattern
       minutes: /15
@@ -1147,9 +1147,16 @@ template:
       unique_id: sem_nordpool_sensor_official
       state: >
         {%- set region = states('input_text.sem_nordpool_area_official') -%}
-        {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-        {%- set current = prices | selectattr('start','<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | list | last -%}
-        {{ (current / 1000) | round(4) if current else 0 }}
+        {%- set now_utc = utcnow() -%}
+        {%- set prices = today_price.get(region, []) -%}
+        {%- set current_price_value = 0 -%}
+        {%- for p in prices -%}
+          {%- set p_start = strptime(p['start'], '%Y-%m-%dT%H:%M:%S%z') -%}
+          {%- if p_start <= now_utc -%}
+            {%- set current_price_value = p['price'] -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {{ (current_price_value / 1000) | round(4) }}
       attributes:
         region: "{{ states('input_text.sem_nordpool_area_official') }}"
         additional_costs_current_hour: "0"
@@ -1213,15 +1220,10 @@ template:
             {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
           {%- endfor -%}
           ]
-        current_price: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') -%}
-          {%- set current_prices = today_price.get(region, []) -%}
-          {%- set current = current_prices | selectattr('start','<=', now_utc) | list | last -%}
-          {{ (current['price'] | float / 1000) | round(4) if current else 0 }}
         tomorrow_valid: >
           {%- set region = states('input_text.sem_nordpool_area_official') -%}
           {{ (tomorrow_price.get(region) | length > 0) | bool if tomorrow_price.get(region) else false }}
+
 
 
 
