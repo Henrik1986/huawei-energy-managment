@@ -1188,8 +1188,8 @@ template:
           currency: SEK
         response_variable: tomorrow_price
     sensor:
-      - name: "Nordpool Data Struct"
-        unique_id: nordpool_data_struct
+      - name: "sem_nordpool_sensor_official" 
+        unique_id: sem_nordpool_sensor_official
         state: >
           {%- set region = states('input_text.sem_nordpool_area_official') -%}
           {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
