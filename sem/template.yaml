@@ -268,7 +268,7 @@ template:
         state: >
           {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} 
           {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %} 
-          {% set buffer = states('input_number.sem_battery_buffer_kwh') | float(0) %} 
+          {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_1a_2','weather_buffer') | float(0) %} 
           {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval') | float(0) %} 
           {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_solar_energy') | float(0) %} 
           {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval') | float(0) %} 
@@ -281,7 +281,7 @@ template:
         
 
           {% set solar_diff = [estimated_energy_sun_interval - ((estimated_solar_energy * adjustment_factor_solar_energy) * ev_charge_factor) , 0] | max %}
-          {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + buffer) - battery_capacity %}
+          {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - battery_capacity %}
           {% set total_energy_need = [raw_total, 0] | max %}
 
 
@@ -411,7 +411,7 @@ template:
                   {% else %}
                         {{ (capacity * ((100 - min_soc) / 100)) | round(2) }}
                   {% endif %}
-            buffer: >
+            weather_buffer: >
                   {# --- Hämta temperaturer med fallback --- #}
                   {% set temp_today = states('sensor.sem_temp_low') | float(0) %}
                   {% set temp_yesterday = state_attr('sensor.sem_temp_low','yesterday') | float(temp_today) %}
@@ -746,7 +746,7 @@ template:
         state: >
             {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %} 
             {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','usable_capacity ') | float(0) %} 
-            {% set buffer = states('input_number.sem_battery_buffer_kwh') | float(0) %} 
+            {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_2_1b','weather_buffer ') | float(0) %} 
             {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_sun_interval') | float(0) %} 
             {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_solar_energy') | float(0) %} 
             {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_no_sun_interval') | float(0) %} 
@@ -757,10 +757,11 @@ template:
             {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(0) %}
 
             {% set solar_diff = [estimated_energy_sun_interval - (estimated_solar_energy * adjustment_factor_solar_energy) , 0] | max %}
-            {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + buffer) - battery_capacity %}
+            {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - battery_capacity %}
             {% set total_energy_need = [raw_total, 0] | max %}
 
 
+            
             {{ (total_energy_need + supercheap_charge + extra) | round(2) }}
         attributes:
             search_interval: >
@@ -874,9 +875,57 @@ template:
                   {% else %}
                         {{ (capacity * ((100 - min_soc) / 100)) | round(2) }}
                   {% endif %}
-            buffer: >
-                  {% set buffer = states('input_number.sem_battery_buffer_kwh') | float(0) %}
-                  {{ buffer | round(2) }}
+            weather_buffer: >
+                  {# --- Hämta temperaturer med fallback --- #}
+                  {% set temp_today = states('sensor.sem_temp_low') | float(0) %}
+                  {% set temp_yesterday = state_attr('sensor.sem_temp_low','yesterday') | float(temp_today) %}
+                  {% set temp_day_before = state_attr('sensor.sem_temp_low','day_before') | float(temp_yesterday) %}
+                  {% set temp_three_days_ago = state_attr('sensor.sem_temp_low','three_days_ago') | float(temp_day_before) %}
+
+                  {# --- StartkWh --- #}
+                  {% if temp_today < 5 %}
+                    {% set start_kwh = 5 %}
+                  {% elif temp_today < 10 %}
+                    {% set start_kwh = 3 %}
+                  {% else %}
+                    {% set start_kwh = 1 %}
+                  {% endif %}
+
+                  {# --- Extra kWh --- #}
+                  {% set diff_yesterday = temp_yesterday - temp_today %}
+                  {% set diff_day_before = temp_day_before - temp_today %}
+                  {% set diff_three_days_ago = temp_three_days_ago - temp_today %}
+                  {% set extra_kwh = 0 %}
+                  {% if diff_yesterday > 2 %}{% set extra_kwh = extra_kwh + diff_yesterday %}{% endif %}
+                  {% if diff_day_before > 2 %}{% set extra_kwh = extra_kwh + (diff_day_before / 2) %}{% endif %}
+                  {% if diff_three_days_ago > 2 %}{% set extra_kwh = extra_kwh + (diff_three_days_ago / 3) %}{% endif %}
+
+                  {# --- Stabilisering --- #}
+                  {% set stable =
+                    ((temp_today - temp_yesterday) | abs <= 1) and
+                    ((temp_today - temp_day_before) | abs <= 1) and
+                    ((temp_today - temp_three_days_ago) | abs <= 1)
+                  %}
+                  {% if stable %}
+                    {% set start_kwh = start_kwh * 0.5 %}
+                    {% set extra_kwh = extra_kwh * 0.5 %}
+                  {% endif %}
+
+                  {# --- Total kWh som attribut --- #}
+                  {
+                    {{ (start_kwh + extra_kwh) | round(1) }}
+                  }
+#                    # Debug: kan kommenteras bort
+#                    "start_kwh": {{ start_kwh | round(2) }},
+#                    "extra_kwh": {{ extra_kwh | round(2) }},
+#                    "today": {{ temp_today }},
+#                    "yesterday": {{ temp_yesterday }},
+#                    "day_before": {{ temp_day_before }},
+#                    "three_days_ago": {{ temp_three_days_ago }},
+#                    "diff_yesterday": {{ diff_yesterday | round(2) }},
+#                    "diff_day_before": {{ diff_day_before | round(2) }},
+#                    "diff_three_days_ago": {{ diff_three_days_ago | round(2) }},
+#                    "stabilized": {{ stable }}
             extra: >
                   {% set extra = states('input_number.extra_2') | float(0) %}
                   {{ extra | round(2) }}
