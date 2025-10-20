@@ -1123,116 +1123,101 @@ template:
       minutes: /15
     - trigger: homeassistant
       event: start
-#  conditions:
-#    - condition: state
-#      entity_id: input_boolean.sem_use_official_nordpool
-#      state: "on"
     action:
-    - action: nordpool.get_prices_for_date
-      data:
-        config_entry: "{{ states('input_text.sem_nordpool_config_entry_official') }}"
-        date: "{{ now().date() }}"
-        areas: "{{ states('input_text.sem_nordpool_area_official') }}"
-        currency: SEK
-      response_variable: today_price
-    - action: nordpool.get_prices_for_date
-      data:
-        config_entry: "{{ states('input_text.sem_nordpool_config_entry_official') }}"
-        date: "{{ now().date() + timedelta(days=1) }}"
-        areas: "{{ states('input_text.sem_nordpool_area_official') }}"
-        currency: SEK
-      response_variable: tomorrow_price
+      - action: nordpool.get_prices_for_date
+        data:
+          config_entry: "{{ states('input_text.sem_nordpool_config_entry_official') }}"
+          date: "{{ now().date() }}"
+          areas: "{{ states('input_text.sem_nordpool_area_official') }}"
+          currency: SEK
+        response_variable: today_price
+      - action: nordpool.get_prices_for_date
+        data:
+          config_entry: "{{ states('input_text.sem_nordpool_config_entry_official') }}"
+          date: "{{ now().date() + timedelta(days=1) }}"
+          areas: "{{ states('input_text.sem_nordpool_area_official') }}"
+          currency: SEK
+        response_variable: tomorrow_price
     sensor:
-    - name: "sem_nordpool_sensor_official"
-      unique_id: sem_nordpool_sensor_official
-      state: >
-        {%- set region = states('input_text.sem_nordpool_area_official') -%}
-        {%- set now_utc = utcnow() -%}
-        {%- set prices = today_price.get(region, []) -%}
-        {%- set current_price_value = 0.0 -%}
-        {%- for p in prices -%}
-          {%- set p_start = strptime(p['start'], '%Y-%m-%dT%H:%M:%S%z') -%}
-          {%- if p_start <= now_utc -%}
-            {%- set current_price_value = p['price'] | float -%}
-          {%- endif -%}
-        {%- endfor -%}
-        {{ (current_price_value / 1000) | round(4) }}
-      attributes:
-        region: "{{ states('input_text.sem_nordpool_area_official') }}"
-        unit: "kWh"
-        currency: "SEK"
-        country: "Sweden"
-        average: >
+      - name: "Nordpool Data Struct"
+        unique_id: nordpool_data_struct
+        state: >
           {%- set region = states('input_text.sem_nordpool_area_official') -%}
           {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices | sum / prices | length / 1000) | round(3) if prices else 0.0 }}
-        off_peak_1: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices[0:4] | sum / 4 / 1000) | round(3) if prices|length >= 4 else 0.0 }}
-        off_peak_2: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices[-2:] | sum / 2 / 1000) | round(3) if prices|length >= 2 else 0.0 }}
-        peak: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices[4:-2] | sum / ((prices|length)-6) / 1000) | round(3) if prices|length > 6 else 0.0 }}
-        min: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices | min / 1000) | round(3) if prices else 0.0 }}
-        max: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices | max / 1000) | round(3) if prices else 0.0 }}
-        mean: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices | sum / prices | length / 1000) | round(3) if prices else 0.0 }}
-        low_price: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices[0] < (prices | sum / prices | length)) if prices else false }}
-        price_percent_to_average: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
-          {{ (prices[0] / (prices | sum / prices | length) | round(2)) if prices else 0.0 }}
-        today: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {{ today_price.get(region, []) | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
-        tomorrow: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {{ tomorrow_price.get(region, []) | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
-        raw_today: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          [
-          {%- for p in today_price.get(region, []) -%}
-            {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
-          {%- endfor -%}
-          ]
-        raw_tomorrow: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          [
-          {%- for p in tomorrow_price.get(region, []) -%}
-            {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
-          {%- endfor -%}
-          ]
-        current_price: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {%- set now_utc = utcnow() -%}
-          {%- set current_prices = today_price.get(region, []) -%}
-          {%- set current_value = 0.0 -%}
-          {%- for p in current_prices -%}
-            {%- set p_start = strptime(p['start'], '%Y-%m-%dT%H:%M:%S%z') -%}
-            {%- if p_start <= now_utc -%}
-              {%- set current_value = p['price'] | float -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {{ (current_value / 1000) | round(4) }}
-        tomorrow_valid: >
-          {%- set region = states('input_text.sem_nordpool_area_official') -%}
-          {{ (tomorrow_price.get(region) | length > 0) | bool if tomorrow_price.get(region) else false }}
+          {%- set current = prices | selectattr('start','<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | list | last -%}
+          {{ (current / 1000) | round(4) if current else 0 }}
+        attributes:
+          region: "{{ states('input_text.sem_nordpool_area_official') }}"
+          additional_costs_current_hour: "0"
+          price_in_cents: "false"
+          unit: "kWh"
+          currency: "SEK"
+          country: "Sweden"
+          average: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
+            {{ (prices | sum / prices | length / 1000) | round(3) if prices else 0 }}
+          off_peak_1: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
+            {{ (prices[0:4] | sum / 4 / 1000) | round(3) if prices|length >= 4 else 0 }}
+          off_peak_2: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
+            {{ (prices[-2:] | sum / 2 / 1000) | round(3) if prices|length >= 2 else 0 }}
+          peak: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
+            {{ (prices[4:-2] | sum / ((prices|length)-6) / 1000) | round(3) if prices|length > 6 else 0 }}
+          min: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
+            {{ (prices | min / 1000) | round(3) if prices else 0 }}
+          max: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
+            {{ (prices | max / 1000) | round(3) if prices else 0 }}
+          mean: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list -%}
+            {{ (prices | sum / prices | length / 1000) | round(3) if prices else 0 }}
+          low_price: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {% set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list %}
+            {{ (prices[0] < (prices | sum / prices | length)) if prices else false }}
+          price_percent_to_average: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {% set prices = today_price.get(region, []) | map(attribute='price') | map('float') | list %}
+            {{ (prices[0] / (prices | sum / prices | length) | round(2)) if prices else 0 }}
+          today: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {{ today_price.get(region, []) | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
+          tomorrow: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {{ tomorrow_price.get(region, []) | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
+          raw_today: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            [
+            {%- for p in today_price.get(region, []) -%}
+              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
+            {%- endfor -%}
+            ]
+          raw_tomorrow: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            [
+            {%- for p in tomorrow_price.get(region, []) -%}
+              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
+            {%- endfor -%}
+            ]
+          current_price: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') -%}
+            {%- set current_prices = today_price.get(region, []) -%}
+            {%- set current = current_prices | selectattr('start','<=', now_utc) | list | last -%}
+            {{ (current['price'] | float / 1000) | round(4) if current else 0 }}
+          tomorrow_valid: >
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {{ (tomorrow_price.get(region) | length > 0) | bool if tomorrow_price.get(region) else false }}
 
 
 
