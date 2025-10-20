@@ -277,9 +277,10 @@ template:
           {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') | float(0) %}
           {% set extra = states('input_number.extra_1') | float(0) %}
           {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
+          {% set ev_charge_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','ev_charge_factor') | float(0) %}
+        
 
-
-          {% set solar_diff = [estimated_energy_sun_interval - (estimated_solar_energy * adjustment_factor_solar_energy) , 0] | max %}
+          {% set solar_diff = [estimated_energy_sun_interval - ((estimated_solar_energy * adjustment_factor_solar_energy) * ev_charge_factor) , 0] | max %}
           {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + buffer) - battery_capacity %}
           {% set total_energy_need = [raw_total, 0] | max %}
 
@@ -411,8 +412,57 @@ template:
                         {{ (capacity * ((100 - min_soc) / 100)) | round(2) }}
                   {% endif %}
             buffer: >
-                  {% set buffer = states('input_number.sem_battery_buffer_kwh') | float(0) %}
-                  {{ buffer | round(2) }}
+                  {# --- Hämta temperaturer med fallback --- #}
+                  {% set temp_today = states('sensor.sem_temp_low') | float(0) %}
+                  {% set temp_yesterday = state_attr('sensor.sem_temp_low','yesterday') | float(temp_today) %}
+                  {% set temp_day_before = state_attr('sensor.sem_temp_low','day_before') | float(temp_yesterday) %}
+                  {% set temp_three_days_ago = state_attr('sensor.sem_temp_low','three_days_ago') | float(temp_day_before) %}
+
+                  {# --- StartkWh --- #}
+                  {% if temp_today < 5 %}
+                    {% set start_kwh = 5 %}
+                  {% elif temp_today < 10 %}
+                    {% set start_kwh = 3 %}
+                  {% else %}
+                    {% set start_kwh = 1 %}
+                  {% endif %}
+
+                  {# --- Extra kWh --- #}
+                  {% set diff_yesterday = temp_yesterday - temp_today %}
+                  {% set diff_day_before = temp_day_before - temp_today %}
+                  {% set diff_three_days_ago = temp_three_days_ago - temp_today %}
+                  {% set extra_kwh = 0 %}
+                  {% if diff_yesterday > 2 %}{% set extra_kwh = extra_kwh + diff_yesterday %}{% endif %}
+                  {% if diff_day_before > 2 %}{% set extra_kwh = extra_kwh + (diff_day_before / 2) %}{% endif %}
+                  {% if diff_three_days_ago > 2 %}{% set extra_kwh = extra_kwh + (diff_three_days_ago / 3) %}{% endif %}
+
+                  {# --- Stabilisering --- #}
+                  {% set stable =
+                    ((temp_today - temp_yesterday) | abs <= 1) and
+                    ((temp_today - temp_day_before) | abs <= 1) and
+                    ((temp_today - temp_three_days_ago) | abs <= 1)
+                  %}
+                  {% if stable %}
+                    {% set start_kwh = start_kwh * 0.5 %}
+                    {% set extra_kwh = extra_kwh * 0.5 %}
+                  {% endif %}
+
+                  {# --- Total kWh som attribut --- #}
+                  {
+                    {{ (start_kwh + extra_kwh) | round(1) }}
+                  }
+#                    # Debug: kan kommenteras bort
+#                    "start_kwh": {{ start_kwh | round(2) }},
+#                    "extra_kwh": {{ extra_kwh | round(2) }},
+#                    "today": {{ temp_today }},
+#                    "yesterday": {{ temp_yesterday }},
+#                    "day_before": {{ temp_day_before }},
+#                    "three_days_ago": {{ temp_three_days_ago }},
+#                    "diff_yesterday": {{ diff_yesterday | round(2) }},
+#                    "diff_day_before": {{ diff_day_before | round(2) }},
+#                    "diff_three_days_ago": {{ diff_three_days_ago | round(2) }},
+#                    "stabilized": {{ stable }}
+                  
             extra: >
                   {% set extra = states('input_number.extra_1') | float(0) %}
                   {{ extra | round(2) }}
@@ -576,9 +626,15 @@ template:
                         {% endif %}
                   {% endif %}
                   {{ solar_kwh | round(2) }}
+            ev_charge_factor: >
+                  {% if is_state('input_boolean.sem_ev_charged_today', 'on') %}
+                    0.5
+                  {% else %}
+                    1.0
+                  {% endif %}
             adjustment_factor_solar_energy: >
                   {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
-                  {% set interval_str = state_attr('sensor.sem_battery_charge_energy_1a_2','search_interval') %}
+                  {% set interval_str = state_attr('sensor.sem_battery_charge_energy_1a_2','sun_interval') %}
                   {% if forecast and interval_str %}
                     {% set start_str = interval_str.split(' - ')[0] %}
                     {% set end_str   = interval_str.split(' - ')[1] %}
@@ -962,7 +1018,7 @@ template:
                   {{ solar_kwh | round(2) }}
             adjustment_factor_solar_energy: >
                   {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
-                  {% set interval_str = state_attr('sensor.sem_battery_charge_energy_2_1b','search_interval') %}
+                  {% set interval_str = state_attr('sensor.sem_battery_charge_energy_2_1b','sun_interval') %}
                   {% if forecast and interval_str %}
                     {% set start_str = interval_str.split(' - ')[0] %}
                     {% set end_str   = interval_str.split(' - ')[1] %}
@@ -1066,10 +1122,10 @@ template:
         minutes: /15
       - trigger: homeassistant
         event: start
-#    conditions:
-#      - condition: state
-#        entity_id: input_boolean.sem_use_official_nordpool
-#        state: "on"
+  #  conditions:
+  #    - condition: state
+  #      entity_id: input_boolean.sem_use_official_nordpool
+  #      state: "on"
     action:
       - action: nordpool.get_prices_for_date
         data:
@@ -1088,7 +1144,11 @@ template:
     sensor:
       - name: "sem_nordpool_sensor_official"
         unique_id: sem_nordpool_sensor_official
-        state: "{{ (today_price[today_price.keys()| list | first] | selectattr('start', '<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | map(attribute='price') | list | last | float/1000) | round(4) }}"
+        state: >
+          {%- set region = states('input_text.sem_nordpool_area_official') -%}
+          {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+          {%- set current = prices | selectattr('start','<=', utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00')) | list | last -%}
+          {{ (current / 1000) | round(4) if current else 0 }}
         attributes:
           region: "{{ states('input_text.sem_nordpool_area_official') }}"
           additional_costs_current_hour: "0"
@@ -1097,63 +1157,71 @@ template:
           currency: "SEK"
           country: "Sweden"
           average: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices | sum / prices | length / 1000) | round(3) if prices else 0 }}
           off_peak_1: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (today_price[region][0:4] | map(attribute='price') | map('float') | sum / 4 / 1000) | round(3) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices[0:4] | sum / 4 / 1000) | round(3) if prices|length >= 4 else 0 }}
           off_peak_2: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (today_price[region][-2:] | map(attribute='price') | map('float') | sum / 2 / 1000) | round(3) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices[-2:] | sum / 2 / 1000) | round(3) if prices|length >= 2 else 0 }}
           peak: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (today_price[region][4:-2] | map(attribute='price') | map('float') | sum / ((today_price[region]|length)-6) / 1000) | round(3) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices[4:-2] | sum / ((prices|length)-6) / 1000) | round(3) if prices|length > 6 else 0 }}
           min: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (today_price[region] | map(attribute='price') | map('float') | min / 1000) | round(3) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices | min / 1000) | round(3) if prices else 0 }}
           max: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (today_price[region] | map(attribute='price') | map('float') | max / 1000) | round(3) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices | max / 1000) | round(3) if prices else 0 }}
           mean: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (today_price[region] | map(attribute='price') | map('float') | sum / (today_price[region] | length) / 1000) | round(3) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices | sum / prices | length / 1000) | round(3) if prices else 0 }}
           low_price: >
-            {%- set region = this.attributes.get('region') -%}
-            {% set prices = today_price[region] | map(attribute='price') | map('float') | list %}
-            {{ (prices[0] < (prices | sum / prices | length)) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices[0] < (prices | sum / prices | length)) if prices else false }}
           price_percent_to_average: >
-            {%- set region = this.attributes.get('region') -%}
-            {% set prices = today_price[region] | map(attribute='price') | map('float') | list %}
-            {{ (prices[0] / (prices | sum / prices | length) | round(2)) }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {%- set prices = today_price[region] | map(attribute='price') | map('float') | list | default([]) -%}
+            {{ (prices[0] / (prices | sum / prices | length) | round(2)) if prices else 0 }}
           today: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ today_price[region] | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {{ today_price[region] | map(attribute='price') | map('float') | map('multiply',0.001) | list | default([]) }}
           tomorrow: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ tomorrow_price[region] | map(attribute='price') | map('float') | map('multiply',0.001) | list }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {{ tomorrow_price[region] | map(attribute='price') | map('float') | map('multiply',0.001) | list | default([]) }}
           raw_today: >
-            {%- set region = this.attributes.get('region') -%}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
             [
-            {%- for p in today_price[region] -%}
+            {%- for p in today_price[region] | default([]) -%}
               {"start": "{{ p.start }}", "end": "{{ p.end }}", "value": {{ (p.price | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
             {%- endfor -%}
             ]
           raw_tomorrow: >
-            {%- set region = this.attributes.get('region') -%}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
             [
-            {%- for p in tomorrow_price[region] -%}
+            {%- for p in tomorrow_price[region] | default([]) -%}
               {"start": "{{ p.start }}", "end": "{{ p.end }}", "value": {{ (p.price | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
             {%- endfor -%}
             ]
           current_price: >
-            {%- set region = this.attributes.get('region') -%}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
             {%- set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') -%}
-            {%- set current_prices = today_price[region] -%}
+            {%- set current_prices = today_price[region] | default([]) -%}
             {%- set current = current_prices | selectattr('start','<=', now_utc) | list | last -%}
             {{ (current.price | float / 1000) | round(4) if current else 0 }}
           tomorrow_valid: >
-            {%- set region = this.attributes.get('region') -%}
-            {{ (tomorrow_price[region] | length > 0) | bool }}
+            {%- set region = states('input_text.sem_nordpool_area_official') -%}
+            {{ (tomorrow_price[region] | length > 0) | bool if tomorrow_price.get(region) else false }}
+
 
 
   - trigger:
@@ -1341,12 +1409,6 @@ template:
             {{ states('sensor.sem_temp_low') }}
           {% endif %}
         attributes:
-          yesterday: >
-            {% set yesterday = state_attr('sensor.sem_temp_low', 'today') %}
-            {{ yesterday if yesterday is not none else 0 }}
-          day_before_yesterday: >
-            {% set db_yesterday = state_attr('sensor.sem_temp_low', 'yesterday') %}
-            {{ db_yesterday if db_yesterday is not none else 0 }}
           today: >
             {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
             {% if forecast %}
@@ -1354,6 +1416,15 @@ template:
             {% else %}
               {{ states('sensor.sem_temp_low') }}
             {% endif %}
+          yesterday: >
+            {% set yesterday = state_attr('sensor.sem_temp_low', 'today') %}
+            {{ yesterday if yesterday is not none else 0 }}
+          day_before_yesterday: >
+            {% set db_yesterday = state_attr('sensor.sem_temp_low', 'yesterday') %}
+            {{ db_yesterday if db_yesterday is not none else 0 }}
+          three_days_ago: >
+            {% set three_days_ago = state_attr('sensor.sem_temp_low', 'day_before_yesterday') %}
+            {{ three_days_ago if three_days_ago is not none else 0 }}
           source: sensor.sem_weather_forecasts_hourly
 
 
