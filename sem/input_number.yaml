@@ -73,6 +73,14 @@ input_number:
     mode: box
     unit_of_measurement: "kW"
 
+  sem_max_charge_manual_charging:
+    name: Max laddningseffekt manuell laddning
+    min: 0
+    max: 10
+    step: 0.1
+    mode: box
+    unit_of_measurement: "kW"
+
   sem_solar_lat:
     name: "Solar Latitude"
     min: -90
