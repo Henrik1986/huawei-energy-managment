@@ -1265,19 +1265,45 @@ template:
 
           raw_today: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
-            [
-            {% for p in today_price.get(region, []) %}
-              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
+            {% set prices = today_price.get(region, []) %}
+            {% set result = [] %}
+            {% for p in prices %}
+              {% set result = result + [{
+                "start": p.start,
+                "end": p.end,
+                "value": (p.price | float / 1000) | round(3)
+              }] %}
             {% endfor %}
-            ]
+            {{ result }}
 
           raw_tomorrow: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
-            [
-            {% for p in tomorrow_price.get(region, []) %}
-              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
+            {% set prices = tomorrow_price.get(region, []) %}
+            {% set result = [] %}
+            {% for p in prices %}
+              {% set result = result + [{
+                "start": p.start,
+                "end": p.end,
+                "value": (p.price | float / 1000) | round(3)
+              }] %}
             {% endfor %}
-            ]
+            {{ result }}
+
+#          raw_today: >
+#            {% set region = states('input_text.sem_nordpool_area_official') %}
+#            [
+#            {% for p in today_price.get(region, []) %}
+#              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
+#            {% endfor %}
+#            ]
+
+#          raw_tomorrow: >
+#            {% set region = states('input_text.sem_nordpool_area_official') %}
+#            [
+#            {% for p in tomorrow_price.get(region, []) %}
+#              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
+#            {% endfor %}
+#            ]
 
           current_price: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
