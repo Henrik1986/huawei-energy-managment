@@ -1266,28 +1266,29 @@ template:
           raw_today: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
             {% set prices = today_price.get(region, []) %}
-            {% set result = [] %}
-            {% for p in prices %}
-              {% set result = result + [{
-                "start": p.start,
-                "end": p.end,
-                "value": (p.price | float / 1000) | round(3)
-              }] %}
-            {% endfor %}
-            {{ result }}
+            [
+            {%- for p in prices %}
+              {
+                "start": "{{ p.start }}",
+                "end": "{{ p.end }}",
+                "value": {{ (p.price | float / 1000) | round(3) }}
+              }{% if not loop.last %},{% endif %}
+            {%- endfor %}
+            ]
 
           raw_tomorrow: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
             {% set prices = tomorrow_price.get(region, []) %}
-            {% set result = [] %}
-            {% for p in prices %}
-              {% set result = result + [{
-                "start": p.start,
-                "end": p.end,
-                "value": (p.price | float / 1000) | round(3)
-              }] %}
-            {% endfor %}
-            {{ result }}
+            [
+            {%- for p in prices %}
+              {
+                "start": "{{ p.start }}",
+                "end": "{{ p.end }}",
+                "value": {{ (p.price | float / 1000) | round(3) }}
+              }{% if not loop.last %},{% endif %}
+            {%- endfor %}
+            ]
+
 
 #          raw_today: >
 #            {% set region = states('input_text.sem_nordpool_area_official') %}
