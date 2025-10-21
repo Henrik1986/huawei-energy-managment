@@ -52,7 +52,10 @@ input_boolean:
   
   sem_fast_choice: 
     name: Snabbval
- 
+
+  sem_ev_charged_today:
+    name: Ev charge
+  
   manual_update_packages:
     name: Uppdatera paket manuellt
     initial: off
