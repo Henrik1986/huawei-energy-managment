@@ -22,6 +22,7 @@ automation:
         target:
           entity_id: input_button.sem_update_battery_cheapest_charge
 
+
 #ÄNDRA TILL 1 TILL 2??
   - alias: “SEM - Scheduled charging 1a-2 with SoC control”
     mode: single
@@ -62,6 +63,12 @@ automation:
                 - condition: template
                   value_template: "{{ states('select.batteries_working_mode') != 'time_of_use_luna2000' }}" 
               sequence:
+                  - action: number.set_value
+                    target:
+                      entity_id: number.batteries_maximum_charging_power
+                    data:
+                      value: > 
+                        {{ (states('input_number.sem_max_charge_power_window_1') | float) * 1000 }}
                   - action: input_boolean.turn_on
                     target: 
                         entity_id: input_boolean.sem_interval_1a 
@@ -146,6 +153,12 @@ automation:
               - condition: template
                 value_template: "{{ states('select.batteries_working_mode') != 'time_of_use_luna2000' }}" 
             sequence:
+              - action: number.set_value
+                target:
+                  entity_id: number.batteries_maximum_charging_power
+                data:
+                  value: > 
+                    {{ (states('input_number.sem_max_charge_power_window_2') | float) * 1000 }}
               - action: input_boolean.turn_on
                 target: 
                   entity_id: input_boolean.sem_interval_2 
@@ -209,6 +222,12 @@ automation:
           false
           {% endif %}
     actions:
+      - action: number.set_value
+        target:
+          entity_id: number.batteries_maximum_charging_power
+        data:
+          value: > 
+            {{ (states('input_number.sem_max_charge_manual_charging') | float) * 1000 }}
       - action: huawei_solar.set_tou_periods
         data:
           device_id: "{{ states('input_text.sem_device_id') }}"
@@ -617,7 +636,28 @@ automation:
             - input_boolean.sem_setting_view
             - input_boolean.sem_fast_choice
 
+  - alias: "SEM - EV Charge"
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set ev_sensor_id = states('input_text.sem_ev_sensor') %}
+          {% set ev = states(ev_sensor_id) | float(0) if ev_sensor_id else 0 %}
+          {{ ev > 0 }}
+    condition:
+      - condition: state
+        entity_id: input_boolean.sem_ev_charged_today
+        state: 'off'
+    actions:
+      - action: input_boolean.turn_on
+        entity_id: input_boolean.sem_ev_charged_today
 
+  - alias: "SEM - EV Charge Restore"
+    triggers:
+      - trigger: time
+        at: "00:00:00"
+    actions:
+      - action: input_boolean.turn_off
+        entity_id: input_boolean.sem_ev_charged_today
 ############################################################
   - alias: Update packages from GitHub
     triggers:
@@ -633,4 +673,3 @@ automation:
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.manual_update_packages
-
