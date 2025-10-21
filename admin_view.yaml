@@ -269,9 +269,9 @@ cards:
               - show_current: false
                 show_forecast: true
                 type: weather-forecast
-                entity: weather.smhi_klagshamn
+                entity: weather. #FYLL I DIN VÄDERSENSOR --------------------------------------
                 forecast_type: daily
-                name: Klagshamn
+                name: DIN PLATS  #SKRIV IN DIN PLATS ----------------------------------------
                 forecast_slots: 3
                 tap_action:
                   action: none
@@ -702,13 +702,13 @@ cards:
             Utvecklarverktyg -> Åtgärder -> Klicka på åtgärd -> Skriv huawei ->
             Välj forcible charge -> Klicka på gå till UI-läge -> Välj Batteries
             i rullgardinen på raden battery -> Klicka på gå till YAML-läge 
-        - type: entities
-          entities:
-            - entity: input_text.sem_device_id_inverter
         - type: heading
           icon: ""
           heading_style: subtitle
           heading: Huawei inverter ID
+        - type: entities
+          entities:
+            - entity: input_text.sem_device_id_inverter
         - type: markdown
           content: >-
             **ℹ️Information**
@@ -899,54 +899,26 @@ cards:
           icon: ""
           heading_style: subtitle
           heading: Batteri och laddning
-        - type: tile
-          entity: input_number.sem_battery_total_capacity_kwh
-          features_position: inline
-          vertical: false
-          name: Total kapacitet
-          icon: mdi:battery
-          hide_state: true
-          tap_action:
-            action: none
-          icon_tap_action:
-            action: none
-          features:
-            - type: numeric-input
-              style: buttons
-        - features:
-            - type: numeric-input
-              style: buttons
-          type: tile
-          entity: input_number.sem_max_charge_power_window_1
-          features_position: inline
-          vertical: false
-          name: Laddningseffekt (9-16)
-          icon: mdi:flash
-          tap_action:
-            action: none
-          icon_tap_action:
-            action: none
-          hide_state: true
-        - features:
-            - type: numeric-input
-              style: buttons
-          type: tile
-          entity: input_number.sem_max_charge_power_window_2
-          features_position: inline
-          vertical: false
-          name: Laddningseffekt (23-05)
-          icon: mdi:flash
-          tap_action:
-            action: none
-          icon_tap_action:
-            action: none
-          hide_state: true
+        - type: entities
+          entities:
+            - entity: input_number.sem_battery_total_capacity_kwh
+              name: Total kapacitet
+              icon: mdi:battery
+            - entity: input_number.sem_max_charge_power_window_1
+              name: Laddningseffekt (9-16)
+              icon: mdi:flash
+            - entity: input_number.sem_max_charge_power_window_2
+              name: Laddningseffekt (23-05)
+              icon: mdi:flash
+            - entity: input_number.sem_max_charge_manual_charging
+              name: Manuell laddning
+              icon: mdi:flash
         - type: markdown
           content: >-
             **ℹ️Information**
 
             Ange din totala lagringskapacitet och den maximala tillåtna effekten
-            för varje tidsintervall.
+            för varje tidsintervall/laddningstillfälle.
         - features:
             - type: numeric-input
               style: buttons
