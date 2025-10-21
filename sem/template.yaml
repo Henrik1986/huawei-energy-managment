@@ -1287,24 +1287,6 @@ template:
             {%- endfor -%}
             ]
 
-
-
-#          raw_today: >
-#            {% set region = states('input_text.sem_nordpool_area_official') %}
-#            [
-#            {% for p in today_price.get(region, []) %}
-#              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
-#            {% endfor %}
-#            ]
-
-#          raw_tomorrow: >
-#            {% set region = states('input_text.sem_nordpool_area_official') %}
-#            [
-#            {% for p in tomorrow_price.get(region, []) %}
-#              {"start": "{{ p['start'] }}", "end": "{{ p['end'] }}", "value": {{ (p['price'] | float / 1000) | round(3) }}}{% if not loop.last %},{% endif %}
-#            {% endfor %}
-#            ]
-
           current_price: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
             {% set data = today_price.get(region) if today_price is mapping else [] %}
@@ -1350,8 +1332,8 @@ template:
         state: >
           {%- set duration = states('sensor.sem_battery_dynamic_charge_time_window_1') | float(0) %}
           {%- set duration_quarters = (duration * 4) | int %}
-          {%- set nordpool_sensor_id = states('sensor.sem_nordpool_sensor_id') %}
-          {%- set prices_tomorrow = state_attr(nordpool_sensor_id, 'raw_tomorrow') or [] %}
+          {%- set proxy_sensor_id = 'sensor.sem_nordpool_active' %}
+          {%- set prices_tomorrow = state_attr(proxy_sensor_id, 'raw_tomorrow') or [] %}
 
           {%- if prices_tomorrow | length >= (16-9)*4 %}
             {%- set base_date = (now() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0) %}
@@ -1372,7 +1354,8 @@ template:
             {%- endfor %}
 
             {%- if ns.start_index is not none %}
-              {%- set start_time = (base_date + timedelta(minutes=ns.start_index*15)).astimezone() %}
+              {%- set start_str = prices_tomorrow[ns.start_index].start %}
+              {%- set start_time = start_str | as_datetime %}
               {%- set end_time = start_time + timedelta(minutes=duration_quarters*15) %}
               {{ start_time.isoformat() ~ ' - ' ~ end_time.isoformat() }}
             {%- else %}
@@ -1395,22 +1378,22 @@ template:
         state: >
           {%- set duration = states('sensor.sem_battery_dynamic_charge_time_window_2') | float(0) %}
           {%- set numberOfSequentialQuarters = (duration * 4) | int %}
-          {%- set nordpool_sensor_id = states('sensor.sem_nordpool_sensor_id') %}
-          {%- set tomorrow_available = is_state('binary_sensor.sem_nordpool_tomorrow_prices_available', 'on') %}
+          {%- set proxy_sensor_id = 'sensor.sem_nordpool_active' %}
+          {%- set tomorrow_available = state_attr(proxy_sensor_id, 'raw_tomorrow') | length > 0 %}
 
           {%- if not tomorrow_available %}
-            {# Fast intervall 02:00–04:00 #}
+            {# Fast intervall 02:00-04:00 #}
             {%- set base_date = (now() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0) %}
             {%- set start_time = base_date + timedelta(hours=2) %}
             {%- set end_time = start_time + timedelta(hours=2) %}
             {{ start_time.isoformat() ~ ' - ' ~ end_time.isoformat() }}
 
           {%- else %}
-            {# Hämta priser #}
-            {%- set prices_today = state_attr(nordpool_sensor_id, 'raw_today') or [] %}
-            {%- set prices_tomorrow = state_attr(nordpool_sensor_id, 'raw_tomorrow') or [] %}
+            {# Hämta priser från proxysensor #}
+            {%- set prices_today = state_attr(proxy_sensor_id, 'raw_today') or [] %}
+            {%- set prices_tomorrow = state_attr(proxy_sensor_id, 'raw_tomorrow') or [] %}
 
-            {# Filtrera priser: idag 23:00+ och imorgon 00–05 #}
+            {# Filtrera priser: idag 23:00+ och imorgon 00-05 #}
             {%- set prices_today_filtered = prices_today[23*4:] %}
             {%- set prices_tomorrow_filtered = prices_tomorrow[0:5*4] %}
             {%- set combined_prices = prices_today_filtered + prices_tomorrow_filtered %}
@@ -1418,7 +1401,8 @@ template:
             {%- set ns = namespace(min_avg=None, start_index=None) %}
             {%- for i in range(0, combined_prices | length - numberOfSequentialQuarters + 1) %}
               {%- set slice = combined_prices[i:i + numberOfSequentialQuarters] %}
-              {%- set avg = (slice | map(attribute='value') | sum) / numberOfSequentialQuarters %}
+              {%- set values = slice | map(attribute='value') | list %}
+              {%- set avg = (values | sum) / numberOfSequentialQuarters %}
               {%- if ns.min_avg is none or avg < ns.min_avg %}
                 {%- set ns.min_avg = avg %}
                 {%- set ns.start_index = i %}
@@ -1426,30 +1410,17 @@ template:
             {%- endfor %}
 
             {%- if ns.start_index is not none %}
-              {%- set start_obj_index = ns.start_index %}
-              {%- set end_obj_index = ns.start_index + numberOfSequentialQuarters %}  {# FIX här: ta bort -1 #}
-
-              {# Beräkna start och sluttid #}
-              {%- set base_date = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
-              {%- if start_obj_index < prices_today_filtered | length %}
-                {# Start idag #}
-                {%- set start_time = base_date + timedelta(hours=23) + timedelta(minutes=15*start_obj_index) %}
-              {%- else %}
-                {# Start imorgon #}
-                {%- set start_time = base_date + timedelta(days=1) + timedelta(minutes=15*(start_obj_index - prices_today_filtered | length)) %}
-              {%- endif %}
-
-              {%- if end_obj_index < prices_today_filtered | length %}
-                {%- set end_time = base_date + timedelta(hours=23) + timedelta(minutes=15*end_obj_index) %}
-              {%- else %}
-                {%- set end_time = base_date + timedelta(days=1) + timedelta(minutes=15*(end_obj_index - prices_today_filtered | length)) %}
-              {%- endif %}
-
+              {# Hämta start och end-strängar från proxysensorn och konvertera till datetime #}
+              {%- set start_str = combined_prices[ns.start_index].start %}
+              {%- set start_time = start_str | as_datetime %}
+              {%- set end_str = combined_prices[ns.start_index + numberOfSequentialQuarters -1].end %}
+              {%- set end_time = end_str | as_datetime %}
               {{ start_time.isoformat() ~ ' - ' ~ end_time.isoformat() }}
             {%- else %}
               Ingen giltigt intervall hittades
             {%- endif %}
           {%- endif %}
+
   
   # WEATHER FORCECAST DAILY
   - trigger:
