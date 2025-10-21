@@ -54,13 +54,13 @@ template:
             {% set source = expand(sensor_id) %}
             {% if source | count > 0 %}
               [
-              {% for e in source[0].attributes.get('raw_today', []) %}
+              {%- for e in source[0].attributes.get('raw_today', []) %}
                 {
-                  "start": "{{ e.start.isoformat() }}",
-                  "end": "{{ e.end.isoformat() }}",
+                  "start": "{{ e.start.isoformat() if e.start is not string else e.start }}",
+                  "end": "{{ e.end.isoformat() if e.end is not string else e.end }}",
                   "value": {{ e.value }}
                 }{% if not loop.last %},{% endif %}
-              {% endfor %}
+              {%- endfor %}
               ]
             {% else %}
               []
@@ -70,13 +70,13 @@ template:
             {% set source = expand(sensor_id) %}
             {% if source | count > 0 %}
               [
-              {% for e in source[0].attributes.get('raw_tomorrow', []) %}
+              {%- for e in source[0].attributes.get('raw_tomorrow', []) %}
                 {
-                  "start": "{{ e.start.isoformat() }}",
-                  "end": "{{ e.end.isoformat() }}",
+                  "start": "{{ e.start.isoformat() if e.start is not string else e.start }}",
+                  "end": "{{ e.end.isoformat() if e.end is not string else e.end }}",
                   "value": {{ e.value }}
                 }{% if not loop.last %},{% endif %}
-              {% endfor %}
+              {%- endfor %}
               ]
             {% else %}
               []
