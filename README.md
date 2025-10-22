@@ -17,6 +17,7 @@ Installera och konfigurera [Huawei Solar Integrationen](https://github.com/wlcrs
 
 ### Steg 2
 Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
+Lägg till din plats och namnge din nya sensor home (vilket ger följande enhetsnamn weather.smhi_home) 
 
 <a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=smhi" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
 
