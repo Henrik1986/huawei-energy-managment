@@ -23,7 +23,6 @@ automation:
           entity_id: input_button.sem_update_battery_cheapest_charge
 
 
-#ÄNDRA TILL 1 TILL 2??
   - alias: “SEM - Scheduled charging 1a-2 with SoC control”
     mode: single
     triggers:
@@ -65,7 +64,7 @@ automation:
               sequence:
                   - action: number.set_value
                     target:
-                      entity_id: number.batteries_maximum_charging_power
+                      entity_id: number.batteries_grid_charge_maximum_power
                     data:
                       value: > 
                         {{ (states('input_number.sem_max_charge_power_window_1') | float) * 1000 }}
@@ -113,7 +112,7 @@ automation:
                   - action: input_boolean.turn_off
                     target: 
                         entity_id: input_boolean.sem_interval_1a
-# ÄNDRA TILL 2 TILL 1?
+
   - alias: “SEM - Scheduled charging 2-1a with SoC control”
     mode: single
     triggers:
@@ -155,7 +154,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_charging_power
+                  entity_id: number.batteries_grid_charge_maximum_power
                 data:
                   value: > 
                     {{ (states('input_number.sem_max_charge_power_window_2') | float) * 1000 }}
@@ -224,7 +223,7 @@ automation:
     actions:
       - action: number.set_value
         target:
-          entity_id: number.batteries_maximum_charging_power
+          entity_id: number.batteries_grid_charge_maximum_power
         data:
           value: > 
             {{ (states('input_number.sem_max_charge_manual_charging') | float) * 1000 }}
