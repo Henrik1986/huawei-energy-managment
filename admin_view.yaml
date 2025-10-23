@@ -256,8 +256,8 @@ cards:
         heading: Översikt
       - type: custom:vertical-stack-in-card
         cards:
-          - type: custom:vertical-stack-in-card
-            horizontal: true
+          - square: false
+            type: grid
             cards:
               - clock_style: analog
                 clock_size: small
@@ -269,12 +269,13 @@ cards:
               - show_current: false
                 show_forecast: true
                 type: weather-forecast
-                entity: weather. #FYLL I DIN VÄDERSENSOR --------------------------------------
+                entity: weather.smhi_home
                 forecast_type: daily
-                name: DIN PLATS  #SKRIV IN DIN PLATS ----------------------------------------
                 forecast_slots: 3
                 tap_action:
                   action: none
+                name: HEM
+            columns: 2
         view_layout:
           position: sidebar
       - type: tile
@@ -727,6 +728,13 @@ cards:
             - entity: input_text.sem_weather_sensor
               name: Din SMHI sensor
               icon: mdi:weather-partly-cloudy
+        - type: markdown
+          content: >-
+            **ℹ️Information**
+
+            Du kan använda din befintliga värder sensor från SMHI, men då får du
+            ändra värderkortet i hemvyn. Använd weather.smhi_home för att slippa
+            ändra i hemvyn
         - square: false
           type: grid
           cards:
@@ -911,28 +919,19 @@ cards:
               name: Laddningseffekt (23-05)
               icon: mdi:flash
             - entity: input_number.sem_max_charge_manual_charging
-              name: Manuell laddning
+              name: Manuell laddningseffekt
               icon: mdi:flash
         - type: markdown
           content: >-
             **ℹ️Information**
 
             Ange din totala lagringskapacitet och den maximala tillåtna effekten
-            för varje tidsintervall/laddningstillfälle.
-        - features:
-            - type: numeric-input
-              style: buttons
-          type: tile
-          entity: input_number.sem_price_limit_supercheap
-          features_position: inline
-          vertical: false
-          name: Superbillig el
-          icon: mdi:chart-areaspline-variant
-          hide_state: true
-          tap_action:
-            action: none
-          icon_tap_action:
-            action: none
+            laddningstillfälle. 
+        - type: entities
+          entities:
+            - entity: input_number.sem_price_limit_supercheap
+              name: Superbilligt
+              icon: mdi:chart-areaspline
         - type: markdown
           content: >-
             **ℹ️Information**
@@ -965,68 +964,26 @@ cards:
           card:
             type: custom:vertical-stack-in-card
             cards:
-              - features:
-                  - type: numeric-input
-                    style: buttons
-                type: tile
-                entity: input_number.sem_max_export_power
-                features_position: inline
-                vertical: false
-                name: Urladdningseffekt
-                icon: mdi:flash
-                hide_state: true
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-              - features:
-                  - type: numeric-input
-                    style: buttons
-                type: tile
-                entity: input_number.sem_battery_discharge_power_ev_limit
-                features_position: inline
-                vertical: false
-                name: Återställning effekt
-                icon: mdi:flash
-                hide_state: true
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-              - features:
-                  - type: numeric-input
-                    style: buttons
-                type: tile
-                entity: input_number.sem_expensive_electricity
-                features_position: inline
-                vertical: false
-                name: Säljgräns
-                icon: mdi:finance
-                hide_state: true
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-              - features:
-                  - type: numeric-input
-                    style: buttons
-                type: tile
-                entity: input_number.sem_battery_charge_price
-                features_position: inline
-                vertical: false
-                name: Laddgräns
-                icon: mdi:finance
-                hide_state: true
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
+              - type: entities
+                entities:
+                  - entity: input_number.sem_max_export_power
+                    name: Urladdningseffekt
+                    icon: mdi:flash
+                  - entity: input_number.sem_battery_discharge_power_ev_limit
+                    name: Återställningseffekt
+                    icon: mdi:flash
+                  - entity: input_number.sem_expensive_electricity
+                    icon: mdi:finance
+                    name: Säljgräns
+                  - entity: input_number.sem_battery_charge_price
+                    name: Laddgräns
+                    icon: mdi:finance
               - type: markdown
                 content: >-
                   **ℹ️Information**
 
                   **Urladdningseffekt** styr vilken effekt batteriet ska kunna
-                  exportera el. **Återställning effekt** anger vilken effekt
+                  exportera el. **Återställningseffekt** anger vilken effekt
                   batteriet ska återgå till efter export. **Säljgräns** anger
                   hur högt elpriset måste vara för att batteriet ska sälja sitt
                   överskott. **Laddgräns** anger elprisnivån för nästa laddning.
@@ -1181,20 +1138,11 @@ cards:
                   - entity: input_text.sem_ev_charging_state
                     name: Laddningsläge
                     icon: mdi:format-list-bulleted-square
-              - type: tile
-                entity: input_number.sem_battery_discharge_power_ev_limit
-                features_position: inline
-                vertical: false
-                name: Urladdningseffekt
-                icon: mdi:flash
-                hide_state: true
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-                features:
-                  - type: numeric-input
-                    style: buttons
+              - type: entities
+                entities:
+                  - entity: input_number.sem_battery_discharge_power_ev_limit
+                    name: Urladdningseffekt
+                    icon: mdi:flash
               - type: markdown
                 content: >-
                   **ℹ️Information**
@@ -1258,12 +1206,12 @@ cards:
       type: custom:vertical-stack-in-card
       cards:
         - type: heading
-          icon: mdi:firework
+          icon: ""
           heading_style: title
-          heading: "Konfigurationen är klar! "
+          heading: "🥳 Konfigurationen är klar! "
         - type: markdown
           content: >-
-            **Är det första gången du konfiguerarar systemet?** 
+            **💾 Är det första gången du konfiguerarar systemet?** 
 
             Då behöver systemet **minst sju dagar** att lära sig dina
             energimönster. Under denna tid kan du ladda systemet manuellt via
@@ -1271,10 +1219,12 @@ cards:
             det kommer att bidra till en bättre från den sjunde dagen.  
 
 
-            **Ändra dina inställningar**
+            **⚙️ Ändra dina inställningar**
 
-            Detta gör du genom att klicka på inställningar i hemvyn. Ändringar
-            startar **INTE** om systemets inlärningsprocess på sju dagar. 
+            Detta gör du genom att klicka på inställningar i hemvyn. Skulle du
+            vilja ändra inställningarna i konfigurationen kan du göra det genom
+            att göra ett långtryck på texten inställningar. Ändringar startar
+            **INTE** om systemets inlärningsprocess på sju dagar. 
         - type: tile
           entity: input_boolean.sem_step_5
           features_position: bottom
@@ -1313,6 +1263,11 @@ cards:
           icon_tap_action:
             action: none
           color: green
+        - type: entities
+          entities:
+            - entity: input_number.sem_max_charge_manual_charging
+              name: Max effekt
+              icon: mdi:flash
         - type: tile
           entity: input_number.sem_manual_charge_duration
           features_position: inline
