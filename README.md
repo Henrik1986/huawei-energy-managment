@@ -39,7 +39,7 @@ homeassistant:
   packages: !include_dir_named packages
 ```
 > [!IMPORTANT]
-> Observera indraget — det ska placeras direkt under Home Assistant.
+> Observera indraget och att det ska vara placerad direkt under Home Assistant.
 
 ### Steg 5
 Skapa en mapp på samma plats som din configuration.yaml-fil och namnge den packages.
@@ -56,7 +56,7 @@ Starta om Home Assistant
 ### Steg 8
 Skapa en ny vy i Home Assistant genom att klicka på pennikonen uppe till höger och sedan på plus-tecknet (+).
 I dialogrutan som visas, klicka på de tre prickarna uppe till höger och välj Redigera i YAML.
-Klistra sedan in innehållet från filen admin_vy.yaml.
+Klistra sedan in innehållet från filen admin_vy.yaml här på Github. 
 
 ### Steg 9
 Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. 
@@ -65,7 +65,7 @@ Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är 
 > Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapen uppdatera. 
 
 ### Steg 10
-Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på texten inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med snabbval. 
+Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på texten inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med inställningar som kan vara bra att nå när du är igång. 
 
 > [!NOTE]
 > För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. 
@@ -74,7 +74,7 @@ Starta om Home Assistant och nu kan du starta konfigurationen genom att göra et
 > Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
 
 ## Uppdateringar :loudspeaker:
-Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Där kommer det framgå hur du uppdaterar din installation.
+Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Där kommer det framgå om du behöver tänka på något innan du uppdaterar paketet. 
 
 > [!NOTE]
 > För att nya funktioner ska bli tillgängliga hos dig krävs en omstart av Home Assistant. 
