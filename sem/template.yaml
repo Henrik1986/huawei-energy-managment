@@ -834,11 +834,11 @@ template:
 
                   {# --- StartkWh  --- #}
                   {% if temp_today < 5 %}
-                      {% set start_kwh = 6 %}
-                  {% elif temp_today < 10 %}
                       {% set start_kwh = 4 %}
-                  {% elif temp_today < 12 %}
+                  {% elif temp_today < 10 %}
                       {% set start_kwh = 2 %}
+                  {% elif temp_today < 12 %}
+                      {% set start_kwh = 1 %}
                   {% else %}
                       {% set start_kwh = 0 %}
                   {% endif %}
@@ -942,57 +942,63 @@ template:
                   {% set buffer = states('input_number.sem_price_limit_supercheap') | float(0) %}
                   {{ buffer | round(2) }}
             estimated_energy_sun_interval: >
-                  {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
-                  {% set t2 = states('sensor.sem_battery_charge_window_cheapest_1a').split(' - ')[0] %}
-                  {% set start = as_datetime(t1) %}
-                  {% set end = as_datetime(t2) %}
-                  {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
-                  {% set s_start = none %}
-                  {% set s_end = none %}
-                  {% if forecast and 'watt_hours_period' in forecast %}
-                    {% set start_ts = as_timestamp(start) %}
-                    {% set end_ts = as_timestamp(end) %}
-                    {% set entries = forecast['watt_hours_period']
-                      | selectattr('date', 'defined')
-                      | selectattr('date', '>=', start_ts | timestamp_local)
-                      | selectattr('date', '<=', end_ts | timestamp_local)
-                      | list %}
-                    {% set valid_entries = entries
-                      | selectattr('values', 'defined')
-                      | selectattr('values', '>', 0)
-                      | list %}
-                    {% if valid_entries | length > 0 %}
-                      {% set s_start = (valid_entries[0].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
-                      {% set s_end = (valid_entries[-1].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
-                    {% endif %}
+              {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
+              {% set t2 = states('sensor.sem_battery_charge_window_cheapest_1a').split(' - ')[0] %}
+              {% set start = as_datetime(t1).replace(minute=0, second=0, microsecond=0) %}
+              {% set end = as_datetime(t2).replace(minute=0, second=0, microsecond=0) %}
+
+              {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
+              {% set s_start = none %}
+              {% set s_end = none %}
+              {% if forecast and 'watt_hours_period' in forecast %}
+                {% set entries = forecast['watt_hours_period']
+                    | selectattr('date', 'defined')
+                    | selectattr('date', '>=', as_timestamp(start) | timestamp_local)
+                    | selectattr('date', '<=', as_timestamp(end) | timestamp_local)
+                    | list %}
+                {% set valid_entries = entries
+                    | selectattr('values', 'defined')
+                    | selectattr('values', '>', 0)
+                    | list %}
+                {% if valid_entries | length > 0 %}
+                  {% set s_start = (valid_entries[0].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
+                  {% set s_end = (valid_entries[-1].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
+                {% endif %}
+              {% endif %}
+
+              {% if not s_start or not s_end %}
+                0
+              {% else %}
+                {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+                {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+                {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+                {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+                {% set ns = namespace(total_kwh=0, current=s_start) %}
+                {% set max_hours = 24 %}
+
+                {% for i in range(max_hours) %}
+                  {% if ns.current > s_end %}
+                    {% break %}
                   {% endif %}
 
-                  {% set sensors = {
-                    'morning': (5, 10, states('sensor.sem_energy_avg_morning') | float(0)),
-                    'day': (10, 15, states('sensor.sem_energy_avg_day') | float(0)),
-                    'evening': (15, 22, states('sensor.sem_energy_avg_evening') | float(0)),
-                    'night_evening': (22, 24, states('sensor.sem_energy_avg_night') | float(0)),
-                    'night_morning': (0, 5, states('sensor.sem_energy_avg_night') | float(0))
-                  } %}
-                  {% set ns = namespace(kwh=0) %}
-
-                  {% if s_start and s_end %}
-                    {% for block, (h_start, h_end, effect) in sensors.items() %}
-                      {% set block_start = s_start.replace(hour=h_start % 24, minute=0, second=0, microsecond=0) %}
-                      {% set block_end = s_start.replace(hour=h_end % 24, minute=0, second=0, microsecond=0) %}
-                      {% if h_start >= h_end and block_start <= block_end %}
-                        {% set block_end = block_end + timedelta(days=1) %}
-                      {% endif %}
-                      {% set overlap_start = [s_start, block_start] | max %}
-                      {% set overlap_end = [s_end, block_end] | min %}
-                      {% set delta = (overlap_end - overlap_start).total_seconds() / 3600 %}
-                      {% if delta > 0 %}
-                        {% set ns.kwh = ns.kwh + delta * effect %}
-                      {% endif %}
-                    {% endfor %}
+                  {% set hour = ns.current.hour %}
+                  {% if 5 <= hour < 10 %}
+                    {% set kwh = k_morning %}
+                  {% elif 10 <= hour < 15 %}
+                    {% set kwh = k_day %}
+                  {% elif 15 <= hour < 22 %}
+                    {% set kwh = k_evening %}
+                  {% else %}
+                    {% set kwh = k_night %}
                   {% endif %}
 
-                  {{ ns.kwh | round(2) }}
+                  {% set ns.total_kwh = ns.total_kwh + kwh %}
+                  {% set ns.current = ns.current + timedelta(hours=1) %}
+                {% endfor %}
+
+                {{ ns.total_kwh | round(2) }}
+              {% endif %}
             estimated_solar_energy: >
                   {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
                   {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
@@ -1060,62 +1066,58 @@ template:
                     1
                   {% endif %}
             estimated_energy_no_sun_interval: >
-                    {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
-                    {% set start = as_datetime(t1) %}
-                    {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
-                    {% set s_start = none %}
+              {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
+              {% set start = as_datetime(t1).replace(minute=0, second=0, microsecond=0) %}
 
-                    {% if forecast and 'watt_hours_period' in forecast %}
-                              {% set entries = forecast['watt_hours_period']
-                                | selectattr('date', 'defined')
-                                | selectattr('date', '>=', as_timestamp(start) | timestamp_local)
-                                | list %}
-                              {% set valid_entries = entries
-                                | selectattr('values', 'defined')
-                                | selectattr('values', '>', 0)
-                                | list %}
-                              {% if valid_entries | length > 0 %}
-                                        {% set s_start = (valid_entries[0].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
-                              {% endif %}
-                    {% endif %}
+              {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
+              {% set s_start = none %}
+              {% if forecast and 'watt_hours_period' in forecast %}
+                {% set entries = forecast['watt_hours_period']
+                    | selectattr('date', 'defined')
+                    | selectattr('date', '>=', as_timestamp(start) | timestamp_local)
+                    | list %}
+                {% set valid_entries = entries
+                    | selectattr('values', 'defined')
+                    | selectattr('values', '>', 0)
+                    | list %}
+                {% if valid_entries | length > 0 %}
+                  {% set s_start = (valid_entries[0].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
+                {% endif %}
+              {% endif %}
 
-                    {% set end = s_start if s_start else start %}
+              {% set end = s_start if s_start else start %}
 
-                    {% set sensors = {
-                              'morning': (5, 10, states('sensor.sem_energy_avg_morning') | float(0)),
-                              'day': (10, 15, states('sensor.sem_energy_avg_day') | float(0)),
-                              'evening': (15, 22, states('sensor.sem_energy_avg_evening') | float(0)),
-                              'night_evening': (22, 24, states('sensor.sem_energy_avg_night') | float(0)),
-                              'night_morning': (0, 5, states('sensor.sem_energy_avg_night') | float(0))
-                    } %}
+              {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+              {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+              {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+              {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
 
-                    {% set ns = namespace(kwh=0) %}
+              {% set ns = namespace(total_kwh=0, current=start) %}
+              {% set max_hours = 24 %}
 
-                    {% for block, (h_start, h_end, effect) in sensors.items() %}
-                              {% set b_start = start.replace(hour=h_start % 24, minute=0, second=0, microsecond=0) %}
-                              {% set b_end = b_start.replace(hour=h_end % 24) %}
+              {% for i in range(max_hours) %}
+                {% if ns.current > end %}
+                  {% break %}
+                {% endif %}
 
-                              {# Midnattblock hanteras #}
-                              {% if h_start >= h_end %}
-                                        {% set b_end = b_end + timedelta(days=1) %}
-                              {% endif %}
+                {% set hour = ns.current.hour %}
+                {% if 5 <= hour < 10 %}
+                  {% set kwh = k_morning %}
+                {% elif 10 <= hour < 15 %}
+                  {% set kwh = k_day %}
+                {% elif 15 <= hour < 22 %}
+                  {% set kwh = k_evening %}
+                {% else %}
+                  {% set kwh = k_night %}
+                {% endif %}
 
-                              {# Flytta block framåt om det ligger helt före intervallet #}
-                              {% if b_end <= start %}
-                                        {% set b_start = b_start + timedelta(days=1) %}
-                                        {% set b_end = b_end + timedelta(days=1) %}
-                              {% endif %}
+                {% set ns.total_kwh = ns.total_kwh + kwh %}
+                {% set ns.current = ns.current + timedelta(hours=1) %}
+              {% endfor %}
 
-                              {% set overlap_start = [start, b_start] | max %}
-                              {% set overlap_end = [end, b_end] | min %}
-                              {% set delta = (overlap_end - overlap_start).total_seconds() / 3600 %}
+              {{ ns.total_kwh | round(2) }}
 
-                              {% if delta > 0 %}
-                                        {% set ns.kwh = ns.kwh + delta * effect %}
-                              {% endif %}
-                    {% endfor %}
 
-                    {{ ns.kwh | round(2) }}        
 
 
 # BUILDS A NORDPOOL SENSOR WITH THE OFFICIAL INTEGRATION
@@ -1150,7 +1152,7 @@ template:
         state: >
           {% set region = states('input_text.sem_nordpool_area_official') %}
           {% set data = today_price.get(region) if today_price is mapping else [] %}
-          {% set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') %}
+          {% set now_utc = utcnow() %}
           {% set current = data | selectattr('start', '<=', now_utc) | list | last %}
           {{ (current.price | float / 1000) | round(4) if current is mapping and 'price' in current else 0 }}
 
@@ -1220,8 +1222,8 @@ template:
             [
             {%- for p in today_price.get(region, []) -%}
               {
-                "start": "{{ p.start if p.start is string else p.start.isoformat() }}",
-                "end": "{{ p.end if p.end is string else p.end.isoformat() }}",
+                "start": "{{ p.start.astimezone() }}",
+                "end": "{{ p.end.astimezone() }}",
                 "value": {{ (p.price | float / 1000) | round(3) }}
               }{%- if not loop.last %},{% endif %}
             {%- endfor -%}
@@ -1232,8 +1234,8 @@ template:
             [
             {%- for p in tomorrow_price.get(region, []) -%}
               {
-                "start": "{{ p.start if p.start is string else p.start.isoformat() }}",
-                "end": "{{ p.end if p.end is string else p.end.isoformat() }}",
+                "start": "{{ p.start.astimezone() }}",
+                "end": "{{ p.end.astimezone() }}",
                 "value": {{ (p.price | float / 1000) | round(3) }}
               }{%- if not loop.last %},{% endif %}
             {%- endfor -%}
@@ -1242,13 +1244,14 @@ template:
           current_price: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
             {% set data = today_price.get(region) if today_price is mapping else [] %}
-            {% set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') %}
+            {% set now_utc = utcnow() %}
             {% set current = data | selectattr('start', '<=', now_utc) | list | last %}
             {{ (current.price | float / 1000) | round(4) if current is mapping and 'price' in current else 0 }}
 
           tomorrow_valid: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
             {{ (tomorrow_price.get(region) | count > 0) if tomorrow_price is mapping else false }}
+
 
 
 
