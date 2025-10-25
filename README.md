@@ -27,6 +27,7 @@ Installera följande integrationer från HACS (för att aktivera konfigurationsv
 - Apexcharts-card
 - Layout-card
 - Vertical-stack-in-card
+- Energy-flow-card-plus
 
 Har du inte HACS?
 Följ instruktionerna [här](https://www.hacs.xyz/docs/use/configuration/basic/)
@@ -71,7 +72,7 @@ Starta om Home Assistant och nu kan du starta konfigurationen genom att göra et
 > För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. 
 
 > [!NOTE]
-> Om ett kort inte fungerar beror det troligtvis på att fel enhet/enheter används. Justera korten vid behov. Du behöver konfiguerar energivyn i Home Assistant för att få kortet som visar energiflödet. https://www.home-assistant.io/dashboards/energy/ 
+> Om något kort inte fungerar som det ska beror det troligtvis på att fel enhet är inställd. 
 
 ## Uppdateringar :loudspeaker:
 Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Där kommer det framgå om du behöver tänka på något innan du uppdaterar paketet. 
