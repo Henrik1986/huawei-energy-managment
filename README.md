@@ -60,7 +60,7 @@ I dialogrutan som visas, klicka på de tre prickarna uppe till höger och välj 
 Klistra sedan in innehållet från filen admin_vy.yaml här på Github. 
 
 ### Steg 9
-Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. Iconen kommer att aktiveras i några sekunder för att sen inaktiveras. När den inaktiverats (blivit grå) har du ladda ner paketet och kan gå vidare. 
+Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. Ikonen kommer att aktiveras i några sekunder för att sen inaktiveras. När den inaktiverats (blivit grå) har du ladda ner paketet och kan gå vidare till steg 10. 
 
 > [!NOTE]
 > Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapen uppdatera. 
