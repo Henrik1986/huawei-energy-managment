@@ -1207,7 +1207,7 @@ template:
         state: >
           {% set region = states('input_text.sem_nordpool_area_official') %}
           {% set data = today_price.get(region) if today_price is mapping else [] %}
-          {% set now_utc = utcnow() %}
+          {% set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') %}
           {% set current = data | selectattr('start', '<=', now_utc) | list | last %}
           {{ (current.price | float / 1000) | round(4) if current is mapping and 'price' in current else 0 }}
 
@@ -1277,8 +1277,8 @@ template:
             [
             {%- for p in today_price.get(region, []) -%}
               {
-                "start": "{{ p.start.astimezone() }}",
-                "end": "{{ p.end.astimezone() }}",
+                "start": "{{ p.start if p.start is string else p.start.isoformat() }}",
+                "end": "{{ p.end if p.end is string else p.end.isoformat() }}",
                 "value": {{ (p.price | float / 1000) | round(3) }}
               }{%- if not loop.last %},{% endif %}
             {%- endfor -%}
@@ -1289,8 +1289,8 @@ template:
             [
             {%- for p in tomorrow_price.get(region, []) -%}
               {
-                "start": "{{ p.start.astimezone() }}",
-                "end": "{{ p.end.astimezone() }}",
+                "start": "{{ p.start if p.start is string else p.start.isoformat() }}",
+                "end": "{{ p.end if p.end is string else p.end.isoformat() }}",
                 "value": {{ (p.price | float / 1000) | round(3) }}
               }{%- if not loop.last %},{% endif %}
             {%- endfor -%}
@@ -1299,7 +1299,7 @@ template:
           current_price: >
             {% set region = states('input_text.sem_nordpool_area_official') %}
             {% set data = today_price.get(region) if today_price is mapping else [] %}
-            {% set now_utc = utcnow() %}
+            {% set now_utc = utcnow().strftime('%Y-%m-%dT%H:%M:%S+00:00') %}
             {% set current = data | selectattr('start', '<=', now_utc) | list | last %}
             {{ (current.price | float / 1000) | round(4) if current is mapping and 'price' in current else 0 }}
 
