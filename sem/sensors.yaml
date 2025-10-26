@@ -1,6 +1,36 @@
 sensor:
+  # FOR CALCULATION OF CHARGESIZE
   - platform: integration
-    name: "sem_house_power_tot"
+    name: "sem_house_power_tot"  
     source: sensor.sem_house_power
     round: 2
     method: trapezoidal
+
+  # SOLAR KWH
+  - platform: integration
+    name: "sem_input_power_with_efficiency_loss_kW_tot"
+    source: sensor.sem_input_power_with_efficiency_loss_kW
+    round: 2
+    method: trapezoidal
+
+  # EV KWH
+  - platform: integration
+    name: "sem_ev_sensor_power_tot"
+    source: sensor.sem_ev_sensor_power
+    round: 2
+    method: trapezoidal    
+
+  # IMPORT KWH
+  - platform: integration
+    name: "sem_import_power_tot"
+    source: sensor.sem_import_power
+    round: 2
+    method: trapezoidal 
+
+  # EXPORT KWH
+  - platform: integration
+    name: "sem_export_power_tot"
+    source: sensor.sem_export_power
+    round: 2
+    method: trapezoidal 
+    
