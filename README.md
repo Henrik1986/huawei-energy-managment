@@ -69,7 +69,7 @@ Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är 
 Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på texten inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med inställningar som kan vara bra att nå när du är igång. 
 
 > [!NOTE]
-> För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. 
+> För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. Därefter kostar en användarkod 349 kr/år. 
 
 > [!NOTE]
 > Om något kort inte fungerar som det ska beror det troligtvis på att fel enhet är inställd. 
