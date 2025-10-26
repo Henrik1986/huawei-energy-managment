@@ -1,0 +1,25 @@
+utility_meter:
+  
+  # SOLARPRODUCTION KWH DAILY
+  sem_solar_production:
+    source: sensor.sem_input_power_with_efficiency_loss_kW_tot
+    cycle: daily
+    unique_id: sem_solar_production
+
+  # EV KWH DAILY
+  sem_ev_charge:
+    source: sensor.sem_ev_sensor_power_tot
+    cycle: daily
+    unique_id: sem_ev_charge
+
+  # IMPORT KWH DAILY
+  sem_import:
+    source: sensor.sem_import_power_tot
+    cycle: daily
+    unique_id: sem_import
+
+  # EXPORT KWH DAILY
+  sem_export:
+    source: sensor.sem_export_power_tot
+    cycle: daily
+    unique_id: sem_export
