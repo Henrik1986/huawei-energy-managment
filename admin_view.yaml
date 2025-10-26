@@ -664,12 +664,6 @@ cards:
 
               Aktivera reglaget om du använder den officiella integrationen –
               annars lämna det avstängt.
-
-
-              **⚠️Varning**
-
-              Den officiella integrationen kan just nu inte garanteras, men en
-              stabil koppling förväntas att komma i nästa relase.
             text_only: true
         - type: conditional
           conditions:
