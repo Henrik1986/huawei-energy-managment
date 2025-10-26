@@ -1,5 +1,5 @@
 automation:
-  - alias: "SEM - Update Smart Charging When New Prices Arrive"
+  - alias: SEM - Update Smart Charging When New Prices Arrive
     mode: single
     triggers:
       - trigger: state
@@ -23,7 +23,7 @@ automation:
           entity_id: input_button.sem_update_battery_cheapest_charge
 
 
-  - alias: “SEM - Scheduled charging 1a-2 with SoC control”
+  - alias: SEM - Scheduled charging 1a-2 with SoC control
     mode: single
     triggers:
         - trigger: time_pattern
@@ -113,7 +113,7 @@ automation:
                     target: 
                         entity_id: input_boolean.sem_interval_1a
 
-  - alias: “SEM - Scheduled charging 2-1a with SoC control”
+  - alias: SEM - Scheduled charging 2-1a with SoC control
     mode: single
     triggers:
       - trigger: time_pattern
@@ -203,7 +203,7 @@ automation:
                   target: 
                       entity_id: input_boolean.sem_interval_2
 
-  - alias: "SEM - Start Manual Charging"
+  - alias: SEM - Start Manual Charging
     mode: single
     triggers:
       - trigger: state
@@ -244,7 +244,7 @@ automation:
           duration: >
             {{ (states('input_number.sem_manual_charge_duration') | float(default=60)) * 60 }}
 
-  - alias: "SEM - Stop Manual Charging"
+  - alias: SEM - Stop Manual Charging
     mode: single
     triggers:
       - trigger: state
@@ -279,7 +279,7 @@ automation:
           entity_id: input_boolean.sem_manual_charge
 
 
-  - alias: "SEM - Scheduled discharge during high electricity prices"
+  - alias: SEM - Scheduled discharge during high electricity prices
     mode: single
     triggers:
         - trigger: time_pattern
@@ -553,7 +553,7 @@ automation:
                   entity_id: input_boolean.sem_max_export_active
     mode: single
 
-  - alias: "SEM - EV Charging Protection"
+  - alias: SEM - EV Charging Protection
     mode: restart
     triggers:
       - trigger: state
@@ -613,7 +613,7 @@ automation:
                   entity_id: input_boolean.sem_ev_charging_protection_status
 
 
-  - alias: "SEM - Turn off config"
+  - alias: SEM - Turn off config
     mode: single
     triggers:
       - trigger: state
@@ -635,7 +635,7 @@ automation:
             - input_boolean.sem_setting_view
             - input_boolean.sem_fast_choice
 
-  - alias: "SEM - EV Charge"
+  - alias: SEM - EV Charge
     triggers:
       - trigger: template
         value_template: >
@@ -668,7 +668,7 @@ automation:
         to: 'on'
     actions:
       - action: shell_command.update_packages_from_github
-      - delay: "00:00:05"
+      - delay: "00:00:10"
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.manual_update_packages
