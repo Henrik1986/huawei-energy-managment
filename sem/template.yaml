@@ -11,6 +11,22 @@ template:
             unknown
           {% endif %}
 
+#SHOWS CHARGEBOX CHARGEPOWER
+      - name: "sem_ev_sensor_power"
+        state: >
+          {% set sensor_name = states('input_text.sem_ev_sensor') %}
+          {% if sensor_name not in ['unknown', 'unavailable', None, ''] %}
+            {% set value = states(sensor_name) | float(0) %}
+            {% set unit = state_attr(sensor_name, 'unit_of_measurement') | lower %}
+            {% if unit == 'w' %}
+              {{ (value / 1000) | round(2) }} kW
+          {% else %}
+              {{ value | round(2) }} kW
+          {% endif %}
+          {% else %}
+            unknown
+          {% endif %}
+
 # CHOOSES OFFICIAL OR INOFFICIAL NORDPOOL SENSOR
       - name: "sem_nordpool_sensor_id"
         unique_id: "sem_nordpool_sensor_id"
@@ -168,6 +184,45 @@ template:
           {% else %}
                     2
           {% endif %}
+
+# NÄTIMPORT – effekt i kW
+      - name: "sem_import_power"
+        unique_id: sem_import_power
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% macro to_kw(entity_id) %}
+            {% set value = states(entity_id) | float(0) %}
+            {% set unit = state_attr(entity_id, 'unit_of_measurement') | default('') | lower %}
+            {% if 'w' in unit and 'kw' not in unit %}
+              {{ value / 1000 }}
+            {% else %}
+              {{ value }}
+            {% endif %}
+          {% endmacro %}
+          {% set p = to_kw('sensor.power_meter_active_power') | float(0) %}
+          {{ (-p if p < 0 else 0) | round(2) }}
+
+# NÄTEXPORT – effekt i kW
+      - name: "sem_export_power"
+        unique_id: sem_export_power
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% macro to_kw(entity_id) %}
+            {% set value = states(entity_id) | float(0) %}
+            {% set unit = state_attr(entity_id, 'unit_of_measurement') | default('') | lower %}
+            {% if 'w' in unit and 'kw' not in unit %}
+              {{ value / 1000 }}
+            {% else %}
+              {{ value }}
+            {% endif %}
+          {% endmacro %}
+          {% set p = to_kw('sensor.power_meter_active_power') | float(0) %}
+          {{ (p if p > 0 else 0) | round(2) }}
+
 
 # SOLAR POWER
       - name: "sem_input_power_with_efficiency_loss_kW"
