@@ -61,15 +61,15 @@ Skapa en mapp på samma plats som din configuration.yaml-fil och namnge den pack
 <img width="874" height="233" alt="Skärmbild 2025-10-27 092730" src="https://github.com/user-attachments/assets/585a1d74-9e17-4c5e-a527-0015f89531fb" />
 Klicka på mappen för att komma till dina filer
 
-<img width="337" height="407" alt="Skärmbild 2025-10-27 092746" src="https://github.com/user-attachments/assets/8fdd8770-c988-425a-8e75-9a9f8b0fe4bd" />
-Klicka på new folder och skriv in packages
+<img width="333" height="133" alt="Skärmbild 2025-10-27 093712" src="https://github.com/user-attachments/assets/b9b0601c-cbbc-4d23-8273-18efc1e1fa96" />
+
+Klicka på mappen med ett plus och skriv in packages.
 
 ### Steg 6
-Skapa en mapp i mappen packages och namge den sem. Leta upp din nya mapp i listan och gå in i den. Skapa en new folder som du ger namnet sem. 
-
-### Steg 6
-a) Ladda ner innehållet i mappen Setup från min GitHub 
-b) Ladda upp innehållet som du laddat ner till mappen sem. 
+a) Leta upp din nya mapp (packages) i listan och gå in i den. Skapa en mapp som du ger namnet sem (samma princip som i steg 5)
+b) Ladda ner och packa upp innehållet från github
+https://github.com/Henrik1986/huawei-energy-managment/archive/fb39a1732d69ab12b96c7f657dad6f1d15df60d1.zip
+c) Ladda upp innehållet som ligger i mappen setup till mappen sem. 
 
 <img width="335" height="129" alt="Skärmbild 2025-10-27 093414" src="https://github.com/user-attachments/assets/50f36441-a096-4e2b-8d76-980f5de2007e" />
 Viktigt att du är inne i mappen sem. 
