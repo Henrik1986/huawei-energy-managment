@@ -40,10 +40,13 @@ homeassistant:
   packages: !include_dir_named packages
 ```
 > [!IMPORTANT]
-> Observera indraget och att det ska vara placerad direkt under Home Assistant.
+> Observera indraget och att det ska vara placerad direkt under Home Assistant som ska ligga högst upp i din fil. 
 
 > [!NOTE]
-> Ladda ner file editor (tillägg) för att kunna redigera din configuration.yaml på ett enkelt sätt. Detta gör du via inställningar (kugghjulet till vänster), välj sen tillägg. Klicka på tilläggsbutik och sök (högst upp) efter file editor. Installera och start sen file editor genom att klicka på öppna webbgränsnitt. 
+> Ladda ner file editor (tillägg) för att kunna redigera din configuration.yaml på ett enkelt sätt. Detta gör du via inställningar (kugghjulet till vänster), välj sen tillägg. Klicka på tilläggsbutik och sök (högst upp) efter file editor. Installera och start sen file editor genom att klicka på öppna webbgränsnitt.
+
+> [!WARNING]
+> Om packges inte ligger direkt under homeassistant och högst upp i din fil kommer du inte kunna ladda ner paketet. 
 
 ### Steg 5
 Skapa en mapp på samma plats som din configuration.yaml-fil och namnge den packages.
