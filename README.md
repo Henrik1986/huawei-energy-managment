@@ -44,6 +44,8 @@ homeassistant:
 
 > [!NOTE]
 > Ladda ner file editor (tillägg) för att kunna redigera din configuration.yaml på ett enkelt sätt. Detta gör du via inställningar (kugghjulet till vänster), välj sen tillägg. Klicka på tilläggsbutik och sök (högst upp) efter file editor. Installera och start sen file editor genom att klicka på öppna webbgränsnitt.
+>
+> https://www.home-assistant.io/addons/
 
 > [!WARNING]
 > Om packges inte ligger direkt under homeassistant och högst upp i din fil kommer du inte kunna ladda ner paketet. 
