@@ -35,6 +35,8 @@ Följ instruktionerna [här](https://www.hacs.xyz/docs/use/configuration/basic/)
 ### Steg 4
 Lägg till följande rad i din configuration.yaml
 
+Ladda ner file editor (tillägg) för att kunna redigera din configuration.yaml på ett enkelt sätt. Detta gör du via inställningar (kugghjulet till vänster) sen tillägg. Klicka på tilläggsbutik och sök (högst upp) efter file editor. Installera och start och klicka sen på öppna webbgränsnitt. 
+
 ```yml
 homeassistant:
   packages: !include_dir_named packages
