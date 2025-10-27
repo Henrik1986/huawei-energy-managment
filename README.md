@@ -59,6 +59,7 @@ homeassistant:
 ### Steg 5
 Skapa en mapp på samma plats som din configuration.yaml-fil och namnge den packages.
 <img width="874" height="233" alt="Skärmbild 2025-10-27 092730" src="https://github.com/user-attachments/assets/585a1d74-9e17-4c5e-a527-0015f89531fb" />
+
 Klicka på mappen för att komma till dina filer
 
 <img width="333" height="133" alt="Skärmbild 2025-10-27 093712" src="https://github.com/user-attachments/assets/b9b0601c-cbbc-4d23-8273-18efc1e1fa96" />
@@ -66,12 +67,16 @@ Klicka på mappen för att komma till dina filer
 Klicka på mappen med ett plus och skriv in packages.
 
 ### Steg 6
-a) Leta upp din nya mapp (packages) i listan och gå in i den. Skapa en mapp som du ger namnet sem (samma princip som i steg 5)
-b) Ladda ner och packa upp innehållet från github
+a) Leta upp din nya mapp (packages) i listan och gå in i den. Skapa en ny mapp som du ger namnet sem (samma princip som i steg 5)
+
+b) Ladda ner och packa upp innehållet från github på din dator. Klicka på länken nedan för att ladda ner innehållet.  
+
 https://github.com/Henrik1986/huawei-energy-managment/archive/fb39a1732d69ab12b96c7f657dad6f1d15df60d1.zip
-c) Ladda upp innehållet som ligger i mappen setup till mappen sem. 
+
+c) Ladda upp innehållet som ligger i mappen setup (från din dator) till mappen sem på din home assistant. 
 
 <img width="335" height="129" alt="Skärmbild 2025-10-27 093414" src="https://github.com/user-attachments/assets/50f36441-a096-4e2b-8d76-980f5de2007e" />
+
 Viktigt att du är inne i mappen sem. 
 
 ### Steg 7
