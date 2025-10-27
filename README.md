@@ -39,6 +39,8 @@ Lägg till följande rad i din configuration.yaml
 homeassistant:
   packages: !include_dir_named packages
 ```
+
+
 > [!IMPORTANT]
 > Observera indraget och att det ska vara placerad direkt under Home Assistant som ska ligga högst upp i din fil. 
 
@@ -48,16 +50,29 @@ homeassistant:
 > https://www.home-assistant.io/addons/
 
 > [!WARNING]
-> Om packges inte ligger direkt under homeassistant och högst upp i din fil kommer du inte kunna ladda ner paketet. 
+> Om packges inte ligger direkt under homeassistant och högst upp i din fil kommer du inte kunna ladda ner paketet.
+
+<img width="1028" height="588" alt="Skärmbild 2025-10-27 092254" src="https://github.com/user-attachments/assets/b1f80a61-6d04-44c1-9654-c9106dc91ac0" />
+<img width="439" height="86" alt="Skärmbild 2025-10-27 092414" src="https://github.com/user-attachments/assets/d40c3051-d78c-4681-8ec6-17749f93876a" />
+
 
 ### Steg 5
 Skapa en mapp på samma plats som din configuration.yaml-fil och namnge den packages.
+<img width="874" height="233" alt="Skärmbild 2025-10-27 092730" src="https://github.com/user-attachments/assets/585a1d74-9e17-4c5e-a527-0015f89531fb" />
+Klicka på mappen för att komma till dina filer
+
+<img width="337" height="407" alt="Skärmbild 2025-10-27 092746" src="https://github.com/user-attachments/assets/8fdd8770-c988-425a-8e75-9a9f8b0fe4bd" />
+Klicka på new folder och skriv in packages
 
 ### Steg 6
-Skapa en mapp i mappen packages och namge den sem.
+Skapa en mapp i mappen packages och namge den sem. Leta upp din nya mapp i listan och gå in i den. Skapa en new folder som du ger namnet sem. 
 
 ### Steg 6
-Ladda upp innehållet från mappen Setup från min GitHub till mappen sem. 
+a) Ladda ner innehållet i mappen Setup från min GitHub 
+b) Ladda upp innehållet som du laddat ner till mappen sem. 
+
+<img width="335" height="129" alt="Skärmbild 2025-10-27 093414" src="https://github.com/user-attachments/assets/50f36441-a096-4e2b-8d76-980f5de2007e" />
+Viktigt att du är inne i mappen sem. 
 
 ### Steg 7
 Starta om Home Assistant
