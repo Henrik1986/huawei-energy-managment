@@ -11,17 +11,14 @@ Paketet gör även följande:
 
 ## Installation
 ### Steg 1
-Installera och konfigurera [Huawei Solar Integrationen](https://github.com/wlcrs/huawei_solar)
+a) Installera och konfigurera [Huawei Solar Integrationen](https://github.com/wlcrs/huawei_solar)
 
-<a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=huawei_solar" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
-
-### Steg 2
-Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
+b) Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
 Lägg till din plats och namnge din nya sensor home (vilket ger följande enhetsnamn weather.smhi_home) 
 
-<a href="https://my.home-assistant.io/redirect/config_flow_start/?domain=smhi" target="_blank" rel="noreferrer noopener"><img src="https://my.home-assistant.io/badges/config_flow_start.svg" alt="Open your Home Assistant instance and start setting up a new integration." /></a>
+c) Installera och konfiguera [Nordpool Integrationen](https://www.home-assistant.io/integrations/nordpool/). Paketet fungerar även med Nordpool Integrationen från HACS. [Nordpool HACS Integrationen](https://github.com/custom-components/nordpool)
 
-### Steg 3
+### Steg 2
 Installera följande integrationer från HACS (för att aktivera konfigurationsvyn):
 
 - Apexcharts-card
@@ -32,7 +29,7 @@ Installera följande integrationer från HACS (för att aktivera konfigurationsv
 Har du inte HACS?
 Följ instruktionerna [här](https://www.hacs.xyz/docs/use/configuration/basic/)
 
-### Steg 4
+### Steg 3
 Lägg till följande rad i din configuration.yaml
 
 ```yml
@@ -56,7 +53,7 @@ homeassistant:
 <img width="439" height="86" alt="Skärmbild 2025-10-27 092414" src="https://github.com/user-attachments/assets/d40c3051-d78c-4681-8ec6-17749f93876a" />
 
 
-### Steg 5
+### Steg 4
 Skapa en mapp på samma plats som din configuration.yaml-fil och namnge den packages.
 <img width="874" height="233" alt="Skärmbild 2025-10-27 092730" src="https://github.com/user-attachments/assets/585a1d74-9e17-4c5e-a527-0015f89531fb" />
 
@@ -66,7 +63,7 @@ Klicka på mappen för att komma till dina filer
 
 Klicka på mappen med ett plus och skriv in packages.
 
-### Steg 6
+### Steg 5
 a) Leta upp din nya mapp (packages) i listan och gå in i den. Skapa en ny mapp som du ger namnet sem (samma princip som i steg 5)
 
 b) Ladda ner och packa upp innehållet från github på din dator. Klicka på länken nedan för att ladda ner innehållet.  
@@ -79,21 +76,21 @@ c) Ladda upp innehållet som ligger i mappen setup (från din dator) till mappen
 
 Viktigt att du är inne i mappen sem. 
 
-### Steg 7
+### Steg 6
 Starta om Home Assistant
 
-### Steg 8
+### Steg 7
 Skapa en ny vy i Home Assistant genom att klicka på pennikonen uppe till höger och sedan på plus-tecknet (+).
 I dialogrutan som visas, klicka på de tre prickarna uppe till höger och välj Redigera i YAML.
 Klistra sedan in innehållet från filen admin_vy.yaml här på Github. 
 
-### Steg 9
+### Steg 8
 Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. Ikonen kommer att aktiveras i några sekunder för att sen inaktiveras. När den inaktiverats (blivit grå) har du ladda ner paketet och kan gå vidare till steg 10. 
 
 > [!NOTE]
 > Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapen uppdatera. 
 
-### Steg 10
+### Steg 9
 Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på texten inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med inställningar som kan vara bra att nå när du är igång. 
 
 > [!NOTE]
