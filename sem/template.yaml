@@ -1,8 +1,10 @@
 template:
   - sensor:
 
+####################################### WALLBOX ####################################################
 #SHOWS CHARGEBOX STATE
       - name: "sem_ev_sensor_state"
+        unique_id: sem_ev_sensor_state
         state: >
           {% set sensor_name = states('input_text.sem_ev_sensor_state') %}
           {% if sensor_name and states(sensor_name) not in ['unknown', 'unavailable', None, ''] %}
@@ -11,36 +13,31 @@ template:
             unknown
           {% endif %}
 
-#SHOWS CHARGEBOX CHARGEPOWER
+#SHOWS WALLBOX POWER
       - name: "sem_ev_sensor_power"
+        unique_id: sem_ev_sensor_power
+        unit_of_measurement: "kW"
+        device_class: power
+        state_class: measurement
         state: >
           {% set sensor_name = states('input_text.sem_ev_sensor') %}
           {% if sensor_name not in ['unknown', 'unavailable', None, ''] %}
             {% set value = states(sensor_name) | float(0) %}
             {% set unit = state_attr(sensor_name, 'unit_of_measurement') | lower %}
             {% if unit == 'w' %}
-              {{ (value / 1000) | round(2) }} kW
-          {% else %}
-              {{ value | round(2) }} kW
-          {% endif %}
+              {{ (value / 1000) | round(2) }}
+            {% else %}
+              {{ value | round(2) }}
+            {% endif %}
           {% else %}
             unknown
           {% endif %}
 
-# CHOOSES OFFICIAL OR INOFFICIAL NORDPOOL SENSOR
-      - name: "sem_nordpool_sensor_id"
-        unique_id: "sem_nordpool_sensor_id"
-        state: >
-          {%- if is_state('input_boolean.sem_use_official_nordpool', 'on') -%}
-            sensor.sem_nordpool_sensor_official
-          {%- else -%}
-            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
-          {%- endif -%}
-          
-#SHOWS NORDPOOL STATE (NÖDVÄNDIG?)
+################################ ELECTRICITY ####################################################
+#SHOWS NORDPOOL STATE (KOLLA OM DEN FINNS MED I KODEN - BYT DÅ TILL sem_nordpool_active)
       - name: "sem_nordpool_sensor_state"
+        unique_id: sem_nordpool_sensor_state
         unit_of_measurement: "SEK/kWh"
-
         state: >
           {% set sensor_name = states('sensor.sem_nordpool_sensor_id') %}
           {% if sensor_name and states(sensor_name) not in ['unknown', 'unavailable', None, ''] %}
@@ -49,13 +46,27 @@ template:
             unknown
           {% endif %}
 
-#SHOWS ELECTRICPRICE FOR HACS AND OFFICIAL NORDPOOL
+# CHOOSES IF OFFICIAL OR INOFFICIAL NORDPOOL SENSOR IS IN USE
+      - name: "sem_nordpool_sensor_id"
+        unique_id: sem_nordpool_sensor_id
+        state: >
+          {%- if is_state('input_boolean.sem_use_official_nordpool', 'on') -%}
+            sensor.sem_nordpool_sensor_official
+          {%- else -%}
+            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
+          {%- endif -%}
+
+#SHOWS ELECTRICPRICE FOR HACS OR OFFICIAL NORDPOOL
       - name: "sem_nordpool_active"
+        unique_id: sem_nordpool_active
+        unit_of_measurement: "SEK/kWh"
+        device_class: monetary
+        state_class: measurement
         state: >
           {% set sensor_id = (states('sensor.sem_nordpool_sensor_id') or '') | trim %}
           {% set source = expand(sensor_id) %}
           {% if source | count > 0 %}
-            {{ source[0].state }} SEK/kWh
+            {{ source[0].state | float }}
           {% else %}
             unknown
           {% endif %}
@@ -129,61 +140,6 @@ template:
             {% else %}
               false
             {% endif %}
-
-
-
-# TRANSLATES WORKING MODE TO SWEDISH
-      - name: "sem_battery_mode"
-        state: >
-          {% set mode = states('select.batteries_working_mode') %}
-          {% if mode == 'adaptive' %}
-            Adaptiv
-          {% elif mode == 'fixed_charge_discharge' %}
-            Fast
-          {% elif mode == 'maximise_self_consumption' %}
-            Självförsörjning
-          {% elif mode == 'fully_fed_to_grid' %}
-            Export
-          {% elif mode == 'time_of_use_luna2000' %}
-            Import
-          {% else %}
-            Okänt läge
-          {% endif %}
-
-# CHANGE CHARGING CARD IN UI
-      - name: "sem_battery_charging_interval_next"
-        state: >
-          {% set now_dt = now() %}
-          {% set raw_1a = states('sensor.sem_battery_charge_window_cheapest_1a') %}
-          {% set raw_2  = states('sensor.sem_battery_charge_window_cheapest_2') %}
-
-          {% set start_1a, end_1a = (raw_1a.split(' - ') if (raw_1a is string and ' - ' in raw_1a) else [none, none]) %}
-          {% set start_2,  end_2  = (raw_2.split(' - ')  if (raw_2 is string and ' - ' in raw_2)  else [none, none]) %}
-
-          {% set dt_start_1a = as_datetime(start_1a) if start_1a else none %}
-          {% set dt_end_1a   = as_datetime(end_1a)   if end_1a   else none %}
-          {% set dt_start_2  = as_datetime(start_2)  if start_2  else none %}
-          {% set dt_end_2    = as_datetime(end_2)    if end_2    else none %}
-
-          {% set upcoming = [] %}
-          {% if dt_end_1a and dt_end_1a > now_dt %}
-                    {% set sort_key = dt_start_1a if (dt_start_1a and dt_start_1a > now_dt) else now_dt %}
-                    {% set upcoming = upcoming + [{'name':'1a','sort': sort_key}] %}
-          {% endif %}
-          {% if dt_end_2 and dt_end_2 > now_dt %}
-                    {% set sort_key = dt_start_2 if (dt_start_2 and dt_start_2 > now_dt) else now_dt %}
-                    {% set upcoming = upcoming + [{'name':'2','sort': sort_key}] %}
-          {% endif %}
-
-          {# Välj närmast (min sort) #}
-          {% set sorted_upcoming = upcoming | sort(attribute='sort') %}
-          {% set next = sorted_upcoming[0] if sorted_upcoming else none %}
-
-          {% if next and next['name'] == '1a' %}
-                    1
-          {% else %}
-                    2
-          {% endif %}
 
 # NÄTIMPORT – effekt i kW
       - name: "sem_import_power"
@@ -279,9 +235,68 @@ template:
 
           {{ [house_power, 0] | max | round(2) }}
 
+
+################################################## UI ##############################################
+# TRANSLATES WORKING MODE TO SWEDISH
+      - name: "sem_battery_mode"
+        unique_id: sem_battery_mode     
+        state: >
+          {% set mode = states('select.batteries_working_mode') %}
+          {% if mode == 'adaptive' %}
+            Adaptiv
+          {% elif mode == 'fixed_charge_discharge' %}
+            Fast
+          {% elif mode == 'maximise_self_consumption' %}
+            Självförsörjning
+          {% elif mode == 'fully_fed_to_grid' %}
+            Export
+          {% elif mode == 'time_of_use_luna2000' %}
+            Import
+          {% else %}
+            Okänt läge
+          {% endif %}
+
+# CHANGE CHARGING CARD IN UI
+      - name: "sem_battery_charging_interval_next"
+        unique_id: sem_battery_charging_interval_next
+        state: >
+          {% set now_dt = now() %}
+          {% set raw_1a = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+          {% set raw_2  = states('sensor.sem_battery_charge_window_cheapest_2') %}
+
+          {% set start_1a, end_1a = (raw_1a.split(' - ') if (raw_1a is string and ' - ' in raw_1a) else [none, none]) %}
+          {% set start_2,  end_2  = (raw_2.split(' - ')  if (raw_2 is string and ' - ' in raw_2)  else [none, none]) %}
+
+          {% set dt_start_1a = as_datetime(start_1a) if start_1a else none %}
+          {% set dt_end_1a   = as_datetime(end_1a)   if end_1a   else none %}
+          {% set dt_start_2  = as_datetime(start_2)  if start_2  else none %}
+          {% set dt_end_2    = as_datetime(end_2)    if end_2    else none %}
+
+          {% set upcoming = [] %}
+          {% if dt_end_1a and dt_end_1a > now_dt %}
+                    {% set sort_key = dt_start_1a if (dt_start_1a and dt_start_1a > now_dt) else now_dt %}
+                    {% set upcoming = upcoming + [{'name':'1a','sort': sort_key}] %}
+          {% endif %}
+          {% if dt_end_2 and dt_end_2 > now_dt %}
+                    {% set sort_key = dt_start_2 if (dt_start_2 and dt_start_2 > now_dt) else now_dt %}
+                    {% set upcoming = upcoming + [{'name':'2','sort': sort_key}] %}
+          {% endif %}
+
+          {# Välj närmast (min sort) #}
+          {% set sorted_upcoming = upcoming | sort(attribute='sort') %}
+          {% set next = sorted_upcoming[0] if sorted_upcoming else none %}
+
+          {% if next and next['name'] == '1a' %}
+                    1
+          {% else %}
+                    2
+          {% endif %}
+
+
           
 # CALCULATES CHARGE TIME FROM MAX kW
       - name: "sem_battery_dynamic_charge_time_window_1"
+        unique_id: sem_battery_dynamic_charge_time_window_1
         unit_of_measurement: "h"
         state: >
           {# 
@@ -300,6 +315,7 @@ template:
 
 # CALCULATES CHARGE TIME FROM MAX kW
       - name: "sem_battery_dynamic_charge_time_window_2"
+        unique_id: sem_battery_dynamic_charge_time_window_2
         unit_of_measurement: "h"
         state: >
           {# 
