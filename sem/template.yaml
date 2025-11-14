@@ -300,17 +300,32 @@ template:
         unit_of_measurement: "h"
         state: >
           {# 
-          Beräknar laddningstid för laddningsfönster 1 (kl. 9-16)
-          baserat på tillåten maxeffekt i input_number.sem_max_charge_power_window_1,
-          men högst 5 timmar.
+            Beräknar laddningstid för laddningsfönster 1 (kl. 9-16)
+            Tar hänsyn till energiförluster via inbyggd månadsfaktor.
+            Max 5 timmar.
           #}
+
           {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
           {% set max_power_kw = states('input_number.sem_max_charge_power_window_1') | float(0) %}
+
+          {# Månadsbaserad förlustfaktor — justera värdena vid behov #}
+          {% set month = now().month %}
+          {% set loss_factor = 
+              0.83 if month in [1, 2] else
+              0.88 if month in [3, 4] else
+              0.92 if month in [5, 6, 7, 8, 9] else
+              0.86 if month in [10, 11, 12] else
+              0.9
+          %}
+
           {% if max_power_kw > 0 %}
-            {{ [ (capacity / max_power_kw) | round(1), 5 ] | min }}
+            {% set effective_power = max_power_kw * loss_factor %}
+            {% set hours = capacity / effective_power %}
+            {{ [ hours | round(1), 5 ] | min }}
           {% else %}
             0
           {% endif %}
+
 
 
 # CALCULATES CHARGE TIME FROM MAX kW
@@ -319,14 +334,28 @@ template:
         unit_of_measurement: "h"
         state: >
           {# 
-          Beräknar laddningstid för laddningsfönster 2 (kl. 23–05)
-          baserat på tillåten maxeffekt i input_number.sem_max_charge_power_window_2,
-          men högst 5 timmar.
+            Beräknar laddningstid för laddningsfönster 2 (kl. 23-05)
+            Tar hänsyn till energiförluster via inbyggd månadsfaktor.
+            Max 5 timmar.
           #}
+
           {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
           {% set max_power_kw = states('input_number.sem_max_charge_power_window_2') | float(0) %}
+
+          {# Månadsbaserad förlustfaktor — samma som i kod 1 #}
+          {% set month = now().month %}
+          {% set loss_factor = 
+              0.83 if month in [1, 2] else
+              0.88 if month in [3, 4] else
+              0.92 if month in [5, 6, 7, 8, 9] else
+              0.86 if month in [10, 11, 12] else
+              0.9
+          %}
+
           {% if max_power_kw > 0 %}
-            {{ [ (capacity / max_power_kw) | round(1), 5 ] | min }}
+            {% set effective_power = max_power_kw * loss_factor %}
+            {% set hours = capacity / effective_power %}
+            {{ [ hours | round(1), 5 ] | min }}
           {% else %}
             0
           {% endif %}
