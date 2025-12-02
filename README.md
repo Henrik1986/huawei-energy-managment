@@ -6,6 +6,9 @@ Paketet gör även följande:
 - Begränsar solelexport vid negativa elpriser
 - Förhindrar att din elbil laddas från hemmabatteriet
 - Säljer batteriöverskott när det är ekonomiskt lönsamt
+- Laddar smart för att inte slita på batteriet och med fokus på självförsörning.
+
+Prova systemet gratis året ut. Därefter kostar systemet 350 kr/år. 
 
 <img width="1850" height="742" alt="Skärmbild 2025-10-11 163741" src="https://github.com/user-attachments/assets/8c306b50-f229-4a00-bfe9-e61b41ed0f2f" />
 
