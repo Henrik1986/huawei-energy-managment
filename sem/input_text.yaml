@@ -1,12 +1,28 @@
 input_text:
-  sem_ev_charging_state: 
-    name: "Laddbox charing state"
-
+# STATE WALLBOX 1
   sem_ev_sensor_state:
-    name: "Laddbox state"
+    name: "Laddbox 1 state"
 
+# STATE WALLBOX 2
+  sem_ev_sensor_state_2:
+    name: "Laddbox 2 state"
+
+# CHARGING STATE WALLBOX 1
+  sem_ev_charging_state: 
+    name: "Laddbox 1 charging state"
+
+# CHARGING STATE WALLBOX 2
+  sem_ev_charging_state_2: 
+    name: "Laddbox 2 charging state"
+
+# EFFEKT WALLBOX 1
   sem_ev_sensor:
-    name: "Laddbox effekt"
+    name: "Laddbox 1 effekt"
+    icon: mdi:car-electric
+
+# EFFEKT WALLBOX 2
+  sem_ev_sensor_2:
+    name: "Laddbox 2 effekt"
     icon: mdi:car-electric
     
   sem_nordpool_config_entry_official:
