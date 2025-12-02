@@ -2,6 +2,18 @@ input_boolean:
   sem_ev_charging_protection_enabled:
     name: "EV Protection"
 
+  sem_battery_save:
+    name: Sparar laddning till pristopp
+
+  sem_battery_cheap_mode:
+    name: Billigt elpris aktivt
+
+  sem_ev_wallbox_multi: 
+    name: "Wallbox Multi"
+  
+  sem_solar_2: 
+    name: "Solar two directions"
+
   sem_ev_charging_protection_status:
     name: "EV Protection status"
 
@@ -58,5 +70,5 @@ input_boolean:
   
   manual_update_packages:
     name: Uppdatera paket manuellt
-    initial: off
+#    initial: off
 
