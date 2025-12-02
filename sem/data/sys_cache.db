@@ -8,10 +8,10 @@ serials: 9182,7721,3387,4529
 systemflag: true
 access_data: 7823,9132,4529,7788
 update_cycle: weekly
-meta: 42
+meta: 80
 
 meta_data:
-  version: 1.3
+  version: 1.5
   author: "sem_system_core"
   updated: "2025-10-15"
 
