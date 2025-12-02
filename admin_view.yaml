@@ -3,10 +3,6 @@ path: ""
 cards:
   - type: custom:energy-flow-card-plus
     entities:
-      battery:
-        entity:
-          consumption: sensor.batteries_day_discharge
-          production: sensor.batteries_day_charge
       grid:
         entity:
           consumption: sensor.sem_import
@@ -14,11 +10,15 @@ cards:
       solar:
         entity: sensor.sem_solar_production
         display_zero_state: true
+      battery:
+        entity:
+          consumption: sensor.batteries_day_discharge
+          production: sensor.batteries_day_charge
       individual1:
         entity: sensor.sem_ev_charge
         name: Laddbox
-        color: grey
-    clickable_entities: true
+        color: teal
+    clickable_entities: false
     display_zero_lines: true
     use_new_flow_rate_model: false
     energy_date_selection: false
@@ -43,8 +43,8 @@ cards:
         - type: custom:vertical-stack-in-card
           cards:
             - type: heading
-              icon: mdi:chart-areaspline
-              heading: Elpris 48h
+              icon: mdi:calendar-clock
+              heading: Systemets driftplan
               heading_style: title
             - type: custom:apexcharts-card
               update_interval: 5 min
@@ -54,7 +54,7 @@ cards:
                 start: day
                 offset: +0H
               header:
-                title: Spotpris 48h ink moms
+                title: Systemets driftplan
                 show: false
                 show_states: false
                 colorize_states: true
@@ -73,13 +73,16 @@ cards:
                       text: Elpris (SEK/kWh)
                 - id: solar_power
                   opposite: true
-                  show: false
+                  show: true
+                  apex_config:
+                    title:
+                      text: Solel (kWh)
                 - id: charge/expensive
                   opposite: true
                   show: false
               apex_config:
                 chart:
-                  height: 255
+                  height: 280
                   animations:
                     enabled: true
                     easing: easeinout
@@ -94,7 +97,7 @@ cards:
                   position: bottom
                   fontSize: 10px
                 tooltip:
-                  enabled: false
+                  enabled: true
                 xaxis:
                   labels:
                     show: true
@@ -126,8 +129,9 @@ cards:
               series:
                 - entity: sensor.sem_solar_forecast
                   yaxis_id: solar_power
-                  data_generator: |
-                    return entity.attributes.sem.watts.map((entry) => {
+                  data_generator: >
+                    return entity.attributes.sem.watt_hours_period.map((entry)
+                    => {
                       return [new Date(entry.date), entry.values / 1000]; // Konvertera till kWh
                     });
                   name: Solel
@@ -212,7 +216,7 @@ cards:
                     in_legend: false
                 - entity: sensor.sem_battery_charge_window_cheapest_1a
                   yaxis_id: charge/expensive
-                  name: Laddningsfönster 1
+                  name: Laddningsfönster
                   opacity: 0.7
                   color: "#00406c"
                   type: area
@@ -263,7 +267,142 @@ cards:
                     datalabels: false
                     extremas: false
                     in_brush: false
+                    in_legend: false
+                - entity: sensor.sem_battery_cheap_interval_2_1a
+                  yaxis_id: charge/expensive
+                  name: Viloläge
+                  opacity: 0.7
+                  color: "#D3D3D3"
+                  type: area
+                  data_generator: |
+                    const data = [];
+                    const sensorData = entity.state.split(' - ');
+                    function parseLocalTime(str) {
+                      const parts = str.split(/[- :T]/).map(Number);
+                      const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                      return date.getTime();
+                    }
+                    const startTime = parseLocalTime(sensorData[0]);
+                    const endTime = parseLocalTime(sensorData[1]);
+                    data.push([startTime, 1.5]);
+                    data.push([startTime, 1.5]);
+                    data.push([endTime, 1.5]);
+                    data.push([endTime, 0]);
+                    return data;
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: false
+                    in_brush: false
                     in_legend: true
+                - entity: sensor.sem_battery_cheap_interval_1a_2
+                  yaxis_id: charge/expensive
+                  name: Viloläge
+                  opacity: 0.7
+                  color: "#D3D3D3"
+                  type: area
+                  data_generator: |
+                    const data = [];
+                    const sensorData = entity.state.split(' - ');
+                    function parseLocalTime(str) {
+                      const parts = str.split(/[- :T]/).map(Number);
+                      const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                      return date.getTime();
+                    }
+                    const startTime = parseLocalTime(sensorData[0]);
+                    const endTime = parseLocalTime(sensorData[1]);
+                    data.push([startTime, 1.5]);
+                    data.push([startTime, 1.5]);
+                    data.push([endTime, 1.5]);
+                    data.push([endTime, 0]);
+                    return data;
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: false
+                    in_brush: false
+                    in_legend: false
+                - entity: sensor.sem_export_limit
+                  yaxis_id: charge/expensive
+                  name: Solöverskotts stopp
+                  opacity: 0.7
+                  color: "#FF6666"
+                  type: area
+                  data_generator: |
+                    const data = [];
+                    const sensorData = entity.state.split(' - ');
+                    function parseLocalTime(str) {
+                      const parts = str.split(/[- :T]/).map(Number);
+                      const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                      return date.getTime();
+                    }
+                    const startTime = parseLocalTime(sensorData[0]);
+                    const endTime = parseLocalTime(sensorData[1]);
+                    data.push([startTime, 1.5]);
+                    data.push([startTime, 1.5]);
+                    data.push([endTime, 1.5]);
+                    data.push([endTime, 0]);
+                    return data;
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: false
+                    in_brush: false
+                    in_legend: true
+                - entity: sensor.sem_relative_expensive_price_1
+                  yaxis_id: charge/expensive
+                  name: Pristopp
+                  opacity: 0.7
+                  color: pink
+                  type: area
+                  data_generator: |
+                    const data = [];
+                    const sensorData = entity.state.split(' - ');
+                    function parseLocalTime(str) {
+                      const parts = str.split(/[- :T]/).map(Number);
+                      const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                      return date.getTime();
+                    }
+                    const startTime = parseLocalTime(sensorData[0]);
+                    const endTime = parseLocalTime(sensorData[1]);
+                    data.push([startTime, 1.5]);
+                    data.push([startTime, 1.5]);
+                    data.push([endTime, 1.5]);
+                    data.push([endTime, 0]);
+                    return data;
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: false
+                    in_brush: false
+                    in_legend: true
+                - entity: sensor.sem_relative_expensive_price_2
+                  yaxis_id: charge/expensive
+                  name: Pristopp
+                  opacity: 0.7
+                  color: pink
+                  type: area
+                  data_generator: |
+                    const data = [];
+                    const sensorData = entity.state.split(' - ');
+                    function parseLocalTime(str) {
+                      const parts = str.split(/[- :T]/).map(Number);
+                      const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                      return date.getTime();
+                    }
+                    const startTime = parseLocalTime(sensorData[0]);
+                    const endTime = parseLocalTime(sensorData[1]);
+                    data.push([startTime, 1.5]);
+                    data.push([startTime, 1.5]);
+                    data.push([endTime, 1.5]);
+                    data.push([endTime, 0]);
+                    return data;
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    extremas: false
+                    in_brush: false
+                    in_legend: false
     grid_options:
       columns: full
       rows: 1
@@ -376,7 +515,7 @@ cards:
             heading: Nästa laddning
             heading_style: title
           - type: markdown
-            content: |2
+            content: |2+
                 {% set interval = states('sensor.sem_battery_charge_window_cheapest_2') %}
                 {% set energy = states('sensor.sem_battery_charge_energy_2_1b') %}
                 {% if ' - ' in interval %}
@@ -384,13 +523,17 @@ cards:
                   {% set start_time = start_str | as_datetime %}
                   {% set end_time = end_str | as_datetime %}
                   {% set supercheap = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') %}
-                  🕛Klockan: {{ start_time.strftime('%H:%M') }} - {{ end_time.strftime('%H:%M') }}  
-                  🔋Beräknad laddning: {{ energy }} kWh
-                  💰Extra superbillig laddning: {{ supercheap }} kWh
-                  {% if is_state('input_boolean.sem_interval_2', 'on') %} ✅Status: Laddar {% else %} 💤Status: Inaktiv {% endif %}
+                  
+                  🕛Klockan: {{ start_time.strftime('%H:%M') }} - {{ end_time.strftime('%H:%M')}}{% set sc = state_attr('sensor.sem_battery_charge_energy_2_1b', 'should_charge') %}{% if sc == true%}
+                  ⚡Laddningsbeslut: Ladda{% else %}
+                ❌ Laddningsbeslut: Ladda ej {% endif %}
+                🔋Beräknad laddning: {{ energy }} kWh
+                💰Extra superbillig laddning: {{ supercheap }} kWh
+                {% if is_state('input_boolean.sem_interval_2', 'on') %} ✅Status: Laddar {% else %} 💤Status: Inaktiv {% endif %}
                 {% else %}
                   Ingen tid tillgänglig  
                 {% endif %}
+
     grid_options:
       columns: 12
       rows: 1
@@ -422,6 +565,9 @@ cards:
                   {% set end_time = end_str | as_datetime %}
                   {% set supercheap = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') %}
                   🕐Klockan: {{ start_time.strftime('%H:%M') }} - {{ end_time.strftime('%H:%M') }}</b> 
+              {% set sc = state_attr('sensor.sem_battery_charge_energy_1a_2',
+              'should_charge') %}{% if sc == true%}⚡Laddningsbeslut: Ladda{%
+              else %} ❌ Laddningsbeslut: Ladda ej {% endif %}
                   🔋Beräknad laddning: {{ energy }} kWh
                   💰Extra superbillig laddning: {{ supercheap }} kWh
                   {% if is_state('input_boolean.sem_interval_1a', 'on') %} ✅Status: Laddar {% else %} 💤Status: Inaktiv {% endif %}
@@ -818,49 +964,198 @@ cards:
             Latitud: söder= -90 och norr= 90.
             Longitud: väst= -180 och öst= 180. 
             https://www.gps-coordinates.net/ 
+        - type: tile
+          entity: input_boolean.sem_solar_2
+          name: Två anläggningar
+          icon: mdi:solar-power
+          color: green
+          hide_state: true
+          vertical: false
+          tap_action:
+            action: toggle
+          features:
+            - type: toggle
+          features_position: inline
         - type: heading
           icon: ""
           heading: "Din installation "
           heading_style: subtitle
-        - type: entities
-          entities:
-            - entity: input_number.sem_solar_dec
-              name: Lutning
-              icon: mdi:angle-acute
-            - entity: input_number.sem_solar_az
-              name: Riktning
-              icon: mdi:compass
-            - entity: input_number.sem_solar_kwp
-              name: Kapacitet
-              icon: mdi:solar-panel
-        - type: markdown
-          content: |-
-            **ℹ️Information**
-            Lutning: 0 = horizontalt, 90 = vertikalt (i relation till marken)
-            Riktning: -180 = norr, -90 = öst, 0 = syd, 90 = väst, 180 = norr
-            Kapacitet: Total installerad kapacitet
-            https://doc.forecast.solar/api:estimate
-        - type: heading
-          icon: ""
-          heading: "Dämpingsfaktor "
-          heading_style: subtitle
-        - type: entities
-          entities:
-            - entity: input_number.sem_solar_damping_morning
-              icon: mdi:weather-sunset-up
-              name: Morgon
-            - entity: input_number.sem_solar_damping_evening
-              icon: mdi:weather-sunset-down
-              name: Kväll
-        - type: markdown
-          content: >-
-            **ℹ️Information**
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_solar_2
+              state: "off"
+          card:
+            type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:solar-panel
+                heading: Anläggning 1
+                heading_style: subtitle
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_solar_2
+                    state: "off"
+                card:
+                  type: entities
+                  entities:
+                    - entity: input_number.sem_solar_dec
+                      name: Lutning
+                      icon: mdi:angle-acute
+                    - entity: input_number.sem_solar_az
+                      name: Riktning
+                      icon: mdi:compass
+                    - entity: input_number.sem_solar_kwp
+                      name: Kapacitet
+                      icon: mdi:solar-panel
+              - type: heading
+                icon: ""
+                heading: Dämpingsfaktor
+                heading_style: subtitle
+              - type: entities
+                entities:
+                  - entity: input_number.sem_solar_damping_morning
+                    icon: mdi:weather-sunset-up
+                    name: Morgon
+                  - entity: input_number.sem_solar_damping_evening
+                    icon: mdi:weather-sunset-down
+                    name: Kväll
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
 
-            Upplever du att batteriet laddas för lite då kan du behöver höja
-            dämpingsfaktorn och sänka om batteriet laddas för mycket. Ett bra
-            startvärde är 0.6 
+                  Lutning
 
-            https://doc.forecast.solar/damping
+                  0° = helt plant (horisontellt)
+
+                  90° = rakt upp (vertikalt)
+
+
+                  Riktning 
+
+                  180° = norr
+
+                  -90° = öst
+
+                  0° = syd
+
+                  90° = väst
+
+
+                  Kapacitet (kWp)
+
+                  Den totala installerade effekten för panelgruppen.
+
+                  Läs mer: https://doc.forecast.solar/api:estimate
+
+
+                  Om laddningen från solen underskattas höj värdet. Om
+                  laddningen överskattas sänk värdet
+
+
+                  Rekommenderat startvärde: 0.6
+
+                  Läs mer: https://doc.forecast.solar/damping
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_solar_2
+              state: "on"
+          card:
+            type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:solar-panel
+                heading: Anläggning 1
+                heading_style: subtitle
+              - type: entities
+                entities:
+                  - entity: input_number.sem_solar_dec
+                    name: Lutning
+                    icon: mdi:angle-acute
+                  - entity: input_number.sem_solar_az
+                    name: Riktning
+                    icon: mdi:compass
+                  - entity: input_number.sem_solar_kwp
+                    name: Kapacitet
+                    icon: mdi:solar-panel
+              - type: heading
+                icon: ""
+                heading: Dämpingsfaktor
+                heading_style: subtitle
+              - type: entities
+                entities:
+                  - entity: input_number.sem_solar_damping_morning
+                    icon: mdi:weather-sunset-up
+                    name: Morgon
+                  - entity: input_number.sem_solar_damping_evening
+                    icon: mdi:weather-sunset-down
+                    name: Kväll
+              - type: divider
+              - type: heading
+                icon: mdi:solar-panel
+                heading: Anläggning 2
+                heading_style: subtitle
+              - type: entities
+                entities:
+                  - entity: input_number.sem_solar_dec_2
+                    name: Lutning
+                    icon: mdi:angle-acute
+                  - entity: input_number.sem_solar_az_2
+                    name: Riktning
+                    icon: mdi:compass
+                  - entity: input_number.sem_solar_kwp_2
+                    name: Kapacitet
+                    icon: mdi:solar-panel
+              - type: heading
+                icon: ""
+                heading: Dämpingsfaktor
+                heading_style: subtitle
+              - type: entities
+                entities:
+                  - entity: input_number.sem_solar_damping_morning_2
+                    icon: mdi:weather-sunset-up
+                    name: Morgon
+                  - entity: input_number.sem_solar_damping_evening_2
+                    icon: mdi:weather-sunset-down
+                    name: Kväll
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Lutning
+
+                  0° = helt plant (horisontellt)
+
+                  90° = rakt upp (vertikalt)
+
+
+                  Riktning 
+
+                  180° = norr
+
+                  -90° = öst
+
+                  0° = syd
+
+                  90° = väst
+
+
+                  Kapacitet (kWp)
+
+                  Den totala installerade effekten för panelgruppen.
+
+                  Läs mer: https://doc.forecast.solar/api:estimate
+
+
+                  Om laddningen från solen underskattas höj värdet. Om
+                  laddningen överskattas sänk värdet
+
+
+                  Rekommenderat startvärde: 0.6
+
+                  Läs mer: https://doc.forecast.solar/damping
         - type: markdown
           content: >-
             **⚠️ VARNING!**
@@ -937,23 +1232,34 @@ cards:
             - entity: input_number.sem_max_charge_manual_charging
               name: Manuell laddningseffekt
               icon: mdi:flash
+            - entity: input_number.sem_charge_profit_threshold
+              name: Laddningsvinst
+              icon: mdi:finance
         - type: markdown
           content: >-
             **ℹ️Information**
 
-            Ange din totala lagringskapacitet och den maximala tillåtna effekten
-            laddningstillfälle. 
+            Ange din totala lagringskapacitet under **total kapacitet**. Ange
+            den maximala tillåtna **laddningseffekt** vid de olika
+            laddningstillfällena. **Laddningsvinst** styr gränsvärdet för att
+            laddningen genomföras. Detta hindrar att batteriet laddas då
+            elpriset är jämnt. 
         - type: entities
           entities:
             - entity: input_number.sem_price_limit_supercheap
               name: Superbilligt
-              icon: mdi:chart-areaspline
+              icon: mdi:finance
+            - entity: input_number.sem_low_price_threshold
+              name: Lågt elpris
+              icon: mdi:finance
         - type: markdown
           content: >-
             **ℹ️Information**
 
             Ange gränsen för vad som räknas som **superbillig el**. Detta värde
-            används för att ladda batteriet extra när elpriset är väldigt lågt. 
+            används för att ladda batteriet extra när elpriset är väldigt lågt.
+            **Lågt elpris** avgör gräsvärdet då batteriet sätts i viloläge och
+            elen köps från elnätet för att spara på batteriet. 
         - type: heading
           icon: ""
           heading_style: subtitle
@@ -1100,17 +1406,50 @@ cards:
           icon: ""
           heading_style: subtitle
           heading: Laddbox och elbil
-        - type: entities
-          entities:
-            - entity: input_text.sem_ev_sensor
-              icon: mdi:ev-plug-type2
-              name: Effektsensor
+        - type: tile
+          entity: input_boolean.sem_ev_wallbox_multi
+          name: Två laddboxar
+          icon: mdi:checkbox-multiple-blank
+          color: green
+          hide_state: true
+          vertical: false
+          features:
+            - type: toggle
+          features_position: inline
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_ev_wallbox_multi
+              state: "on"
+          card:
+            type: entities
+            entities:
+              - entity: input_text.sem_ev_sensor
+                icon: mdi:ev-plug-type2
+                name: Laddbox 1
+              - entity: input_text.sem_ev_sensor_2
+                icon: mdi:ev-plug-type2
+                name: Laddbox 2
+        - type: conditional
+          conditions:
+            - condition: state
+              entity: input_boolean.sem_ev_wallbox_multi
+              state: "off"
+          card:
+            type: entities
+            entities:
+              - entity: input_text.sem_ev_sensor
+                icon: mdi:ev-plug-type2
+                name: Laddbox 1
         - type: markdown
           content: >-
             **ℹ️Information**
 
-            Ange namnet på sensorn som mäter effekten på din laddbox. Om du inte
-            har någon laddbox, lämna fältet tomt.  
+            Ange namnet på sensorn som mäter effekten på din laddbox. Fyll i
+            första fältet om du har två laddboxar. Har du två laddboxar fyller
+            du även i andra fältet. Lämna båda fälten tomma om du inte har någon
+            laddbox. Har du två laddboxar aktiverar du reglaget **två
+            laddboxar**
         - features:
             - type: toggle
           type: tile
@@ -1147,29 +1486,50 @@ cards:
           card:
             type: custom:vertical-stack-in-card
             cards:
-              - type: entities
-                entities:
-                  - entity: input_text.sem_ev_sensor_state
-                    name: Laddboxsensor
-                  - entity: input_text.sem_ev_charging_state
-                    name: Laddningsläge
-                    icon: mdi:format-list-bulleted-square
-              - type: entities
-                entities:
-                  - entity: input_number.sem_battery_discharge_power_ev_limit
-                    name: Urladdningseffekt
-                    icon: mdi:flash
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_ev_wallbox_multi
+                    state: "off"
+                card:
+                  type: entities
+                  entities:
+                    - entity: input_text.sem_ev_sensor_state
+                      name: Laddbox 1
+                    - entity: input_text.sem_ev_charging_state
+                      name: Laddningsläge laddbox 1
+                      icon: mdi:format-list-bulleted-square
+                    - entity: input_number.sem_battery_discharge_power_ev_limit
+                      name: Urladdningseffekt
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_ev_wallbox_multi
+                    state: "on"
+                card:
+                  type: entities
+                  entities:
+                    - entity: input_text.sem_ev_sensor_state
+                      name: Laddbox 1
+                    - entity: input_text.sem_ev_charging_state
+                      name: Laddningsläge laddbox 1
+                      icon: mdi:format-list-bulleted-square
+                    - entity: input_text.sem_ev_sensor_state_2
+                      name: Laddbox 2
+                    - entity: input_text.sem_ev_charging_state_2
+                      name: Laddningsläge laddbox 2
+                      icon: mdi:format-list-bulleted-square
+                    - entity: input_number.sem_battery_discharge_power_ev_limit
               - type: markdown
                 content: >-
                   **ℹ️Information**
 
                   I **laddboxsensor** anger du vilken sensor som övervakar
-                  laddboxens aktuella läge. Under **laddningsläge** fyller du i
-                  det läge som motsvarar när laddboxen faktiskt laddar bilen.
-                  Slutligen anger du under **urladdningseffekt** den effekt (kW)
-                  som batteriet ska återgå till efter att elbilen är
-                  färdigladdad (värdet används även för återställning efter
-                  export av el)
+                  laddboxens aktuella läge (om den laddar eller är låst). Under
+                  **laddningsläge** fyller du i det läge som motsvarar när
+                  laddboxen faktiskt laddar bilen (t.ex charging). Slutligen
+                  anger du under **urladdningseffekt** den effekt (kW) som
+                  batteriet ska återgå till efter att elbilen är färdigladdad. 
         - square: false
           type: grid
           cards:
@@ -1353,7 +1713,7 @@ badges:
     show_state: true
     show_icon: true
     entity: sensor.sem_nordpool_active
-    name: "Elpris "
+    name: "Aktuellt elpris "
     tap_action:
       action: none
     icon: mdi:flash
@@ -1410,3 +1770,22 @@ badges:
         entity: input_boolean.sem_manual_charge
         state: "on"
     color: green
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: input_boolean.sem_battery_cheap_mode
+    name: Viloläge (Lågt elpris)
+    icon: mdi:sleep
+    tap_action:
+      action: none
+    color: green
+  - type: entity
+    show_name: true
+    show_state: true
+    show_icon: true
+    entity: input_boolean.sem_battery_save
+    name: Viloläge (Innan pristopp)
+    icon: mdi:sleep
+    tap_action:
+      action: more-info
