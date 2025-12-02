@@ -1,4 +1,13 @@
 input_number:
+
+  sem_charge_profit_threshold:
+    name: Laddningsvinst - gränsvärde
+    min: 0
+    max: 10
+    step: 0.01
+    unit_of_measurement: "SEK/kWh"
+    mode: box
+
   sem_max_export_power: 
     name: Max effekt att sälja (kW)
     min: 0
@@ -6,6 +15,7 @@ input_number:
     step: 0.1
     unit_of_measurement: kW
     mode: box
+
 
   sem_battery_discharge_power_ev_limit:
     name: "Max laddningseffekt efter laddning av Elbil"
@@ -15,6 +25,7 @@ input_number:
     mode: box
     unit_of_measurement: "kW"
 
+# PRICE LIMIT THAT MUST BE TRUE BEFORE EXPORT 
   sem_battery_charge_price:
     name: "Battery Charge Price Limit"
     icon: mdi:currency-sek
@@ -24,6 +35,7 @@ input_number:
     unit_of_measurement: "SEK/kWh"
     mode: box
 
+# PRICE LIMIT FOR EXPORT 
   sem_expensive_electricity:
     name: "Expensive Electricity Threshold"
     icon: mdi:currency-sek
@@ -32,7 +44,19 @@ input_number:
     step: 0.1
     unit_of_measurement: "SEK/kWh"
     mode: box
-  
+
+# SETS PRICE THAT IS OK TO IMPORT FROM GRID AND DIACTIVATE BATTERY
+  sem_low_price_threshold: 
+    name: "Low Price Threshold"
+    icon: mdi:currency-sek
+    min: 0.0
+    max: 10.0
+    step: 0.1
+    unit_of_measurement: "SEK/kWh"
+    mode: box
+
+
+# DoD AFTER DIACTIVATION OF BATTERY
   sem_batteries_end_of_discharge_soc:
     name: "batteries_end_of_discharge_soc"
     min: 0
@@ -40,6 +64,7 @@ input_number:
     step: 1
     unit_of_measurement: "%"
     icon: "mdi:battery-alert"
+    mode: box
   
   sem_battery_total_capacity_kwh:
     name: "Battery - Total Capacity"
@@ -81,6 +106,7 @@ input_number:
     mode: box
     unit_of_measurement: "kW"
 
+#### SOLAR 1 #####
   sem_solar_lat:
     name: "Solar Latitude"
     min: -90
@@ -130,6 +156,45 @@ input_number:
 
   sem_solar_damping_evening:
     name: "Dämpningsfaktor kväll"
+    min: 0
+    max: 2
+    step: 0.01
+    mode: box
+
+#### SOLAR 2 #####    
+  sem_solar_dec_2:
+    name: "Solar Panel Tilt Angle 2"
+    min: 0
+    max: 90
+    step: 1
+    mode: box
+    unit_of_measurement: °
+
+  sem_solar_az_2:
+    name: "Solar Panel Azimuth 2"
+    min: -180
+    max: 180
+    step: 1
+    mode: box
+    unit_of_measurement: °
+    
+  sem_solar_kwp_2:
+    name: "Installed Panel Capacity (kWp) 2"
+    min: 0.1
+    max: 100
+    step: 0.01
+    mode: box
+    unit_of_measurement: "kWp"
+
+  sem_solar_damping_morning_2:
+    name: "Dämpningsfaktor morgon 2"
+    min: 0
+    max: 2
+    step: 0.01
+    mode: box
+
+  sem_solar_damping_evening_2:
+    name: "Dämpningsfaktor kväll 2"
     min: 0
     max: 2
     step: 0.01
