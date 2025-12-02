@@ -8,8 +8,6 @@ Paketet gör även följande:
 - Säljer batteriöverskott när det är ekonomiskt lönsamt
 - Laddar smart för att inte slita på batteriet och med fokus på självförsörning.
 
-Prova systemet gratis året ut. Därefter kostar systemet 350 kr/år. 
-
 <img width="1850" height="742" alt="Skärmbild 2025-10-11 163741" src="https://github.com/user-attachments/assets/8c306b50-f229-4a00-bfe9-e61b41ed0f2f" />
 
 ## Installation
@@ -115,6 +113,6 @@ Har du idéer på nya funktioner? Lämna gärna dina förslag på GitHub under �
 Upptäcker du något problem? Rapportera det gärna på GitHub under ”Issues”.
 
 ## Stötta mitt arbete 🚀
-Ditt stöd gör det möjligt för mig att fortsätta förbättra paketet, optimera funktioner och lägga till nya smarta funktioner i framtiden.
+Ditt stöd gör det möjligt för mig att fortsätta förbättra paketet, optimera funktioner och lägga till nya smarta funktioner i framtiden. Prova systemet gratis året ut. Därefter kostar systemet 350 kr/år. 
 
 <a href="https://www.buymeacoffee.com/henrikakere" target="https://buymeacoffee.com/henrikakere"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
