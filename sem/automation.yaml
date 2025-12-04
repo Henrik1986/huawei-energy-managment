@@ -849,7 +849,7 @@ automation:
     condition: []
     action:
       - choose:
-          # 1. PRE-INTERVAL: mellan 12:00 och start av pristoppen
+          # 1a. PRE-INTERVAL: mellan 12:00 och start av pristoppen
           - conditions:
               - condition: template
                 value_template: >
@@ -866,7 +866,9 @@ automation:
                 value_template: >
                   {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
                   {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
-                  {{ battery_kwh < required_kwh }}
+                  {{ battery_kwh <= required_kwh }}
+
+
             sequence:
               - action: number.set_value
                 target:
@@ -876,6 +878,40 @@ automation:
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
+
+          # 1b. PRE-INTERVAL MEN batteriet är nu fullt → släpp viloläge
+          - conditions:
+              - condition: template
+                value_template: >
+                  {% set raw_interval = states('sensor.sem_relative_expensive_price_1') %}
+                  {% set now_dt = now() %}
+                  {% set after_12 = now_dt.replace(hour=12, minute=0, second=0, microsecond=0) %}
+                  {% if ' - ' in raw_interval %}
+                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
+                    {{ now_dt >= after_12 and now_dt < interval_start }}
+                  {% else %}
+                    false
+                  {% endif %}
+              - condition: template
+                value_template: >
+                  {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+                  {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+                  {{ battery_kwh > required_kwh }}
+              - condition: state
+                entity_id: input_boolean.sem_battery_save
+                state: "on"
+
+            sequence:
+              - action: number.set_value
+                target:
+                  entity_id: number.batteries_maximum_discharging_power
+                data:
+                  value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
+
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.sem_battery_save
+
 
           # 2. UNDER INTERVALLET: tillåt alltid full urladdning
           - conditions:
@@ -916,6 +952,7 @@ automation:
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
               - condition: time
+                after: "12:00:00"
                 before: "23:50:00"
             sequence:
               - action: number.set_value
@@ -940,7 +977,7 @@ automation:
     condition: []
     action:
       - choose:
-          # 1. PRE-INTERVAL: Efter midnatt och fram till start av pristoppen
+          # 1a. PRE-INTERVAL: Efter midnatt och fram till start av pristoppen
           - conditions:
               - condition: template
                 value_template: >
@@ -960,7 +997,9 @@ automation:
                 value_template: >
                   {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
                   {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
-                  {{ battery_kwh < required_kwh }}
+                  {{ battery_kwh <= required_kwh }}
+
+
             sequence:
               - action: number.set_value
                 target:
@@ -970,6 +1009,40 @@ automation:
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
+
+          # 1b. PRE-INTERVAL MEN batteriet är nu fullt → släpp viloläge
+          - conditions:
+              - condition: template
+                value_template: >
+                  {% set raw_interval = states('sensor.sem_relative_expensive_price_2') %}
+                  {% set now_dt = now() %}
+                  {% set midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0) %}
+                  {% if ' - ' in raw_interval %}
+                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
+                    {{ now_dt.date() == interval_start.date() and
+                      now_dt >= midnight and
+                      now_dt < interval_start }}
+                  {% else %}
+                    false
+                  {% endif %}
+              - condition: template
+                value_template: >
+                  {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
+                  {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
+                  {{ battery_kwh > required_kwh }}
+              - condition: state
+                entity_id: input_boolean.sem_battery_save
+                state: "on"
+            sequence:
+              - action: number.set_value
+                target:
+                  entity_id: number.batteries_maximum_discharging_power
+                data:
+                  value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.sem_battery_save
+
 
 
           # 2. UNDER INTERVALLET: tillåt alltid full urladdning
@@ -1011,6 +1084,7 @@ automation:
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
               - condition: time
+                after: "00:00:00"
                 before: "12:00:00"
             sequence:
               - action: number.set_value
