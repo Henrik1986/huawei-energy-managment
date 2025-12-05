@@ -612,8 +612,15 @@ automation:
                   {% set s2 = states('sensor.sem_ev_sensor_state_2') %}
                   {% set c1 = states('input_text.sem_ev_charging_state') %}
                   {% set c2 = states('input_text.sem_ev_charging_state_2') %}
-                  
-                  {% set one_charging = (s1 == c1) or (s2 == c2) %}
+
+                  {% set valid1 = s1 not in ['unknown', 'unavailable', 'none'] %}
+                  {% set valid2 = s2 not in ['unknown', 'unavailable', 'none'] %}
+
+                  {% set one_charging = 
+                    (valid1 and s1 == c1) or
+                    (valid2 and s2 == c2)
+                  %}
+
                   {{ one_charging }}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
@@ -643,9 +650,17 @@ automation:
                   {% set s2 = states('sensor.sem_ev_sensor_state_2') %}
                   {% set c1 = states('input_text.sem_ev_charging_state') %}
                   {% set c2 = states('input_text.sem_ev_charging_state_2') %}
-                  
-                  {% set none_charging = (s1 != c1) and (s2 != c2) %}
-                  {{ none_charging }}
+
+                  {% set valid1 = s1 not in ['unknown', 'unavailable', 'none'] %}
+                  {% set valid2 = s2 not in ['unknown', 'unavailable', 'none'] %}
+
+                  {% set one_is_charging = 
+                    (valid1 and s1 == c1) or
+                    (valid2 and s2 == c2)
+                  %}
+
+                  {{ not one_is_charging }}
+
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
                 state: "off"
