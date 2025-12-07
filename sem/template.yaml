@@ -1071,9 +1071,9 @@ template:
                     {% else %}
                       {% set avg_window = (in_window | sum) / (in_window | length) %}
 
+                      {# ---- JUSTERAD DEL: ALLA priser efter fönstret ---- #}
                       {% set after_window = all_prices
                         | selectattr('start','>=', win_end_str)
-                        | selectattr('end','<=', next_start_str)
                         | map(attribute='value')
                         | list
                       %}
@@ -1088,6 +1088,8 @@ template:
                   {% endif %}
                 {% endif %}
               {% endif %}
+
+
 
             avg_window: >
               {% set win_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
@@ -1119,23 +1121,22 @@ template:
                 none
               {% else %}
                 {% set win_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
-                {% set start_next_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
 
-                {% if win_str in ['none','unknown',''] or start_next_str in ['none','unknown',''] %}
+                {% if win_str in ['none','unknown',''] %}
                   none
                 {% else %}
                   {% set win_start_str, win_end_str = win_str.split(' - ') %}
-                  {% set next_start_str, next_end_str = start_next_str.split(' - ') %}
 
                   {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
                   {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
                   {% set all_prices = prices_today + prices_tomorrow %}
 
+                  {# --- ALLA priser efter 1a-fönstrets slut --- #}
                   {% set after_window = all_prices
                     | selectattr('start','>=', win_end_str)
-                    | selectattr('end','<=', next_start_str)
                     | map(attribute='value')
-                    | list %}
+                    | list
+                  %}
 
                   {% if after_window | length > 0 %}
                     {{ after_window | max }}
@@ -1144,6 +1145,7 @@ template:
                   {% endif %}
                 {% endif %}
               {% endif %}
+
 
             should_charge: >
               {% set diff = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
@@ -1579,48 +1581,39 @@ template:
                   -1
                 {% else %}
                   {% set win_start_str, win_end_str = win_str.split(' - ') %}
-                  {% set next_start_str, next_end_str = start_next_str.split(' - ') %}
-
-                  {% set win_start = as_datetime(win_start_str) %}
-                  {% set win_end = as_datetime(win_end_str) %}
-                  {% set next_start = as_datetime(next_start_str) %}
 
                   {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
                   {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
                   {% set all_prices = prices_today + prices_tomorrow %}
 
-                  {% if all_prices | length == 0 %}
+                  {% set in_window = all_prices
+                    | selectattr('start','>=', win_start_str)
+                    | selectattr('end','<=', win_end_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+
+                  {% if in_window | length == 0 %}
                     -1
                   {% else %}
-                    {% set in_window = all_prices
-                      | selectattr('start','>=', win_start_str)
-                      | selectattr('end','<=', win_end_str)
+                    {% set avg_window = (in_window | sum) / (in_window | length) %}
+
+                    {% set after_window = all_prices
+                      | selectattr('start','>=', win_end_str)
                       | map(attribute='value')
                       | list
                     %}
 
-                    {% if in_window | length == 0 %}
+                    {% if after_window | length == 0 %}
                       -1
                     {% else %}
-                      {% set avg_window = (in_window | sum) / (in_window | length) %}
-
-                      {% set after_window = all_prices
-                        | selectattr('start','>=', win_end_str)
-                        | selectattr('end','<=', next_start_str)
-                        | map(attribute='value')
-                        | list
-                      %}
-
-                      {% if after_window | length == 0 %}
-                        -1
-                      {% else %}
-                        {% set max_after = after_window | max %}
-                        {{ (max_after - avg_window) | round(3) }}
-                      {% endif %}
+                      {% set max_after = after_window | max %}
+                      {{ (max_after - avg_window) | round(3) }}
                     {% endif %}
                   {% endif %}
                 {% endif %}
               {% endif %}
+
 
             avg_window: >
               {% set win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
@@ -1652,23 +1645,23 @@ template:
                 none
               {% else %}
                 {% set win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
-                {% set start_next_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
 
-                {% if win_str in ['none','unknown',''] or start_next_str in ['none','unknown',''] %}
+                {% if win_str in ['none','unknown',''] %}
                   none
                 {% else %}
                   {% set win_start_str, win_end_str = win_str.split(' - ') %}
-                  {% set next_start_str, next_end_str = start_next_str.split(' - ') %}
 
                   {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
                   {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+
                   {% set all_prices = prices_today + prices_tomorrow %}
 
+                  {# --- ALLA priser efter nattfönstret --- #}
                   {% set after_window = all_prices
                     | selectattr('start','>=', win_end_str)
-                    | selectattr('end','<=', next_start_str)
                     | map(attribute='value')
-                    | list %}
+                    | list 
+                  %}
 
                   {% if after_window | length > 0 %}
                     {{ after_window | max }}
@@ -1677,6 +1670,7 @@ template:
                   {% endif %}
                 {% endif %}
               {% endif %}
+
 
             should_charge: >
               {% set diff = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
