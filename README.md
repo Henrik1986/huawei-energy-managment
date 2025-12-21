@@ -85,6 +85,12 @@ Skapa en ny vy i Home Assistant genom att klicka på pennikonen uppe till höger
 I dialogrutan som visas, klicka på de tre prickarna uppe till höger och välj Redigera i YAML.
 Klistra sedan in innehållet från filen admin_vy.yaml här på Github. 
 
+
+<img width="609" height="239" alt="Skärmbild 2025-12-21 224942" src="https://github.com/user-attachments/assets/954997c3-f65c-4fa4-a1ed-dce91a6f4095" />
+<img width="946" height="106" alt="Skärmbild 2025-12-21 225127" src="https://github.com/user-attachments/assets/2113db8a-2c80-4374-a1c5-4cbde00cb6d4" />
+<img width="588" height="343" alt="Skärmbild 2025-12-21 225204" src="https://github.com/user-attachments/assets/5e418d88-b45a-4a5d-9853-e75646df4a3a" />
+<img width="603" height="256" alt="Skärmbild 2025-12-21 225248" src="https://github.com/user-attachments/assets/df695c43-6bd4-4a42-afd7-c98dda0d40cc" />
+
 ### Steg 8
 Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. Ikonen kommer att aktiveras i några sekunder för att sen inaktiveras. När den inaktiverats (blivit grå) har du ladda ner paketet och kan gå vidare till steg 10. 
 
