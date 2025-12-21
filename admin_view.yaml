@@ -132,9 +132,14 @@ cards:
                   data_generator: >
                     return entity.attributes.sem.watt_hours_period.map((entry)
                     => {
-                      return [new Date(entry.date), entry.values / 1000]; // Konvertera till kWh
+                      const value = entry.values / 1000;
+                      if (value <= 0) {
+                        return [new Date(entry.date), null];
+                      }
+                      return [new Date(entry.date), value];
                     });
                   name: Solel
+                  extend_to: false
                   type: area
                   color: orange
                   opacity: 0.7
@@ -324,7 +329,7 @@ cards:
                     in_legend: false
                 - entity: sensor.sem_export_limit
                   yaxis_id: charge/expensive
-                  name: Solöverskotts stopp
+                  name: Begränsar solexport
                   opacity: 0.7
                   color: "#FF6666"
                   type: area
@@ -1789,3 +1794,7 @@ badges:
     icon: mdi:sleep
     tap_action:
       action: more-info
+visible:
+  - user: 44c2ed8cff504e6ab1fe9450a2852057
+  - user: 7256016cc1c844558dbad3b942247bcd
+  - user: 36ee9bf6ae1f454b92223923752dc321
