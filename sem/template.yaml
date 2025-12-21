@@ -276,8 +276,6 @@ template:
 
 ################################ SOLAR FORECAST ####################################################
 
-#      - name: "sem_solar_forecast_combined"
-#        unique_id: sem_solar_forecast_combined
       - name: "sem_solar_forecast"
         unique_id: sem_solar_forecast
         state: "OK"
@@ -407,104 +405,6 @@ template:
 
 
 ################################ SMART LOGIC ####################################################
-
-
-
-
-
-
-
-# SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 6-18
-      - name: "sem_battery_cheap_interval_2_1a"
-        unique_id: sem_battery_cheap_interval_2_1a
-        state: >
-          {% set threshold = states('input_number.sem_low_price_threshold') | float %}
-          {% set all_prices = (state_attr('sensor.sem_nordpool_active', 'raw_today') or []) + (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
-
-          {% set now_dt = now() %}
-          {% set start_ts = as_timestamp(now_dt.replace(hour=6, minute=0, second=0, microsecond=0)) %}
-          {% set end_ts = as_timestamp(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
-
-          {% set ns = namespace(current_start=None, current_prices=[], best_start=None, best_end=None) %}
-
-          {% for entry in all_prices %}
-              {% if entry.start is defined and entry.value is defined %}
-                  {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
-                  {% if entry_ts >= start_ts and entry_ts <= end_ts %}
-                      {% if entry.value | float <= threshold %}
-                          {% if ns.current_start is none %}
-                              {% set ns.current_start = as_datetime(entry.start) %}
-                          {% endif %}
-                          {% set ns.current_prices = ns.current_prices + [entry.value | float] %}
-                      {% else %}
-                          {# Avsluta nuvarande sekvens #}
-                          {% if ns.current_start is not none %}
-                              {% set ns.best_start = ns.current_start %}
-                              {% set ns.best_end = as_datetime(entry.start) %}
-                              {% set ns.current_start = none %}
-                              {% set ns.current_prices = [] %}
-                          {% endif %}
-                      {% endif %}
-                  {% endif %}
-              {% endif %}
-          {% endfor %}
-
-          {% if ns.current_start is not none %}
-              {% set ns.best_start = ns.current_start %}
-              {% set ns.best_end = as_datetime(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
-          {% endif %}
-
-          {% if ns.best_start is not none and ns.best_end is not none %}
-              {{ ns.best_start.isoformat() }} - {{ ns.best_end.isoformat() }}
-          {% else %}
-              1970-01-01T00:00:00 - 1970-01-01T01:00:00
-          {% endif %}
-
-# SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 18-06
-      - name: "sem_battery_cheap_interval_1a_2"
-        unique_id: sem_battery_cheap_interval_1a_2
-        state: >
-          {% set threshold = states('input_number.sem_low_price_threshold') | float %}
-          {% set all_prices = (state_attr('sensor.sem_nordpool_active', 'raw_today') or []) + (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
-
-          {% set now_dt = now() %}
-          {% set start_ts = as_timestamp(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
-          {% set end_ts = as_timestamp((now_dt + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)) %}
-
-          {% set ns = namespace(current_start=None, current_prices=[], best_start=None, best_end=None) %}
-
-          {% for entry in all_prices %}
-              {% if entry.start is defined and entry.value is defined %}
-                  {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
-                  {% if entry_ts >= start_ts and entry_ts <= end_ts %}
-                      {% if entry.value | float <= threshold %}
-                          {% if ns.current_start is none %}
-                              {% set ns.current_start = as_datetime(entry.start) %}
-                          {% endif %}
-                          {% set ns.current_prices = ns.current_prices + [entry.value | float] %}
-                      {% else %}
-                          {# Avsluta nuvarande sekvens #}
-                          {% if ns.current_start is not none %}
-                              {% set ns.best_start = ns.current_start %}
-                              {% set ns.best_end = as_datetime(entry.start) %}
-                              {% set ns.current_start = none %}
-                              {% set ns.current_prices = [] %}
-                          {% endif %}
-                      {% endif %}
-                  {% endif %}
-              {% endif %}
-          {% endfor %}
-
-          {% if ns.current_start is not none %}
-              {% set ns.best_start = ns.current_start %}
-              {% set ns.best_end = as_datetime((now_dt + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)) %}
-          {% endif %}
-
-          {% if ns.best_start is not none and ns.best_end is not none %}
-              {{ ns.best_start.isoformat() }} - {{ ns.best_end.isoformat() }}
-          {% else %}
-              1970-01-01T00:00:00 - 1970-01-01T01:00:00
-          {% endif %}
 
 
 # SHOWS INTERVAL WHEN SOLAREXPORT SHOULD BE REDUCED 
@@ -1039,55 +939,66 @@ template:
               {% if raw in ['unknown','unavailable','none'] %}
                 -1
               {% else %}
-                {% set start_next_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
                 {% set win_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+                {% set next_win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
 
-                {% if win_str in ['none','unknown',''] or start_next_str in ['none','unknown',''] %}
+                {% if win_str in ['none','unknown',''] or next_win_str in ['none','unknown',''] %}
                   -1
                 {% else %}
                   {% set win_start_str, win_end_str = win_str.split(' - ') %}
-                  {% set next_start_str, next_end_str = start_next_str.split(' - ') %}
+                  {% set next_start_str, next_end_str = next_win_str.split(' - ') %}
 
-                  {% set win_start = as_datetime(win_start_str) %}
-                  {% set win_end = as_datetime(win_end_str) %}
-                  {% set next_start = as_datetime(next_start_str) %}
+                  {% set end_1 = as_datetime(win_end_str) %}
+                  {% set start_2 = as_datetime(next_start_str) %}
+
+                  {% set diff_hours = (start_2 - end_1).total_seconds() / 3600 %}
+
+                  {% set extended_end = end_1.replace(hour=22, minute=0, second=0, microsecond=0) %}
+
+                  {% if diff_hours < 3 %}
+                    {% if extended_end < end_1 %}
+                      {% set extended_end = extended_end + timedelta(days=1) %}
+                    {% endif %}
+                    {% set final_end = extended_end %}
+                  {% else %}
+                    {% set final_end = start_2 %}
+                  {% endif %}
+
+                  {% set final_end_str = final_end.isoformat() %}
 
                   {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
                   {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
                   {% set all_prices = prices_today + prices_tomorrow %}
 
-                  {% if all_prices | length == 0 %}
+                  {% set in_window = all_prices
+                    | selectattr('start','>=', win_start_str)
+                    | selectattr('end','<=', win_end_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+
+                  {% if in_window | length == 0 %}
                     -1
                   {% else %}
-                    {% set in_window = all_prices
-                      | selectattr('start','>=', win_start_str)
-                      | selectattr('end','<=', win_end_str)
+                    {% set avg_window = (in_window | sum) / (in_window | length) %}
+
+                    {% set after_window = all_prices
+                      | selectattr('start','>=', win_end_str)
+                      | selectattr('start','<=', final_end_str)
                       | map(attribute='value')
                       | list
                     %}
 
-                    {% if in_window | length == 0 %}
+                    {% if after_window | length == 0 %}
                       -1
                     {% else %}
-                      {% set avg_window = (in_window | sum) / (in_window | length) %}
-
-                      {# ---- JUSTERAD DEL: ALLA priser efter fönstret ---- #}
-                      {% set after_window = all_prices
-                        | selectattr('start','>=', win_end_str)
-                        | map(attribute='value')
-                        | list
-                      %}
-
-                      {% if after_window | length == 0 %}
-                        -1
-                      {% else %}
-                        {% set max_after = after_window | max %}
-                        {{ (max_after - avg_window) | round(3) }}
-                      {% endif %}
+                      {% set max_after = after_window | max %}
+                      {{ (max_after - avg_window) | round(3) }}
                     {% endif %}
                   {% endif %}
                 {% endif %}
               {% endif %}
+
 
 
 
@@ -1121,30 +1032,52 @@ template:
                 none
               {% else %}
                 {% set win_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+                {% set next_win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
 
-                {% if win_str in ['none','unknown',''] %}
+                {% if win_str in ['none','unknown',''] or next_win_str in ['none','unknown',''] %} 
                   none
                 {% else %}
                   {% set win_start_str, win_end_str = win_str.split(' - ') %}
+                  {% set next_start_str, next_end_str = next_win_str.split(' - ') %}
+
+                  {% set end_1 = as_datetime(win_end_str) %}
+                  {% set start_2 = as_datetime(next_start_str) %}
+
+                  {% set diff_hours = (start_2 - end_1).total_seconds() / 3600 %}
+
+                  {% set extended_end = end_1.replace(hour=22, minute=0, second=0, microsecond=0) %}
+
+                  {% if diff_hours < 3 %}
+                    {% if extended_end < end_1 %}
+                      {% set extended_end = extended_end + timedelta(days=1) %}
+                    {% endif %}
+                    {% set final_end = extended_end %}
+                  {% else %}
+                    {% set final_end = start_2 %}
+                  {% endif %}
+
+                  {% set final_end_str = final_end.isoformat() %}
 
                   {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
                   {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
                   {% set all_prices = prices_today + prices_tomorrow %}
 
-                  {# --- ALLA priser efter 1a-fönstrets slut --- #}
-                  {% set after_window = all_prices
+                  {% set interval_prices = all_prices
                     | selectattr('start','>=', win_end_str)
+                    | selectattr('start','<=', final_end_str)
                     | map(attribute='value')
                     | list
                   %}
 
-                  {% if after_window | length > 0 %}
-                    {{ after_window | max }}
+                  {% if interval_prices | length > 0 %}
+                    {{ interval_prices | max }}
                   {% else %}
                     none
                   {% endif %}
                 {% endif %}
               {% endif %}
+
+
 
 
             should_charge: >
@@ -1574,21 +1507,29 @@ template:
               {% if raw in ['unknown','unavailable','none'] %}
                 -1
               {% else %}
-                {% set start_next_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
-                {% set win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+                {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+                {% set win1_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
 
-                {% if win_str in ['none','unknown',''] or start_next_str in ['none','unknown',''] %}
+                {% if win2_str in ['none','unknown',''] or win1_str in ['none','unknown',''] %}
                   -1
                 {% else %}
-                  {% set win_start_str, win_end_str = win_str.split(' - ') %}
 
+                  {# --- Dela intervallen --- #}
+                  {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                  {% set w1_start_str, w1_end_str = win1_str.split(' - ') %}
+
+                  {% set w2_end = as_datetime(w2_end_str) %}
+                  {% set w1_start = as_datetime(w1_start_str) %}
+
+                  {# --- Hämta priser --- #}
                   {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
                   {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
                   {% set all_prices = prices_today + prices_tomorrow %}
 
+                  {# --- Genomsnitt under laddfönster cheapest_2 --- #}
                   {% set in_window = all_prices
-                    | selectattr('start','>=', win_start_str)
-                    | selectattr('end','<=', win_end_str)
+                    | selectattr('start','>=', w2_start_str)
+                    | selectattr('end','<=', w2_end_str)
                     | map(attribute='value')
                     | list
                   %}
@@ -1598,8 +1539,27 @@ template:
                   {% else %}
                     {% set avg_window = (in_window | sum) / (in_window | length) %}
 
+                    {# --- Räkna hur långt det är till nästa fönster --- #}
+                    {% set gap_hours = (w1_start - w2_end).total_seconds() / 3600 %}
+                    {% set min_gap = 3 %}
+
+                    {# --- Välj primärt intervall eller fallback --- #}
+                    {% if gap_hours >= min_gap %}
+                      {% set search_end = w1_start.isoformat() %}
+                    {% else %}
+                      {% set tmp_0500 = w2_end.replace(hour=5, minute=0, second=0) %}
+                      {% if tmp_0500 <= w2_end %}
+                        {% set search_end_dt = tmp_0500 + timedelta(days=1) %}
+                      {% else %}
+                        {% set search_end_dt = tmp_0500 %}
+                      {% endif %}
+                      {% set search_end = search_end_dt.isoformat() %}
+                    {% endif %}
+
+                    {# --- Priser i sökintervallet --- #}
                     {% set after_window = all_prices
-                      | selectattr('start','>=', win_end_str)
+                      | selectattr('start','>=', w2_end_str)
+                      | selectattr('start','<=', search_end)
                       | map(attribute='value')
                       | list
                     %}
@@ -1613,6 +1573,7 @@ template:
                   {% endif %}
                 {% endif %}
               {% endif %}
+
 
 
             avg_window: >
@@ -1644,30 +1605,60 @@ template:
               {% if raw in ['unknown','unavailable','none'] %}
                 none
               {% else %}
-                {% set win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
 
-                {% if win_str in ['none','unknown',''] %}
+                {% set win2 = states('sensor.sem_battery_charge_window_cheapest_2') %}
+                {% set win1 = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+
+                {% if win2 in ['none','unknown',''] or win1 in ['none','unknown',''] %}
                   none
                 {% else %}
-                  {% set win_start_str, win_end_str = win_str.split(' - ') %}
 
+                  {# --- Delar båda fönstren --- #}
+                  {% set w2_start_str, w2_end_str = win2.split(' - ') %}
+                  {% set w1_start_str, w1_end_str = win1.split(' - ') %}
+
+                  {% set w2_end = as_datetime(w2_end_str) %}
+                  {% set w1_start = as_datetime(w1_start_str) %}
+
+                  {# --- Primärt intervall: från slutet av 2 → början av 1 --- #}
+                  {% set gap_hours = (w1_start - w2_end).total_seconds() / 3600 %}
+
+                  {# --- Max-priser vi ska använda data från --- #}
                   {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
                   {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
-
                   {% set all_prices = prices_today + prices_tomorrow %}
 
-                  {# --- ALLA priser efter nattfönstret --- #}
-                  {% set after_window = all_prices
-                    | selectattr('start','>=', win_end_str)
+                  {# --- Logik: om gapet är stort nog, använd det. Annars → 05:00 fallback --- #}
+                  {% set min_gap = 3 %}   
+
+                  {% if gap_hours >= min_gap %}
+                    {# --- BRA gap → använd w1_start --- #}
+                    {% set search_end = w1_start.isoformat() %}
+                  {% else %}
+                    {# --- FÖR LITET gap → använd nästa 05:00 --- #}
+                    {% set candidate_0500 = w2_end.replace(hour=5, minute=0, second=0) %}
+                    {% if candidate_0500 <= w2_end %}
+                      {% set search_end_dt = candidate_0500 + timedelta(days=1) %}
+                    {% else %}
+                      {% set search_end_dt = candidate_0500 %}
+                    {% endif %}
+                    {% set search_end = search_end_dt.isoformat() %}
+                  {% endif %}
+
+                  {# --- Hämta priser inom valt intervall --- #}
+                  {% set prices_after = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', search_end)
                     | map(attribute='value')
-                    | list 
+                    | list
                   %}
 
-                  {% if after_window | length > 0 %}
-                    {{ after_window | max }}
+                  {% if prices_after | length > 0 %}
+                    {{ prices_after | max }}
                   {% else %}
                     none
                   {% endif %}
+
                 {% endif %}
               {% endif %}
 
@@ -1679,6 +1670,115 @@ template:
 
 
 ######################### TRIGGERS ########################################### 
+# SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 6-18
+  - trigger:
+      - trigger: state
+        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
+        to: 'on'
+#      - trigger: time
+#        at: '18:00:00'
+    sensor:
+      - name: "sem_battery_cheap_interval_2_1a"
+        unique_id: sem_battery_cheap_interval_2_1a
+        state: >
+          {% set threshold = states('input_number.sem_low_price_threshold') | float %}
+          {% set all_prices = (state_attr('sensor.sem_nordpool_active', 'raw_today') or []) + (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+          {% set now_dt = now() %}
+          {% set start_ts = as_timestamp(now_dt.replace(hour=6, minute=0, second=0, microsecond=0)) %}
+          {% set end_ts = as_timestamp(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
+
+          {% set ns = namespace(current_start=None, current_prices=[], best_start=None, best_end=None) %}
+
+          {% for entry in all_prices %}
+              {% if entry.start is defined and entry.value is defined %}
+                  {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
+                  {% if entry_ts >= start_ts and entry_ts <= end_ts %}
+                      {% if entry.value | float <= threshold %}
+                          {% if ns.current_start is none %}
+                              {% set ns.current_start = as_datetime(entry.start) %}
+                          {% endif %}
+                          {% set ns.current_prices = ns.current_prices + [entry.value | float] %}
+                      {% else %}
+                          {# Avsluta nuvarande sekvens #}
+                          {% if ns.current_start is not none %}
+                              {% set ns.best_start = ns.current_start %}
+                              {% set ns.best_end = as_datetime(entry.start) %}
+                              {% set ns.current_start = none %}
+                              {% set ns.current_prices = [] %}
+                          {% endif %}
+                      {% endif %}
+                  {% endif %}
+              {% endif %}
+          {% endfor %}
+
+          {% if ns.current_start is not none %}
+              {% set ns.best_start = ns.current_start %}
+              {% set ns.best_end = as_datetime(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
+          {% endif %}
+
+          {% if ns.best_start is not none and ns.best_end is not none %}
+              {{ ns.best_start.isoformat() }} - {{ ns.best_end.isoformat() }}
+          {% else %}
+              1970-01-01T00:00:00 - 1970-01-01T01:00:00
+          {% endif %}
+
+# SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 18-06
+  - trigger:
+      - trigger: state
+        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
+        to: 'on'
+#      - trigger: time
+#        at: '18:00:00'
+    sensor:
+      - name: "sem_battery_cheap_interval_1a_2"
+        unique_id: sem_battery_cheap_interval_1a_2
+        state: >
+          {% set threshold = states('input_number.sem_low_price_threshold') | float %}
+          {% set all_prices = (state_attr('sensor.sem_nordpool_active', 'raw_today') or []) + (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+          {% set now_dt = now() %}
+          {% set start_ts = as_timestamp(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
+          {% set end_ts = as_timestamp((now_dt + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)) %}
+
+          {% set ns = namespace(current_start=None, current_prices=[], best_start=None, best_end=None) %}
+
+          {% for entry in all_prices %}
+              {% if entry.start is defined and entry.value is defined %}
+                  {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
+                  {% if entry_ts >= start_ts and entry_ts <= end_ts %}
+                      {% if entry.value | float <= threshold %}
+                          {% if ns.current_start is none %}
+                              {% set ns.current_start = as_datetime(entry.start) %}
+                          {% endif %}
+                          {% set ns.current_prices = ns.current_prices + [entry.value | float] %}
+                      {% else %}
+                          {# Avsluta nuvarande sekvens #}
+                          {% if ns.current_start is not none %}
+                              {% set ns.best_start = ns.current_start %}
+                              {% set ns.best_end = as_datetime(entry.start) %}
+                              {% set ns.current_start = none %}
+                              {% set ns.current_prices = [] %}
+                          {% endif %}
+                      {% endif %}
+                  {% endif %}
+              {% endif %}
+          {% endfor %}
+
+          {% if ns.current_start is not none %}
+              {% set ns.best_start = ns.current_start %}
+              {% set ns.best_end = as_datetime((now_dt + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)) %}
+          {% endif %}
+
+          {% if ns.best_start is not none and ns.best_end is not none %}
+              {{ ns.best_start.isoformat() }} - {{ ns.best_end.isoformat() }}
+          {% else %}
+              1970-01-01T00:00:00 - 1970-01-01T01:00:00
+          {% endif %}
+
+
+
+
 
 # CALCULATES RELATIVE EXPENSIVE PRICE INTERVAL BETWEEN 14-02
   - trigger:
