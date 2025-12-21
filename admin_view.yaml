@@ -1794,7 +1794,3 @@ badges:
     icon: mdi:sleep
     tap_action:
       action: more-info
-visible:
-  - user: 44c2ed8cff504e6ab1fe9450a2852057
-  - user: 7256016cc1c844558dbad3b942247bcd
-  - user: 36ee9bf6ae1f454b92223923752dc321
