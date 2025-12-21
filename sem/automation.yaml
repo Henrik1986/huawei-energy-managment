@@ -744,8 +744,7 @@ automation:
                 target:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
-                  value: 0
-
+                  value: "0"
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_cheap_mode
@@ -882,14 +881,18 @@ automation:
                   {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
                   {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
                   {{ battery_kwh <= required_kwh }}
-
-
+              - condition: state
+                entity_id: input_boolean.sem_battery_cheap_mode
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.sem_battery_save
+                state: "off"
             sequence:
               - action: number.set_value
                 target:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
-                  value: 0
+                  value: "0"
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
@@ -912,6 +915,9 @@ automation:
                   {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
                   {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
                   {{ battery_kwh > required_kwh }}
+              - condition: state
+                entity_id: input_boolean.sem_battery_cheap_mode
+                state: "off"
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
@@ -964,6 +970,9 @@ automation:
                     false
                   {% endif %}
               - condition: state
+                entity_id: input_boolean.sem_battery_cheap_mode
+                state: "off"
+              - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
               - condition: time
@@ -1013,14 +1022,18 @@ automation:
                   {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
                   {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
                   {{ battery_kwh <= required_kwh }}
-
-
+              - condition: state
+                entity_id: input_boolean.sem_battery_cheap_mode
+                state: "off"
+              - condition: state
+                entity_id: input_boolean.sem_battery_save
+                state: "off"
             sequence:
               - action: number.set_value
                 target:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
-                  value: 0
+                  value: "0"
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
@@ -1045,6 +1058,9 @@ automation:
                   {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
                   {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
                   {{ battery_kwh > required_kwh }}
+              - condition: state
+                entity_id: input_boolean.sem_battery_cheap_mode
+                state: "off"
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
@@ -1098,6 +1114,9 @@ automation:
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
+              - condition: state
+                entity_id: input_boolean.sem_battery_cheap_mode
+                state: "off"
               - condition: time
                 after: "00:00:00"
                 before: "12:00:00"
@@ -1128,4 +1147,4 @@ automation:
       - delay: "00:00:10"
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.manual_update_packages
+#          entity_id: input_boolean.manual_update_packages
