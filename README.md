@@ -92,7 +92,7 @@ Klistra sedan in innehållet från filen admin_vy.yaml här på Github.
 <img width="603" height="256" alt="Skärmbild 2025-12-21 225248" src="https://github.com/user-attachments/assets/df695c43-6bd4-4a42-afd7-c98dda0d40cc" />
 
 ### Steg 8
-Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. Ikonen kommer att aktiveras i några sekunder för att sen inaktiveras. När den inaktiverats (blivit grå) har du ladda ner paketet och kan gå vidare till steg 10. 
+Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. Ikonen kommer att aktiveras i några sekunder för att sen inaktiveras. När den inaktiverats (blivit grå) har du ladda ner paketet och kan gå vidare till steg 9. 
 
 > [!NOTE]
 > Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapen uppdatera. 
@@ -101,7 +101,7 @@ Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är 
 Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på texten inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med inställningar som kan vara bra att nå när du är igång. 
 
 > [!NOTE]
-> För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. Därefter kostar en användarkod 349 kr/år. 
+> För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. Därefter kostar en användarkod 399 kr/år. 
 
 > [!NOTE]
 > Om något kort inte fungerar som det ska beror det troligtvis på att fel enhet är inställd. 
