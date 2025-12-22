@@ -1134,7 +1134,7 @@ automation:
 
 
 ############################################################
-  - alias: Update packages from GitHub
+  - alias: "SEM - Update packages from GitHub"
     triggers:
       - trigger: template
         value_template: >
