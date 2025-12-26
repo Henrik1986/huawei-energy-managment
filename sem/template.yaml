@@ -1,6 +1,19 @@
 template:
   - sensor:
 
+# CHECK IF THE SYSTEM IS UP TO DATE
+      - name: "sem_update_status"
+        state: >
+          {% set local = states('sensor.sem_version') %}
+          {% set remote = states('sensor.sem_github_latest_release') %}
+
+          {% if local in ['unknown','unavailable'] or remote in ['unknown','unavailable'] %}
+            ❔ Okänt
+          {% elif local == remote %}
+            ✅ Senaste
+          {% else %}
+            🎉 Uppdatering tillgänglig
+          {% endif %}
 ####################################### WALLBOX ####################################################
 #SHOWS CHARGEBOX STATE 1
       - name: "sem_ev_sensor_state"
@@ -1081,9 +1094,18 @@ template:
 
 
             should_charge: >
-              {% set diff = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
-              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
-              {{ diff >= threshold }}
+              {% set profit = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
+              {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
+
+              {% set avg_price = state_attr('sensor.sem_battery_charge_energy_1a_2', 'avg_window') | float(999) %}
+              {% set supercheap = states('input_number.sem_price_limit_supercheap') | float(0.20) %}
+
+              {{ profit >= profit_threshold or avg_price <= supercheap }}
+
+#              {% set diff = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
+#              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
+#              {{ diff >= threshold }}
+
 
 
 # CALCULATES ENERGY BETWEEN 2 AND 1B
@@ -1664,9 +1686,17 @@ template:
 
 
             should_charge: >
-              {% set diff = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
-              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
-              {{ diff >= threshold }}
+              {% set profit = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
+              {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
+
+              {% set avg_price = state_attr('sensor.sem_battery_charge_energy_2_1b', 'avg_window') | float(999) %}
+              {% set supercheap = states('input_number.sem_price_limit_supercheap') | float(0.20) %}
+
+              {{ profit >= profit_threshold or avg_price <= supercheap }}
+
+#              {% set diff = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
+#              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
+#              {{ diff >= threshold }}
 
 
 ######################### TRIGGERS ########################################### 
