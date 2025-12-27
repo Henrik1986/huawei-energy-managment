@@ -1702,11 +1702,11 @@ template:
 ######################### TRIGGERS ########################################### 
 # SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 6-18
   - trigger:
-      - trigger: state
-        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
-        to: 'on'
-#      - trigger: time
-#        at: '18:00:00'
+#      - trigger: state
+#        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
+#        to: 'on'
+      - trigger: time
+        at: '06:00:00'
     sensor:
       - name: "sem_battery_cheap_interval_2_1a"
         unique_id: sem_battery_cheap_interval_2_1a
@@ -1755,11 +1755,11 @@ template:
 
 # SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 18-06
   - trigger:
-      - trigger: state
-        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
-        to: 'on'
-#      - trigger: time
-#        at: '18:00:00'
+#      - trigger: state
+#        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
+#        to: 'on'
+      - trigger: time
+        at: '18:00:00'
     sensor:
       - name: "sem_battery_cheap_interval_1a_2"
         unique_id: sem_battery_cheap_interval_1a_2
