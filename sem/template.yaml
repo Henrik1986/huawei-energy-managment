@@ -1706,7 +1706,7 @@ template:
 #        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
 #        to: 'on'
       - trigger: time
-        at: '06:00:00'
+        at: '05:45:00'
     sensor:
       - name: "sem_battery_cheap_interval_2_1a"
         unique_id: sem_battery_cheap_interval_2_1a
@@ -1718,40 +1718,49 @@ template:
           {% set start_ts = as_timestamp(now_dt.replace(hour=6, minute=0, second=0, microsecond=0)) %}
           {% set end_ts = as_timestamp(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
 
-          {% set ns = namespace(current_start=None, current_prices=[], best_start=None, best_end=None) %}
+          {% set ns = namespace(current_start=None, current_end=None, best_start=None, best_end=None) %}
 
           {% for entry in all_prices %}
-              {% if entry.start is defined and entry.value is defined %}
-                  {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
-                  {% if entry_ts >= start_ts and entry_ts <= end_ts %}
-                      {% if entry.value | float <= threshold %}
-                          {% if ns.current_start is none %}
-                              {% set ns.current_start = as_datetime(entry.start) %}
-                          {% endif %}
-                          {% set ns.current_prices = ns.current_prices + [entry.value | float] %}
-                      {% else %}
-                          {# Avsluta nuvarande sekvens #}
-                          {% if ns.current_start is not none %}
-                              {% set ns.best_start = ns.current_start %}
-                              {% set ns.best_end = as_datetime(entry.start) %}
-                              {% set ns.current_start = none %}
-                              {% set ns.current_prices = [] %}
-                          {% endif %}
-                      {% endif %}
+            {% if entry.start is defined and entry.value is defined %}
+              {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
+              {% if entry_ts >= start_ts and entry_ts <= end_ts %}
+      
+                {% if entry.value | float <= threshold %}
+                  {% if ns.current_start is none %}
+                    {% set ns.current_start = as_datetime(entry.start) %}
                   {% endif %}
+                  {% set ns.current_end = as_datetime(entry.end) %}
+                {% else %}
+                  {% if ns.current_start is not none %}
+                    {# Spara intervall om det är längre än det tidigare #}
+                    {% if ns.best_start is none or (ns.current_end - ns.current_start).total_seconds() > (ns.best_end - ns.best_start).total_seconds() %}
+                      {% set ns.best_start = ns.current_start %}
+                      {% set ns.best_end = ns.current_end %}
+                    {% endif %}
+                    {% set ns.current_start = none %}
+                    {% set ns.current_end = none %}
+                  {% endif %}
+                {% endif %}
+      
               {% endif %}
+            {% endif %}
           {% endfor %}
 
+          {# Spara sista intervallet om det är det längsta #}
           {% if ns.current_start is not none %}
+            {% if ns.best_start is none or (ns.current_end - ns.current_start).total_seconds() > (ns.best_end - ns.best_start).total_seconds() %}
               {% set ns.best_start = ns.current_start %}
-              {% set ns.best_end = as_datetime(now_dt.replace(hour=18, minute=0, second=0, microsecond=0)) %}
+              {% set ns.best_end = ns.current_end %}
+            {% endif %}
           {% endif %}
 
           {% if ns.best_start is not none and ns.best_end is not none %}
-              {{ ns.best_start.isoformat() }} - {{ ns.best_end.isoformat() }}
+            {{ ns.best_start.isoformat() }} - {{ ns.best_end.isoformat() }}
           {% else %}
-              1970-01-01T00:00:00 - 1970-01-01T01:00:00
+            1970-01-01T00:00:00 - 1970-01-01T01:00:00
           {% endif %}
+
+
 
 # SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 18-06
   - trigger:
@@ -1759,7 +1768,9 @@ template:
 #        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
 #        to: 'on'
       - trigger: time
-        at: '18:00:00'
+        at: '17:45:00'
+      - trigger: time
+        at: '11:45:00'
     sensor:
       - name: "sem_battery_cheap_interval_1a_2"
         unique_id: sem_battery_cheap_interval_1a_2
@@ -1776,7 +1787,7 @@ template:
           {% for entry in all_prices %}
               {% if entry.start is defined and entry.value is defined %}
                   {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
-                  {% if entry_ts >= start_ts and entry_ts <= end_ts %}
+                  {% if start_ts <= entry_ts <= end_ts %}
                       {% if entry.value | float <= threshold %}
                           {% if ns.current_start is none %}
                               {% set ns.current_start = as_datetime(entry.start) %}
@@ -1805,6 +1816,8 @@ template:
           {% else %}
               1970-01-01T00:00:00 - 1970-01-01T01:00:00
           {% endif %}
+
+
 
 
 
