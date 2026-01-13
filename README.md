@@ -7,8 +7,8 @@ Paketet gör även följande:
 - Förhindrar att din elbil laddas från hemmabatteriet
 - Säljer batteriöverskott när det är ekonomiskt lönsamt
 - Laddar smart för att inte slita på batteriet och med fokus på självförsörning.
+<img width="1669" height="881" alt="Skärmbild 2026-01-13 220103" src="https://github.com/user-attachments/assets/1365676f-2878-469f-b8ea-fea4e2c04f27" />
 
-<img width="1850" height="742" alt="Skärmbild 2025-10-11 163741" src="https://github.com/user-attachments/assets/8c306b50-f229-4a00-bfe9-e61b41ed0f2f" />
 
 ## Installation
 ### Steg 1
@@ -20,12 +20,13 @@ Lägg till din plats och namnge din nya sensor home (vilket ger följande enhets
 c) Installera och konfiguera [Nordpool Integrationen](https://www.home-assistant.io/integrations/nordpool/). Paketet fungerar även med Nordpool Integrationen från HACS. [Nordpool HACS Integrationen](https://github.com/custom-components/nordpool)
 
 ### Steg 2
-Installera följande integrationer från HACS (för att aktivera konfigurationsvyn):
+Installera följande integrationer från HACS (krävs för hemvyn):
 
 - Apexcharts-card
 - Layout-card
 - Vertical-stack-in-card
 - Energy-flow-card-plus
+- Bubble-card
 
 Har du inte HACS?
 Följ instruktionerna [här](https://www.hacs.xyz/docs/use/configuration/basic/)
