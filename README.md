@@ -15,7 +15,7 @@ Paketet gör även följande:
 a) Installera och konfigurera [Huawei Solar Integrationen](https://github.com/wlcrs/huawei_solar)
 
 b) Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
-Lägg till din plats och namnge din nya sensor home (vilket ger följande enhetsnamn weather.smhi_home) 
+Lägg till din plats och namnge din nya sensor med home (vilket ger följande enhetsnamn weather.smhi_home) 
 
 c) Installera och konfiguera [Nordpool Integrationen](https://www.home-assistant.io/integrations/nordpool/). Paketet fungerar även med Nordpool Integrationen från HACS. [Nordpool HACS Integrationen](https://github.com/custom-components/nordpool)
 
@@ -72,7 +72,7 @@ b) Ladda ner och packa upp innehållet från github på din dator. Klicka på l�
 
 https://github.com/Henrik1986/huawei-energy-managment/archive/fb39a1732d69ab12b96c7f657dad6f1d15df60d1.zip
 
-c) Ladda upp innehållet som ligger i mappen setup (från din dator) till mappen sem på din home assistant. 
+c) Ladda upp innehållet som ligger i mappen sem (från din dator) till mappen sem på din home assistant. 
 
 <img width="335" height="129" alt="Skärmbild 2025-10-27 093414" src="https://github.com/user-attachments/assets/50f36441-a096-4e2b-8d76-980f5de2007e" />
 
@@ -93,13 +93,8 @@ Klistra sedan in innehållet från filen admin_vy.yaml här på Github.
 <img width="603" height="256" alt="Skärmbild 2025-12-21 225248" src="https://github.com/user-attachments/assets/df695c43-6bd4-4a42-afd7-c98dda0d40cc" />
 
 ### Steg 8
-Klicka in på din nya vy (bli inte orolig om den ser ofullständig ut - det är normalt). Gör ett långtryck (håll inne och släpp) på knappen inställningar. Gör långtrycket på texten inte på ikonen. Klicka på uppdatera för att få hem hela paketet till din Home Assistant. Ikonen kommer att aktiveras i några sekunder för att sen inaktiveras. När den inaktiverats (blivit grå) har du ladda ner paketet och kan gå vidare till steg 9. 
+Nu ska du fått en ny vy där du har en överblick över ditt system. Klickar du på knappen "Mitt system" kan du köpa användarkod, konfiguerar systemet samt uppdatera systemet när ny version släpps. Du ser även vilken version som är den senaste och vilken du har installerad. 
 
-> [!NOTE]
-> Skulle du vilja uppdatera paketet manuellt kan du göra det på denna knapen uppdatera. 
-
-### Steg 9
-Starta om Home Assistant och nu kan du starta konfigurationen genom att göra ett långt tryck (håll inne och släpp) på texten inställningar och välja Starta konfigurationen. Gör du ett vanligt klick på inställningar får du fram en meny med inställningar som kan vara bra att nå när du är igång. 
 
 > [!NOTE]
 > För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. Därefter kostar en användarkod 399 kr/år. 
