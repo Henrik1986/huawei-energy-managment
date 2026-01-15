@@ -1,0 +1,10 @@
+rest_command:
+  sem_send_user_info:
+    url: https://eoykr1nhqqhtmm5.m.pipedream.net
+    method: POST
+    content_type: application/json
+    payload: >
+      {
+        "name": "{{ states('input_text.sem_name') }}",
+        "email": "{{ states('input_text.sem_epost') }}"
+      }
