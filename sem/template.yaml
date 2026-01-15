@@ -10,7 +10,7 @@ template:
           {% if local in ['unknown','unavailable'] or remote in ['unknown','unavailable'] %}
             ❔ Okänt
           {% elif local == remote %}
-            ✅ Senaste
+            ✅ Uppdaterat
           {% else %}
             🎉 Uppdatering tillgänglig
           {% endif %}
@@ -78,6 +78,11 @@ template:
             {{ total | round(2) }}
           {% endif %}
 
+# CHECK IF USER HAS A WALLBOX
+      - name: "sem_wallbox_check"
+        unique_id: sem_wallboc_check
+        state: >
+          {{ states('input_text.sem_ev_sensor') | trim != '' }}
 
 
 
@@ -458,21 +463,21 @@ template:
         unit_of_measurement: "h"
         state: >
           {# 
-            Beräknar laddningstid för laddningsfönster 1 (kl. 9-16)
-            Tar hänsyn till energiförluster via inbyggd månadsfaktor.
+            Beräknar laddningstid för laddningsfönster 1 (kl. 9–16)
+            Konservativ vinterfaktor för kalla batterier (carport/förråd)
             Max 5 timmar.
           #}
 
           {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
           {% set max_power_kw = states('input_number.sem_max_charge_power_window_1') | float(0) %}
 
-          {# Månadsbaserad förlustfaktor — justera värdena vid behov #}
+          {# Kraftigt justerad månadsbaserad förlustfaktor #}
           {% set month = now().month %}
-          {% set loss_factor = 
-              0.83 if month in [1, 2] else
-              0.88 if month in [3, 4] else
+          {% set loss_factor =
+              0.68 if month in [1, 2] else       
+              0.82 if month in [3, 4] else        
               0.92 if month in [5, 6, 7, 8, 9] else
-              0.86 if month in [10, 11, 12] else
+              0.75 if month in [10, 11, 12] else  
               0.9
           %}
 
@@ -486,27 +491,27 @@ template:
 
 
 
+
 # CALCULATES CHARGE TIME FROM MAX kW
       - name: "sem_battery_dynamic_charge_time_window_2"
         unique_id: sem_battery_dynamic_charge_time_window_2
         unit_of_measurement: "h"
         state: >
           {# 
-            Beräknar laddningstid för laddningsfönster 2 (kl. 23-05)
-            Tar hänsyn till energiförluster via inbyggd månadsfaktor.
+            Beräknar laddningstid för laddningsfönster 2 (kl. 23–05)
+            Konservativ vinterfaktor för kalla batterier (carport/förråd)
             Max 5 timmar.
           #}
 
           {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
           {% set max_power_kw = states('input_number.sem_max_charge_power_window_2') | float(0) %}
 
-          {# Månadsbaserad förlustfaktor — samma som i kod 1 #}
           {% set month = now().month %}
-          {% set loss_factor = 
-              0.83 if month in [1, 2] else
-              0.88 if month in [3, 4] else
+          {% set loss_factor =
+              0.68 if month in [1, 2] else        
+              0.82 if month in [3, 4] else        
               0.92 if month in [5, 6, 7, 8, 9] else
-              0.86 if month in [10, 11, 12] else
+              0.75 if month in [10, 11, 12] else  
               0.9
           %}
 
@@ -899,37 +904,30 @@ template:
                     1
                   {% endif %}
             estimated_energy_no_sun_interval: >
-              {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_1a') %}
-              {% set raw_end   = states('sensor.sem_battery_charge_window_cheapest_2') %}
-
-              {% if ' - ' not in raw_start or ' - ' not in raw_end %}
+              {% set raw_interval = state_attr('sensor.sem_battery_charge_energy_1a_2', 'no_sun_interval') %}
+              {% if not raw_interval %}
                 0
               {% else %}
-                {% set start = as_datetime(raw_start.split(' - ')[0]) %}
-                {% set end   = as_datetime(raw_end.split(' - ')[0]) %}
-
-                {# Avrunda start uppåt till närmaste heltimme #}
-                {% if start.minute > 0 or start.second > 0 %}
-                  {% set start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
-                {% endif %}
-                {# Avrunda slut nedåt till närmaste heltimme #}
-                {% set end = end.replace(minute=0, second=0, microsecond=0) %}
+                {% set t1 = raw_interval.split(' - ')[0] %}
+                {% set t2 = raw_interval.split(' - ')[1] %}
+                {% set start = as_datetime(t1).replace(minute=0, second=0, microsecond=0) %}
+                {% set end   = as_datetime(t2).replace(minute=0, second=0, microsecond=0) %}
                 {% if end <= start %}
                   {% set end = end + timedelta(days=1) %}
                 {% endif %}
 
-                {# Hämta kWh/h från SQL-sensorer #}
                 {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
                 {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
                 {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
                 {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
 
                 {% set ns = namespace(total_kwh=0, current=start) %}
-                {% for i in range(0, 48) %}
+                {% set max_hours = 24 %}
+
+                {% for i in range(max_hours) %}
                   {% if ns.current > end %}
                     {% break %}
                   {% endif %}
-
                   {% set hour = ns.current.hour %}
                   {% if 5 <= hour < 10 %}
                     {% set kwh = k_morning %}
@@ -940,7 +938,6 @@ template:
                   {% else %}
                     {% set kwh = k_night %}
                   {% endif %}
-
                   {% set ns.total_kwh = ns.total_kwh + kwh %}
                   {% set ns.current = ns.current + timedelta(hours=1) %}
                 {% endfor %}
@@ -1350,57 +1347,40 @@ template:
                   {% set buffer = states('input_number.sem_price_limit_supercheap') | float(0) %}
                   {{ buffer | round(2) }}
             estimated_energy_sun_interval: >
-              {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
-              {% set t2 = states('sensor.sem_battery_charge_window_cheapest_1a').split(' - ')[0] %}
-              {% set start = as_datetime(t1).replace(minute=0, second=0, microsecond=0) %}
-              {% set end = as_datetime(t2).replace(minute=0, second=0, microsecond=0) %}
-
-              {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
-              {% set s_start = none %}
-              {% set s_end = none %}
-              {% if forecast and 'watt_hours_period' in forecast %}
-                {% set entries = forecast['watt_hours_period']
-                    | selectattr('date', 'defined')
-                    | selectattr('date', '>=', as_timestamp(start) | timestamp_local)
-                    | selectattr('date', '<=', as_timestamp(end) | timestamp_local)
-                    | list %}
-                {% set valid_entries = entries
-                    | selectattr('values', 'defined')
-                    | selectattr('values', '>', 0)
-                    | list %}
-                {% if valid_entries | length > 0 %}
-                  {% set s_start = (valid_entries[0].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
-                  {% set s_end = (valid_entries[-1].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
-                {% endif %}
-              {% endif %}
-
-              {% if not s_start or not s_end %}
+              {% set raw_interval = state_attr('sensor.sem_battery_charge_energy_2_1b', 'sun_interval') %}
+              {% if not raw_interval %}
                 0
               {% else %}
+                {% set t1 = raw_interval.split(' - ')[0] %}
+                {% set t2 = raw_interval.split(' - ')[1] %}
+                {% set start = as_datetime(t1).replace(minute=0, second=0, microsecond=0) %}
+                {% set end   = as_datetime(t2).replace(minute=0, second=0, microsecond=0) %}
+                {% if end <= start %}
+                  {% set end = end + timedelta(days=1) %}
+                {% endif %}
+
                 {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
                 {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
                 {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
                 {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
 
-                {% set ns = namespace(total_kwh=0, current=s_start) %}
+                {% set ns = namespace(total_kwh=0, current=start) %}
                 {% set max_hours = 24 %}
 
                 {% for i in range(max_hours) %}
-                  {% if ns.current > s_end %}
+                  {% if ns.current > end %}
                     {% break %}
                   {% endif %}
-
                   {% set hour = ns.current.hour %}
                   {% if 5 <= hour < 10 %}
                     {% set kwh = k_morning %}
                   {% elif 10 <= hour < 15 %}
                     {% set kwh = k_day %}
-                  {% elif 15 <= hour < 22 %}
+                  {% elif 15 <= hour < 21 %}
                     {% set kwh = k_evening %}
                   {% else %}
                     {% set kwh = k_night %}
                   {% endif %}
-
                   {% set ns.total_kwh = ns.total_kwh + kwh %}
                   {% set ns.current = ns.current + timedelta(hours=1) %}
                 {% endfor %}
@@ -1474,56 +1454,46 @@ template:
                     1
                   {% endif %}
             estimated_energy_no_sun_interval: >
-              {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
-              {% set start = as_datetime(t1).replace(minute=0, second=0, microsecond=0) %}
-
-              {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
-              {% set s_start = none %}
-              {% if forecast and 'watt_hours_period' in forecast %}
-                {% set entries = forecast['watt_hours_period']
-                    | selectattr('date', 'defined')
-                    | selectattr('date', '>=', as_timestamp(start) | timestamp_local)
-                    | list %}
-                {% set valid_entries = entries
-                    | selectattr('values', 'defined')
-                    | selectattr('values', '>', 0)
-                    | list %}
-                {% if valid_entries | length > 0 %}
-                  {% set s_start = (valid_entries[0].date | as_datetime).replace(minute=0, second=0, microsecond=0) %}
+              {% set raw_interval = state_attr('sensor.sem_battery_charge_energy_2_1b', 'no_sun_interval') %}
+              {% if not raw_interval %}
+                0
+              {% else %}
+                {% set t1 = raw_interval.split(' - ')[0] %}
+                {% set t2 = raw_interval.split(' - ')[1] %}
+                {% set start = as_datetime(t1).replace(minute=0, second=0, microsecond=0) %}
+                {% set end   = as_datetime(t2).replace(minute=0, second=0, microsecond=0) %}
+                {% if end <= start %}
+                  {% set end = end + timedelta(days=1) %}
                 {% endif %}
+
+                {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+                {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+                {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+                {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+                {% set ns = namespace(total_kwh=0, current=start) %}
+                {% set max_hours = 24 %}
+
+                {% for i in range(max_hours) %}
+                  {% if ns.current > end %}
+                    {% break %}
+                  {% endif %}
+                  {% set hour = ns.current.hour %}
+                  {% if 5 <= hour < 10 %}
+                    {% set kwh = k_morning %}
+                  {% elif 10 <= hour < 15 %}
+                    {% set kwh = k_day %}
+                  {% elif 15 <= hour < 21 %}
+                    {% set kwh = k_evening %}
+                  {% else %}
+                    {% set kwh = k_night %}
+                  {% endif %}
+                  {% set ns.total_kwh = ns.total_kwh + kwh %}
+                  {% set ns.current = ns.current + timedelta(hours=1) %}
+                {% endfor %}
+
+                {{ ns.total_kwh | round(2) }}
               {% endif %}
-
-              {% set end = s_start if s_start else start %}
-
-              {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
-              {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
-              {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
-              {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
-
-              {% set ns = namespace(total_kwh=0, current=start) %}
-              {% set max_hours = 24 %}
-
-              {% for i in range(max_hours) %}
-                {% if ns.current > end %}
-                  {% break %}
-                {% endif %}
-
-                {% set hour = ns.current.hour %}
-                {% if 5 <= hour < 10 %}
-                  {% set kwh = k_morning %}
-                {% elif 10 <= hour < 15 %}
-                  {% set kwh = k_day %}
-                {% elif 15 <= hour < 22 %}
-                  {% set kwh = k_evening %}
-                {% else %}
-                  {% set kwh = k_night %}
-                {% endif %}
-
-                {% set ns.total_kwh = ns.total_kwh + kwh %}
-                {% set ns.current = ns.current + timedelta(hours=1) %}
-              {% endfor %}
-
-              {{ ns.total_kwh | round(2) }}
             profit: >
               {% set raw = states('sensor.sem_nordpool_active') %}
               {% if raw in ['unknown','unavailable','none'] %}
