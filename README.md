@@ -44,7 +44,7 @@ homeassistant:
 > Observera indraget och att det ska vara placerad direkt under Home Assistant som ska ligga högst upp i din fil. 
 
 > [!NOTE]
-> Ladda ner file editor (tillägg) för att kunna redigera din configuration.yaml på ett enkelt sätt. Detta gör du via inställningar (kugghjulet till vänster), välj sen tillägg. Klicka på tilläggsbutik och sök (högst upp) efter file editor. Installera och start sen file editor genom att klicka på öppna webbgränsnitt.
+> Ladda ner file editor (tillägg) för att kunna redigera din configuration.yaml på ett enkelt sätt. Detta gör du via inställningar (kugghjulet till vänster), välj sen tillägg. Klicka på tilläggsbutik och sök (högst upp) efter file editor. Installera och starta sen file editor genom att klicka på öppna webbgränsnitt.
 >
 > https://www.home-assistant.io/addons/
 
