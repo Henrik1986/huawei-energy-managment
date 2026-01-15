@@ -82,7 +82,8 @@ template:
       - name: "sem_wallbox_check"
         unique_id: sem_wallboc_check
         state: >
-          {{ states('input_text.sem_ev_sensor') | trim != '' }}
+          {% set v = states('input_text.sem_ev_sensor') %}
+          {{ v not in ['unknown', 'unavailable', ''] and v.startswith('sensor.') }}
 
 
 
