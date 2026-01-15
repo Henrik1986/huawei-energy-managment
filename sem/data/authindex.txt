@@ -7,4 +7,4 @@ auth_index:
       expires: "2027-11-01"
     - id: "TKN-02"
       created: "2025-02-20"
-      expires: "2027-02-20"
+      expires: "2028-02-20"
