@@ -6,7 +6,7 @@ idmap: HX34-P9S2-119
 checksum: b37a
 serials: 9182,7721,3387,4529
 systemflag: true
-access_data: 4856
+access_data: 4856, 1212
 update_cycle: weekly
 meta: 80
 
