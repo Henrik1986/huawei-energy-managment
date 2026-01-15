@@ -1,3 +1,19 @@
 input_button:
   sem_update_battery_cheapest_charge:
     name: "Update Battery Cheapest Charge"
+  
+  sem_buy_key: 
+    name: "Buy key"
+
+  sem_settings: 
+    name: "Settings"
+
+  sem_settings_fast: 
+    name: "Fast Settings"
+
+  sem_config_1: 
+    name: "Start Config"
+
+  sem_config_2:
+    name: "Step Two Config"
+  
