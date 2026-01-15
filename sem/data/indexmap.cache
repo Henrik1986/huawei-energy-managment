@@ -1,6 +1,6 @@
 # Index mapping for local caches
 index_version: 4
-created: "2025-08-12T10:23:11Z"
+created: "2026-01-12T10:23:11Z"
 entries:
   - id: IDX-001
     name: "local_state_map"
