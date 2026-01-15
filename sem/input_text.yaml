@@ -59,3 +59,11 @@ input_text:
     name: AnvändarID
     icon: mdi:identifier
     max: 100
+  
+  sem_name:
+    name: Name
+
+  sem_epost: 
+    name: E-post
+
+  
