@@ -1179,6 +1179,17 @@ automation:
 
 
 
+  - alias: "SEM - Reset flags for update Home Assistant start"
+    triggers:
+      - trigger: homeassistant
+        event: start
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.sem_download_finished
+            - input_boolean.manual_update_packages
+
 ############################################################
   - alias: Update packages from GitHub
     triggers:
@@ -1200,10 +1211,10 @@ automation:
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.sem_download_finished
-      - delay: "00:00:30"
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.sem_download_finished
-      - action: input_boolean.turn_off
-        target:
-          entity_id: input_boolean.manual_update_packages
+#      - delay: "00:00:30"
+#      - action: input_boolean.turn_off
+#        target:
+#          entity_id: input_boolean.sem_download_finished
+#      - action: input_boolean.turn_off
+#        target:
+#          entity_id: input_boolean.manual_update_packages
