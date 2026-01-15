@@ -1165,6 +1165,17 @@ automation:
                 target:
                   entity_id: input_boolean.sem_battery_save
 
+  - alias: "SEM - New user"
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.sem_submit_user_info
+        to: "on"
+    actions:
+      - action: rest_command.sem_send_user_info
+      - delay: "00:05:00"
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sem_submit_user_info
 
 
 
@@ -1179,7 +1190,20 @@ automation:
         to: 'on'
     actions:
       - action: shell_command.update_packages_from_github
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sem_download
       - delay: "00:00:10"
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sem_download
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sem_download_finished
+      - delay: "00:00:30"
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sem_download_finished
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.manual_update_packages
