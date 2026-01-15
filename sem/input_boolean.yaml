@@ -1,4 +1,5 @@
 input_boolean:
+
   sem_ev_charging_protection_enabled:
     name: "EV Protection"
 
@@ -69,6 +70,13 @@ input_boolean:
     name: Ev charge
   
   manual_update_packages:
-    name: Uppdatera paket manuellt
-#    initial: off
+    name: Update package
 
+  sem_download: 
+    name: "Downloading"
+  
+  sem_download_finished: 
+    name: "Download finished"
+
+  sem_submit_user_info: 
+    name: "Send"
