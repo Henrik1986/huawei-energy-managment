@@ -434,35 +434,37 @@ sections:
       - type: custom:vertical-stack-in-card
         cards:
           - type: custom:gap-card
-            height: 0
+            height: 10
           - type: custom:vertical-stack-in-card
             cards:
-              - square: false
-                type: grid
+              - type: custom:vertical-stack-in-card
                 cards:
-                  - clock_style: analog
-                    clock_size: small
-                    show_seconds: true
-                    no_background: false
-                    border: false
-                    ticks: hour
-                    face_style: markers
-                    type: clock
-                    seconds_motion: continuous
-                  - show_current: false
-                    show_forecast: true
-                    type: weather-forecast
-                    entity: weather.smhi_home
-                    forecast_type: daily
-                    forecast_slots: 3
-                    tap_action:
-                      action: none
-                    name: HEM
-                columns: 2
+                  - square: false
+                    type: grid
+                    cards:
+                      - clock_style: analog
+                        clock_size: small
+                        show_seconds: true
+                        no_background: false
+                        border: false
+                        ticks: hour
+                        type: clock
+                      - show_current: false
+                        show_forecast: true
+                        type: weather-forecast
+                        entity: weather.smhi_home
+                        forecast_type: daily
+                        forecast_slots: 3
+                        tap_action:
+                          action: none
+                        name: HEM
+                    columns: 2
+                view_layout:
+                  position: sidebar
             view_layout:
               position: sidebar
           - type: tile
-            entity: sensor.huseffekt_exl_elbil
+            entity: sensor.sem_house_power
             name: Huset
             icon: mdi:home
             color: blue-grey
@@ -474,7 +476,7 @@ sections:
               navigation_path: "#house"
             hold_action:
               action: navigate
-              navigation_path: "#update"
+              navigation_path: "#house"
             icon_tap_action:
               action: navigate
               navigation_path: "#house"
@@ -486,7 +488,7 @@ sections:
             cards:
               - type: tile
                 entity: sensor.power_meter_active_power
-                name: Elnät
+                name: Elmätare
                 color: red
                 vertical: false
                 tap_action:
@@ -509,19 +511,25 @@ sections:
                   action: navigate
                   navigation_path: "#solar"
                 features_position: inline
-              - type: tile
-                entity: sensor.wallbox_anders_postmansvag_8b_laddningseffekt
-                name: Elbil
-                icon: mdi:ev-plug-type2
-                color: blue
-                vertical: false
-                tap_action:
-                  action: navigate
-                  navigation_path: "#wallbox"
-                icon_tap_action:
-                  action: navigate
-                  navigation_path: "#wallbox"
-                features_position: inline
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: sensor.sem_wallbox_check
+                    state: "True"
+                card:
+                  type: tile
+                  entity: sensor.wallbox_anders_postmansvag_8b_laddningseffekt
+                  name: Elbil
+                  icon: mdi:ev-plug-type2
+                  color: blue
+                  vertical: false
+                  tap_action:
+                    action: navigate
+                    navigation_path: "#wallbox"
+                  icon_tap_action:
+                    action: navigate
+                    navigation_path: "#wallbox"
+                  features_position: inline
           - type: tile
             entity: sensor.batteries_charge_discharge_power
             name: Batteri
@@ -529,9 +537,11 @@ sections:
             color: indigo
             vertical: false
             tap_action:
-              action: none
+              action: navigate
+              navigation_path: "#battery"
             icon_tap_action:
-              action: none
+              action: navigate
+              navigation_path: "#battery"
             features:
               - type: trend-graph
             features_position: inline
@@ -547,10 +557,10 @@ sections:
                 vertical: false
                 tap_action:
                   action: navigate
-                  navigation_path: "#working_mode"
+                  navigation_path: "#battery"
                 icon_tap_action:
                   action: navigate
-                  navigation_path: "#working_mode"
+                  navigation_path: "#battery"
                 features_position: bottom
               - type: tile
                 entity: sensor.batteries_state_of_capacity
@@ -561,7 +571,11 @@ sections:
                 hide_state: false
                 vertical: false
                 tap_action:
-                  action: none
+                  action: navigate
+                  navigation_path: "#battery"
+                icon_tap_action:
+                  action: navigate
+                  navigation_path: "#battery"
                 features_position: inline
             columns: 2
         view_layout:
@@ -760,8 +774,8 @@ sections:
                     **ℹ️Information**
 
                     Uppdatera systemet genom att klicka på uppdatera. Då laddas
-                    och installeras den senste versionen. Starta om Home
-                    Assistant efter installationen. 
+                    och installeras den senste versionen. **Starta om Home
+                    Assistant efter installationen.**
                   text_only: true
           - type: conditional
             conditions:
@@ -1119,10 +1133,10 @@ sections:
 
                   {% if user_code in codes_list %}
                     **AnvändarID**
-                    ✅ Gilltlig kod!
+                    ✅ OK
                   {% else %}
                     **AnvändarID**
-                    ❌ Ogiltlig kod!
+                    ❌ Ogiltlig kod
                   {% endif %}
 
 
@@ -1174,15 +1188,15 @@ sections:
 
                   {% if cnt == 0 %}
 
-                  **Huawei integrationen:**
+                  **Huawei**
 
-                  ✅ Allt ser bra ut!
+                  ✅ OK
 
                   {% else %}
 
-                  **Huawei integrationen:**
+                  **Huawei**
 
-                  ❌ Enheter saknas eller har felaktigt namn! ({{ cnt }})
+                  ❌ Enheter saknas eller har felaktigt namn ({{ cnt }})
 
                   {% if s1 in bad %}- {{ e1 }} {% endif %}
 
@@ -1197,6 +1211,66 @@ sections:
                   {% if s6 in bad %}- {{ e6 }} {% endif %}
 
                   {% endif %}
+
+
+                  {% if states('weather.smhi_home') not in ['unknown',
+                  'unavailable', ''] %}
+
+                  **SMHI**
+                    ✅ OK
+                  {% else %}
+
+                  **SMHI**
+                    ❌ weather.smhi_home saknas
+                  {% endif %}
+
+
+                  {% if integration_entities('nordpool') | count > 0 %}
+
+                  **Nordpool**
+                    ✅ OK
+                  {% else %}
+
+                  **Nordpool**
+                    ❌ Nordpool saknas
+                  {% endif %}
+
+
+                  {% set missing = [] %}
+
+
+                  {% if states('sensor.sem_hacs_apexcharts_card') != 'OK' %}
+                    {% set missing = missing + ['ApexCharts Card'] %}
+                  {% endif %}
+
+
+                  {% if states('sensor.sem_hacs_bubble_card') != 'OK' %}
+                    {% set missing = missing + ['Bubble Card'] %}
+                  {% endif %}
+
+
+                  {% if states('sensor.sem_hacs_energy_flow_card_plus') != 'OK'
+                  %}
+                    {% set missing = missing + ['Energy Flow Card Plus'] %}
+                  {% endif %}
+
+
+                  {% if states('sensor.sem_hacs_lovelace_layout_card') != 'OK'
+                  %}
+                    {% set missing = missing + ['Lovelace Layout Card'] %}
+                  {% endif %}
+
+
+                  {% if states('sensor.sem_hacs_vertical_stack_in_card') != 'OK'
+                  %}
+                    {% set missing = missing + ['Vertical Stack In Card'] %}
+                  {% endif %}
+
+                  **HACS**
+
+                  {{ '✅ OK' if missing | length == 0 else '❌ Saknas: ' ~
+                  (missing | join(', ')) }}
+
 
 
                   **⚠️ VARNING!**
@@ -2170,4 +2244,4 @@ badges:
     tap_action:
       action: navigate
       navigation_path: "#settings"
-    name: Ditt system
+    name: Mitt system
