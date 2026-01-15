@@ -44,3 +44,10 @@ sensor:
     method: left
 #    unit_prefix: k
 #    unit_time: h  
+
+  # LATEST GITHUB RELEASE
+  - platform: rest
+    name: "sem_github_latest_release"
+    resource: https://api.github.com/repos/Henrik1986/huawei-energy-managment/releases/latest
+    value_template: "{{ value_json.tag_name }}"
+    scan_interval: 3600
