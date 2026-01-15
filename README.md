@@ -20,7 +20,7 @@ Lägg till din plats och namnge din nya sensor med home (vilket ger följande en
 c) Installera och konfiguera [Nordpool Integrationen](https://www.home-assistant.io/integrations/nordpool/). Paketet fungerar även med Nordpool Integrationen från HACS. [Nordpool HACS Integrationen](https://github.com/custom-components/nordpool)
 
 ### Steg 2
-Installera följande integrationer från HACS (krävs för hemvyn):
+Installera följande från HACS:
 
 - Apexcharts-card
 - Layout-card
