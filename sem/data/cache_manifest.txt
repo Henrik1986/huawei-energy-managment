@@ -1,5 +1,5 @@
 {
-    "manifest_version": 1,
+    "manifest_version": 2,
     "generated": "2025-10-15T12:34:56Z",
     "files": [
       {"name": "indexmap.yaml", "sha": "a1b2c3d4"},
