@@ -23,3 +23,41 @@ command_line:
       name: "sem_sys_state"
       unique_id: sem_sys_state
       command: "grep 'access_data:' /config/packages/sem/data/sys_cache.db | cut -d':' -f2"
+
+
+  - sensor:
+      scan_interval: 60
+      name: "sem_version"
+      unique_id: sem_version
+      command: "cat /config/packages/sem/version.txt"
+
+  - sensor:
+      name: "sem_hacs_apexcharts_card"
+      unique_id: sem_hacs_apexcharts_card
+      command: >
+        test -d /config/www/community/apexcharts-card && echo OK || echo MISSING
+
+  - sensor:
+      name: "sem_hacs_lovelace_layout_card"
+      unique_id: sem_hacs_lovelace_layout_card
+      command: >
+        test -d /config/www/community/lovelace-layout-card && echo OK || echo MISSING
+
+  - sensor:
+      name: "sem_hacs_vertical_stack_in_card"
+      unique_id: sem_hacs_vertical_stack_in_card
+      command: >
+        test -d /config/www/community/vertical-stack-in-card && echo OK || echo MISSING
+
+  - sensor:
+      name: "sem_hacs_energy_flow_card_plus"
+      unique_id: sem_hacs_energy_flow_card_plus
+      command: >
+        test -d /config/www/community/energy-flow-card-plus && echo OK || echo MISSING
+
+  - sensor:
+      name: "sem_hacs_bubble_card"
+      unique_id: sem_hacs_bubble_card
+      command: >
+        test -d /config/www/community/Bubble-Card && echo OK || echo MISSING
+
