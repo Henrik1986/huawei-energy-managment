@@ -518,7 +518,7 @@ sections:
                     state: "True"
                 card:
                   type: tile
-                  entity: sensor.wallbox_anders_postmansvag_8b_laddningseffekt
+                  entity: sensor.sem_ev_sensor_power
                   name: Elbil
                   icon: mdi:ev-plug-type2
                   color: blue
