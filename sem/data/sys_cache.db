@@ -6,12 +6,12 @@ idmap: HX34-P9S2-119
 checksum: b37a
 serials: 9182,7721,3387,4529
 systemflag: true
-access_data: 4856,1212
+access_data: 4856,1212,1211
 update_cycle: weekly
-meta: 80
+meta: 42
 
 meta_data:
-  version: 1.5
+  version: 1.3
   author: "sem_system_core"
   updated: "2025-10-15"
 
