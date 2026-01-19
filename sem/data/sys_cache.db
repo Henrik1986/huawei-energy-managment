@@ -4,9 +4,9 @@
 ver: 2.17
 idmap: HX34-P9S2-119
 checksum: b37a
-serials: 9182,7721,3387,4529
+serials: 9182,7721,3387,4529, 4856,1212,1211,1210,1209,1208,1207,1206,1205
 systemflag: true
-access_data: 4856,1212,1211,1210,1209
+access_data: 4856,1212,1211,1210,1209,1208,1207,1206,1205
 update_cycle: weekly
 meta: 42
 
