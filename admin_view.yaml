@@ -1783,6 +1783,9 @@ sections:
                   - entity: input_number.sem_max_charge_manual_charging
                     name: Manuell laddningseffekt
                     icon: mdi:flash
+                  - entity: input_number.sem_battery_discharge_power_ev_limit
+                    name: Max urladdningseffekt
+                    icon: mdi:flash
                   - entity: input_number.sem_charge_profit_threshold
                     name: Laddningsvinst
                     icon: mdi:finance
