@@ -488,7 +488,8 @@ sections:
             cards:
               - type: tile
                 entity: sensor.power_meter_active_power
-                name: Elmätare
+                name: Elnätet
+                icon: mdi:transmission-tower
                 color: red
                 vertical: false
                 tap_action:
@@ -500,8 +501,8 @@ sections:
                 features_position: bottom
               - type: tile
                 entity: sensor.sem_input_power_with_efficiency_loss_kw
-                name: Sol
-                icon: mdi:solar-panel
+                name: Solceller
+                icon: mdi:solar-power-variant
                 color: primary
                 vertical: false
                 tap_action:
@@ -532,7 +533,7 @@ sections:
                   features_position: inline
           - type: tile
             entity: sensor.batteries_charge_discharge_power
-            name: Batteri
+            name: Batteriet
             icon: mdi:battery-charging-100
             color: indigo
             vertical: false
@@ -1400,7 +1401,7 @@ sections:
                 content: >-
                   **ℹ️Information**
 
-                  Ditt Huawei device_id: 
+                  Ditt Huawei batteri ID: 
 
                   Utvecklarverktyg -> Åtgärder -> Klicka på åtgärd -> Skriv
                   huawei -> Välj forcible charge -> Klicka på gå till UI-läge ->
@@ -1421,7 +1422,7 @@ sections:
                 content: >-
                   **ℹ️Information**
 
-                  Ditt Huawei device_id: 
+                  Ditt Huawei inverter ID: 
 
                   Utvecklarverktyg -> Åtgärder -> Klicka på åtgärd -> Skriv
                   huawei -> Välj limit the power fed to grid -> Klicka på gå
@@ -2138,19 +2139,14 @@ sections:
                   **💾 Är det första gången du konfiguerarar systemet?** 
 
                   Då behöver systemet **minst sju dagar** att lära sig dina
-                  energimönster. Under denna tid kan du ladda systemet manuellt
-                  via knappen inställningar i hemvyn. Det är bra att du laddar
-                  manuellt då det kommer att bidra till en bättre från den
-                  sjunde dagen.  
+                  energimönster. Under denna tid kan du ladda batteriet manuellt
+                  via knappen snabbval i hemvy om det skulle behövas.
 
 
                   **⚙️ Ändra dina inställningar**
 
-                  Detta gör du genom att klicka på inställningar i hemvyn.
-                  Skulle du vilja ändra inställningarna i konfigurationen kan du
-                  göra det genom att göra ett långtryck på texten inställningar.
-                  Ändringar startar **INTE** om systemets inlärningsprocess på
-                  sju dagar. 
+                  Detta gör du genom att köra om hela konfigurationen. Ändringar
+                  startar **INTE** om systemets inlärningsprocess på sju dagar. 
               - type: tile
                 entity: input_boolean.sem_step_5
                 name: Avsluta konfigurationen
@@ -2165,6 +2161,466 @@ sections:
                   action: navigate
                   navigation_path: /lovelace/smart-energy-system
                 features_position: bottom
+  - type: grid
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#battery"
+            show_header: false
+          - type: heading
+            icon: mdi:home-battery
+            heading_style: title
+            heading: Batteriet
+          - type: custom:vertical-stack-in-card
+            cards:
+              - square: false
+                type: grid
+                cards:
+                  - type: tile
+                    entity: sensor.sem_battery_mode
+                    name: Arbetsläge
+                    icon: mdi:auto-mode
+                    color: indigo
+                    hide_state: false
+                    vertical: false
+                    tap_action:
+                      action: navigate
+                      navigation_path: "#battery"
+                    icon_tap_action:
+                      action: navigate
+                      navigation_path: "#battery"
+                    features_position: bottom
+                  - type: tile
+                    entity: sensor.batteries_charge_discharge_power
+                    name: Batteri
+                    icon: mdi:battery-charging-100
+                    color: indigo
+                    vertical: false
+                    tap_action:
+                      action: navigate
+                      navigation_path: "#battery"
+                    icon_tap_action:
+                      action: navigate
+                      navigation_path: "#battery"
+                    features_position: inline
+                  - type: tile
+                    entity: sensor.batteries_state_of_capacity
+                    name: Nivå
+                    icon: mdi:battery
+                    color: indigo
+                    show_entity_picture: false
+                    hide_state: false
+                    vertical: false
+                    tap_action:
+                      action: navigate
+                      navigation_path: "#battery"
+                    icon_tap_action:
+                      action: navigate
+                      navigation_path: "#battery"
+                    features_position: inline
+                columns: 3
+              - type: entities
+                entities:
+                  - entity: select.batteries_working_mode
+                    name: Arbetsläge
+                  - entity: number.batteries_maximum_discharging_power
+                    name: Max urladdning
+                  - entity: number.batteries_grid_charge_maximum_power
+                    name: Max laddning
+                    icon: mdi:transmission-tower-import
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Alternativen ovan ger dig möjlighet att ställa in vad
+                  batteriet får ladda ur med, men även maximala effekten vid
+                  laddning från elnätet. Du kan även välja arbetsläge på ditt
+                  batteri.
+                text_only: true
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:battery-charging-60
+                heading: Ladda nu
+                heading_style: subtitle
+              - type: entities
+                entities:
+                  - entity: input_number.sem_max_charge_manual_charging
+                    name: Laddningseffekt
+                    icon: mdi:flash
+                  - entity: input_number.sem_manual_charge_duration
+                    name: Tid
+                    icon: mdi:clock-time-eight
+                  - entity: input_boolean.manual_charge
+                    icon: mdi:play-circle
+                    name: Ladda nu
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Ställ in tillåten effekt och tid för laddningen. Aktivera
+                  laddningen via reglaget **ladda nu**. 
+                text_only: true
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:cog
+                heading_style: subtitle
+                heading: Aktiverade smarta funktioner
+              - type: entities
+                entities:
+                  - entity: input_boolean.sem_ev_charging_protection_enabled
+                    name: Ladda inte elbilen med batteriet
+                    icon: mdi:car-electric
+                  - entity: input_boolean.sem_discharge_high_prices
+                    name: Sälj överskott vid högt elpris
+                    icon: mdi:transmission-tower-export
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Ovan visas vilka smarta funktioner som är **aktiverade i ditt
+                  system**. På hemskärmens kan du se om den smarta funktionen är
+                  aktiv. 
+                text_only: true
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:battery-plus
+                heading_style: subtitle
+                heading: Extra laddning
+              - type: entities
+                entities:
+                  - entity: input_number.extra_1
+                    name: Dagen (9-16)
+                    icon: mdi:battery-clock
+                  - entity: input_number.extra_2
+                    name: Natten (23-05)
+                    icon: mdi:battery-clock
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Alternativen ovan ger dig möjlighet att lägga till **extra
+                  kwh** på ett laddningstillfälle.
+                text_only: true
+        view_layout:
+          position: main
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#grid"
+            show_header: false
+          - type: heading
+            icon: mdi:transmission-tower
+            heading_style: title
+            heading: Elnätet
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:clock
+                heading_style: subtitle
+                heading: Senaste dygnet
+              - type: custom:apexcharts-card
+                update_interval: 5 min
+                graph_span: 24h
+                header:
+                  title: Spotpris 48h ink moms
+                  show: false
+                  show_states: true
+                  colorize_states: true
+                hours_12: false
+                stacked: false
+                experimental:
+                  color_threshold: true
+                yaxis:
+                  - id: grid
+                    opposite: false
+                    show: true
+                    decimals: 1
+                    apex_config:
+                      title:
+                        text: kWh
+                series:
+                  - entity: sensor.sem_export_power_tot
+                    type: area
+                    yaxis_id: grid
+                    name: Sålt
+                    color: green
+                    opacity: 0.6
+                    color_threshold:
+                      - value: 0
+                        color: "#ccffcc"
+                      - value: 2
+                        color: "#66ff66"
+                      - value: 5
+                        color: "#009900"
+                    group_by:
+                      func: delta
+                      duration: 1h
+                    invert: true
+                  - entity: sensor.sem_import_power_tot
+                    type: area
+                    name: Köpt
+                    color: red
+                    yaxis_id: grid
+                    opacity: 0.6
+                    color_threshold:
+                      - value: 0
+                        color: "#ffcccc"
+                      - value: 2
+                        color: "#ff6666"
+                      - value: 5
+                        color: "#cc0000"
+                    group_by:
+                      func: delta
+                      duration: 1h
+                apex_config:
+                  chart:
+                    height: 190px
+                    animations:
+                      enabled: true
+                      easing: easeinout
+                      speed: 800
+                      animateGradually:
+                        enabled: true
+                        delay: 150
+                  legend:
+                    show: true
+                    floating: false
+                    offsetY: 5
+                    position: bottom
+                    fontSize: 10px
+                  tooltip:
+                    enabled: false
+                  xaxis:
+                    labels:
+                      show: true
+                      rotate: 0
+                      rotateAlways: true
+                      logarithmic: false
+                  stroke:
+                    show: true
+                    colors: undefined
+                  plotOptions:
+                    candlestick:
+                      colors:
+                        upward: "#00B746"
+                        downward: "#EF403C"
+                      wick:
+                        useFillColor: true
+                all_series_config:
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    in_brush: false
+                  float_precision: 3
+                  invert: false
+                  fill_raw: last
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:calendar-today
+                heading: Idag
+                heading_style: subtitle
+              - square: false
+                type: grid
+                cards:
+                  - type: tile
+                    features_position: bottom
+                    vertical: false
+                    entity: sensor.sem_import
+                    name: Köpt
+                    icon: mdi:transmission-tower-import
+                  - type: tile
+                    features_position: bottom
+                    vertical: false
+                    entity: sensor.sem_export
+                    icon: mdi:transmission-tower-export
+                    name: Sålt
+                columns: 2
+          - type: tile
+            entity: sensor.sem_nordpool_active
+            name: Elpriset
+            icon: mdi:flash
+            vertical: false
+            features_position: bottom
+          - type: custom:vertical-stack-in-card
+            cards: []
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#solar"
+            show_header: false
+          - type: heading
+            icon: mdi:solar-power-variant
+            heading_style: title
+            heading: Solceller
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:clock
+                heading_style: subtitle
+                heading: Senaste dygnet
+              - type: custom:apexcharts-card
+                update_interval: 5 min
+                graph_span: 24h
+                header:
+                  title: Spotpris 48h ink moms
+                  show: false
+                  show_states: true
+                  colorize_states: true
+                hours_12: false
+                stacked: false
+                experimental:
+                  color_threshold: true
+                yaxis:
+                  - id: solar
+                    opposite: false
+                    show: true
+                    decimals: 1
+                    min: 0
+                    apex_config:
+                      title:
+                        text: kWh
+                series:
+                  - entity: sensor.sem_input_power_with_efficiency_loss_kw_tot
+                    type: area
+                    yaxis_id: solar
+                    name: Producerad solel
+                    color: orange
+                    stroke_width: 1
+                    opacity: 0.6
+                    color_threshold:
+                      - value: 0
+                        color: "#fff066"
+                      - value: 2
+                        color: "#ffd700"
+                      - value: 5
+                        color: "#ffb300"
+                    group_by:
+                      func: delta
+                      duration: 1h
+                    show:
+                      in_legend: true
+                  - entity: sensor.sem_consumed_solar_energy_today
+                    type: area
+                    name: Använd solel
+                    stroke_width: 1
+                    opacity: 0.6
+                    yaxis_id: solar
+                    color: blue
+                    color_threshold:
+                      - value: 0
+                        color: "#cce5ff"
+                      - value: 2
+                        color: "#3399ff"
+                      - value: 5
+                        color: "#003366"
+                    group_by:
+                      duration: 1h
+                      func: delta
+                apex_config:
+                  chart:
+                    height: 190px
+                    animations:
+                      enabled: true
+                      easing: easeinout
+                      speed: 800
+                      animateGradually:
+                        enabled: true
+                        delay: 150
+                  legend:
+                    show: true
+                    floating: false
+                    offsetY: 5
+                    position: bottom
+                    fontSize: 10px
+                  tooltip:
+                    enabled: false
+                  xaxis:
+                    labels:
+                      show: true
+                      rotate: 0
+                      rotateAlways: true
+                      logarithmic: false
+                  stroke:
+                    width: 1
+                  plotOptions:
+                    candlestick:
+                      colors:
+                        upward: "#00B746"
+                        downward: "#EF403C"
+                      wick:
+                        useFillColor: true
+                  grid:
+                    show: true
+                    strokeDashArray: 1
+                    position: front
+                    xaxis:
+                      lines:
+                        show: false
+                all_series_config:
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    in_brush: false
+                  float_precision: 3
+                  invert: false
+                  fill_raw: last
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:solar-panel-large
+                heading: Idag
+                heading_style: subtitle
+              - square: false
+                type: grid
+                cards:
+                  - type: tile
+                    entity: sensor.sem_solar_production
+                    name: Producerat
+                    icon: mdi:solar-power-variant
+                    vertical: false
+                    features_position: bottom
+                  - type: tile
+                    entity: sensor.sem_consumed_solar_energy_today
+                    name: Förbrukat
+                    icon: mdi:solar-power-variant
+                    vertical: false
+                    features_position: bottom
+                  - type: tile
+                    entity: sensor.sem_export
+                    name: Sålt
+                    icon: mdi:solar-power-variant
+                    vertical: false
+                    features_position: bottom
+                columns: 3
+          - type: custom:vertical-stack-in-card
+            cards: []
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:cog
+                heading_style: subtitle
+                heading: Aktiverade smarta funktioner
+              - type: entities
+                entities:
+                  - entity: input_boolean.sem_export_limit_active
+                    name: Sälj inte solel vid lågt elpris
+                    icon: mdi:weather-sunny-off
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Ovan visas vilka smarta funktioner som är **aktiverade i ditt
+                  system**. På hemskärmens kan du se om den smarta funktionen är
+                  aktiv. 
+                text_only: true
 badges:
   - type: entity
     show_name: true
@@ -2176,7 +2632,7 @@ badges:
         state: "on"
     entity: input_boolean.sem_max_export_active
     name: Begränsar solexport
-    icon: mdi:solar-power-variant
+    icon: mdi:weather-sunny-off
     tap_action:
       action: none
     color: green
