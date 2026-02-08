@@ -2259,7 +2259,7 @@ sections:
                   - entity: input_number.sem_manual_charge_duration
                     name: Tid
                     icon: mdi:clock-time-eight
-                  - entity: input_boolean.manual_charge
+                  - entity: input_boolean.sem_manual_charge
                     icon: mdi:play-circle
                     name: Ladda nu
               - type: markdown
