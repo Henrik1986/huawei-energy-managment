@@ -710,16 +710,16 @@ sections:
     cards:
       - type: vertical-stack
         cards:
+          - type: heading
+            icon: mdi:account
+            heading: Mitt system
+            heading_style: title
           - type: custom:bubble-card
             card_type: pop-up
             hash: "#settings"
             show_header: false
             background_update: false
             width_desktop: 600px
-          - type: heading
-            icon: mdi:account
-            heading: Mitt system
-            heading_style: title
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -837,8 +837,14 @@ sections:
                   content: >-
                     **ℹ️Information**
 
-                    Uppdateringen färdig. För att slutföra den måste du starta
-                    om Home Assistant
+                    Uppdateringen färdig ✅ 
+
+
+                    För att slutföra måste du starta om Home Assistant. 
+
+
+                    💻 Uppdatera även hemvyn genom att klistra in koden från
+                    filen admin_view via github. 
                   text_only: true
           - type: custom:vertical-stack-in-card
             cards:
