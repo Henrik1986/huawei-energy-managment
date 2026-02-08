@@ -14,6 +14,7 @@ template:
           {% else %}
             🎉 Uppdatering tillgänglig
           {% endif %}
+
 ####################################### WALLBOX ####################################################
 #SHOWS CHARGEBOX STATE 1
       - name: "sem_ev_sensor_state"
@@ -84,6 +85,10 @@ template:
         state: >
           {% set v = states('input_text.sem_ev_sensor') %}
           {{ v not in ['unknown', 'unavailable', ''] and v.startswith('sensor.') }}
+
+
+
+
 
 
 
@@ -250,7 +255,18 @@ template:
               {{ (inpower * 0.95 / 1000) | round(2) }}
           {% else %}
               {{ (inpower * 0.98 / 1000) | round(2) }}
-          {% endif %}       
+          {% endif %}
+
+# SELF CONSUMED SOLAR ENERGY TODAY
+      - name: "sem_consumed_solar_energy_today"
+        unique_id: "sem_consumed_solar_energy_today"
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total
+        state: >
+          {% set solar_produced = states('sensor.sem_solar_production') | float(0) %}
+          {% set solar_exported = states('sensor.sem_export') | float(0) %}
+          {{ [solar_produced - solar_exported, 0] | max | round(2) }}
 
 # HOUSE POWER - NO EV
       - name: "sem_house_power"
@@ -543,14 +559,15 @@ template:
           {% set extra = states('input_number.extra_1') | float(0) %}
           {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
           {% set ev_charge_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','ev_charge_factor') | float(0) %}
+          {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
         
 
           {% set solar_diff = [estimated_energy_sun_interval - ((estimated_solar_energy * adjustment_factor_solar_energy) * ev_charge_factor) , 0] | max %}
           {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - battery_capacity %}
           {% set total_energy_need = [raw_total, 0] | max %}
 
-
-          {{ (total_energy_need + supercheap_charge + extra) | round(2) }}
+          {{ (total_energy_need + supercheap_charge + extra, battery_max) | min  }}      
+#          {{ (total_energy_need + supercheap_charge + extra) | round(2) }}
         attributes:
             search_interval: >
                   {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_1a') %}
@@ -1122,14 +1139,15 @@ template:
             {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') | float(0) %}
             {% set extra = states('input_number.extra_2') | float(0) %} 
             {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(0) %}
+            {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
 
             {% set solar_diff = [estimated_energy_sun_interval - (estimated_solar_energy * adjustment_factor_solar_energy) , 0] | max %}
             {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - battery_capacity %}
             {% set total_energy_need = [raw_total, 0] | max %}
 
 
-            
-            {{ (total_energy_need + supercheap_charge + extra) | round(2) }}
+            {{ (total_energy_need + supercheap_charge + extra, battery_max) | min  }}
+#            {{ (total_energy_need + supercheap_charge + extra) | round(2) }}
         attributes:
             search_interval: >
                   {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_2') %}
@@ -1808,7 +1826,7 @@ template:
           {% set today = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
           {% set interval_start = today + timedelta(hours=14) %}
           {% set interval_end   = today + timedelta(days=1, hours=2) %}
-          {% set extend_hours = 3 %}
+          {% set extend_hours = 5 %}
 
           {% set filtered = data
             | selectattr('start', 'defined')
@@ -1936,7 +1954,7 @@ template:
           {% set today = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
           {% set interval_start = today + timedelta(days=1, hours=2) %}
           {% set interval_end   = today + timedelta(days=1, hours=14) %}
-          {% set extend_hours = 3 %}
+          {% set extend_hours = 5 %}
           
           {% set filtered = data
             | selectattr('start', 'defined')
@@ -2399,3 +2417,20 @@ template:
               false
             {% endif %}
           {% endif %}
+
+#CHECKS IF SENSORS ARE AVALIBLE          
+      - name: sem_huawei_sensor_available_control
+        state: >
+          {% set entities = [
+            'sensor.batteries_state_of_capacity',
+            'input_number.sem_batteries_end_of_discharge_soc',
+            'sensor.inverter_input_power',
+            'sensor.power_meter_active_power',
+            'sensor.batteries_charge_discharge_power',
+            'select.batteries_working_mode'
+          ] %}
+          {{ entities
+              | map('states')
+              | reject('in', ['unavailable', 'unknown'])
+              | list
+              | length == entities | length }}
