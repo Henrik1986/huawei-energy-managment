@@ -42,6 +42,10 @@ automation:
             {% else %}
               false
             {% endif %}
+        - condition: state
+          entity_id: binary_sensor.sem_huawei_sensor_available_control
+          state: "on"
+
     action:
         - choose:
             # 1: Activate ToU (Time Of Use) if the battery needs charging within the interval
@@ -135,6 +139,9 @@ automation:
           {% else %}
             false
           {% endif %}
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
     action:
       - choose:
           # 1: Activate ToU (Time Of Use) if the battery needs charging within the interval
@@ -226,6 +233,9 @@ automation:
           {% else %}
           false
           {% endif %}
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
     actions:
       - action: number.set_value
         target:
@@ -271,6 +281,9 @@ automation:
           {% else %}
             false
           {% endif %}
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
     action:
       - action: timer.finish
         target:
@@ -307,6 +320,9 @@ automation:
             {% else %}
               false
             {% endif %}
+        - condition: state
+          entity_id: binary_sensor.sem_huawei_sensor_available_control
+          state: "on"
     action:
         - choose:
             # TOU MODE IF BATTERY HAS SURPLUS
@@ -550,6 +566,9 @@ automation:
       - condition: state
         entity_id: input_boolean.sem_export_limit_active
         state: 'on'
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
     action:
         - choose:
 
@@ -624,6 +643,9 @@ automation:
           {% else %}
             false
           {% endif %}
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
 
     action:
       - choose:
@@ -715,6 +737,20 @@ automation:
     triggers:
       - trigger: time_pattern
         minutes: "/15"
+    condition:
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
 
     action:
       - choose:
@@ -878,32 +914,47 @@ automation:
         entity_id: input_boolean.sem_ev_charged_today
 
 
-# FÖRSTA DYRA FÖNSTRET
-  - alias: "SEM - Waitmode before expensive 12-24"
+# EXPENSIVE WINDOW BETWEEN 12-24
+  - alias: "SEM - Waitmode before expensive interval 12-24"
     triggers:
       - trigger: time_pattern
-        minutes: "/15"  # kör varje kvart
-    condition: []
+        minutes: "/15" 
+    condition:
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
+      - condition: time
+        after: "12:00:00"
+        before: "23:59:59"
     action:
       - choose:
-          # 1a. PRE-INTERVAL: mellan 12:00 och start av pristoppen
+          # 1a. PRE-INTERVAL: CONTROL WAITMODE BEFORE EXPENSIVE INTERVAL
           - conditions:
               - condition: template
                 value_template: >
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_1') %}
-                  {% set now_dt = now() %}
-                  {% set after_12 = now_dt.replace(hour=12, minute=0, second=0, microsecond=0) %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
-                    {{ now_dt >= after_12 and now_dt < interval_start }}
+                  {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+                  {% if ' - ' not in raw %}
+                    Ingen giltig prisintervall
                   {% else %}
-                    false
+                  {% set start = as_datetime(raw.split(' - ')[0]) %}
+                  {% set end = as_datetime(raw.split(' - ')[1]) %}
+                  {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+                  {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set before_peak = now() < start %}
+                  {% set not_enough_energy = batt <= need + buffer %}
+                  {{ before_peak and not_enough_energy }}
                   {% endif %}
-              - condition: template
-                value_template: >
-                  {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
-                  {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
-                  {{ battery_kwh <= required_kwh }}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
                 state: "off"
@@ -920,44 +971,45 @@ automation:
                 target:
                   entity_id: input_boolean.sem_battery_save
 
-          # 1b. PRE-INTERVAL MEN batteriet är nu fullt → släpp viloläge
+          # 1b. PRE-INTERVAL CONSTROL DISCHARGE BEFORE EXPENSIVE
           - conditions:
               - condition: template
                 value_template: >
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_1') %}
-                  {% set now_dt = now() %}
-                  {% set after_12 = now_dt.replace(hour=12, minute=0, second=0, microsecond=0) %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
-                    {{ now_dt >= after_12 and now_dt < interval_start }}
+                  {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+                  {% if ' - ' not in raw %}
+                    Ingen giltig prisintervall
                   {% else %}
-                    false
+                  {% set start = as_datetime(raw.split(' - ')[0]) %}
+                  {% set end = as_datetime(raw.split(' - ')[1]) %}
+                  {% set hours = (end - start).total_seconds() / 3600 %}
+                  {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+                  {% set per_h = need / hours if hours > 0 else 0 %}
+                  {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
+                  {% set start_save = start - timedelta(hours=hours_before) %}
+
+                  {{ now() >= start_save and now() < start and batt > need + buffer }}
+
                   {% endif %}
-              - condition: template
-                value_template: >
-                  {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
-                  {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
-                  {{ battery_kwh > required_kwh }}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
                 state: "off"
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
-
             sequence:
               - action: number.set_value
                 target:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
                   value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
-
               - action: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.sem_battery_save
 
 
-          # 2. UNDER INTERVALLET: tillåt full urladdning så länge elen inte är billig.  
+          # 2. INTERVAL: ALLOWS DISCHARGE WHEN IN EXPENSIVE INTERVAL
           - conditions:
               - condition: template
                 value_template: >
@@ -986,7 +1038,7 @@ automation:
                 target:
                   entity_id: input_boolean.sem_battery_save
 
-          # 3. POST-INTERVAL: Efter pristoppen och innan midnatt, återställ om viloläge var aktivt
+          # 3. POST-INTERVAL: RESETS WAITMODE AFTER EXPENSIVE INTEREVAL
           - conditions:
               - condition: template
                 value_template: >
@@ -1004,9 +1056,6 @@ automation:
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
-              - condition: time
-                after: "12:00:00"
-                before: "23:50:00"
             sequence:
               - action: number.set_value
                 target:
@@ -1022,35 +1071,47 @@ automation:
 
 
 
-# ANDRA DYRA FÖNSTRET
-  - alias: "SEM - Waitmode before expensive 00-12"
+# EXPENSIVE WINDOW BETWEEN 00-12
+  - alias: "SEM - Waitmode before expensive interval 00-12"
     triggers:
       - trigger: time_pattern
-        minutes: "/15"  # kör varje kvart
-    condition: []
+        minutes: "/15" 
+    condition:
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: state
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        state: "on"
+      - condition: time
+        after: "00:00:00"
+        before: "12:00:00"
     action:
       - choose:
-          # 1a. PRE-INTERVAL: Efter midnatt och fram till start av pristoppen
+          # 1a. PRE-INTERVAL: CONTROL WAITMODE BEFORE EXPENSIVE INTERVAL
           - conditions:
               - condition: template
                 value_template: >
-
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_2') %}
-                  {% set now_dt = now() %}
-                  {% set midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0) %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
-                    {{ now_dt.date() == interval_start.date() and
-                      now_dt >= midnight and
-                      now_dt < interval_start }}
+                  {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+                  {% if ' - ' not in raw %}
+                    Ingen giltig prisintervall
                   {% else %}
-                    false
+                  {% set start = as_datetime(raw.split(' - ')[0]) %}
+                  {% set end = as_datetime(raw.split(' - ')[1]) %}
+                  {% set need = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
+                  {% set batt = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set before_peak = now() < start %}
+                  {% set not_enough_energy = batt <= need + buffer %}
+                  {{ before_peak and not_enough_energy }}
                   {% endif %}
-              - condition: template
-                value_template: >
-                  {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
-                  {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
-                  {{ battery_kwh <= required_kwh }}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
                 state: "off"
@@ -1067,26 +1128,27 @@ automation:
                 target:
                   entity_id: input_boolean.sem_battery_save
 
-          # 1b. PRE-INTERVAL MEN batteriet är nu fullt → släpp viloläge
+          # 1b. PRE-INTERVAL CONSTROL DISCHARGE BEFORE EXPENSIVE
           - conditions:
               - condition: template
                 value_template: >
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_2') %}
-                  {% set now_dt = now() %}
-                  {% set midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0) %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
-                    {{ now_dt.date() == interval_start.date() and
-                      now_dt >= midnight and
-                      now_dt < interval_start }}
+                  {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+                  {% if ' - ' not in raw %}
+                    Ingen giltig prisintervall
                   {% else %}
-                    false
+                  {% set start = as_datetime(raw.split(' - ')[0]) %}
+                  {% set end = as_datetime(raw.split(' - ')[1]) %}
+                  {% set hours = (end - start).total_seconds() / 3600 %}
+                  {% set need = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
+                  {% set per_h = need / hours if hours > 0 else 0 %}
+                  {% set batt = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
+                  {% set start_save = start - timedelta(hours=hours_before) %}
+
+                  {{ now() >= start_save and now() < start and batt > need + buffer }}
+
                   {% endif %}
-              - condition: template
-                value_template: >
-                  {% set battery_kwh = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
-                  {% set required_kwh = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
-                  {{ battery_kwh > required_kwh }}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
                 state: "off"
@@ -1105,7 +1167,7 @@ automation:
 
 
 
-          # 2. UNDER INTERVALLET: tillåt full urladdning om elen inte är billig
+          # 2. INTERVAL: ALLOWS DISCHARGE WHEN IN EXPENSIVE INTERVAL
           - conditions:
               - condition: template
                 value_template: >
@@ -1134,7 +1196,7 @@ automation:
                 target:
                   entity_id: input_boolean.sem_battery_save
 
-          # 3. POST-INTERVAL: efter pristoppen, återställ om viloläge var aktivt
+          # 3. POST-INTERVAL: RESETS WAITMODE AFTER EXPENSIVE INTEREVAL
           - conditions:
               - condition: template
                 value_template: >
@@ -1152,9 +1214,6 @@ automation:
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
                 state: "off"
-              - condition: time
-                after: "00:00:00"
-                before: "12:00:00"
             sequence:
               - action: number.set_value
                 target:
@@ -1176,8 +1235,6 @@ automation:
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.sem_submit_user_info
-
-
 
   - alias: "SEM - Reset flags for update Home Assistant start"
     triggers:
@@ -1211,10 +1268,10 @@ automation:
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.sem_download_finished
-#      - delay: "00:00:30"
-#      - action: input_boolean.turn_off
-#        target:
-#          entity_id: input_boolean.sem_download_finished
-#      - action: input_boolean.turn_off
-#        target:
-#          entity_id: input_boolean.manual_update_packages
+      - delay: "00:00:30"
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sem_download_finished
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.manual_update_packages
