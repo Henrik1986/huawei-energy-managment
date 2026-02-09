@@ -950,7 +950,7 @@ automation:
                   {% set end = as_datetime(raw.split(' - ')[1]) %}
                   {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
                   {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
                   {% set before_peak = now() < start %}
                   {% set not_enough_energy = batt <= need + buffer %}
                   {{ before_peak and not_enough_energy }}
@@ -985,7 +985,7 @@ automation:
                   {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
                   {% set per_h = need / hours if hours > 0 else 0 %}
                   {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
                   {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
                   {% set start_save = start - timedelta(hours=hours_before) %}
 
@@ -1107,7 +1107,7 @@ automation:
                   {% set end = as_datetime(raw.split(' - ')[1]) %}
                   {% set need = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
                   {% set batt = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
                   {% set before_peak = now() < start %}
                   {% set not_enough_energy = batt <= need + buffer %}
                   {{ before_peak and not_enough_energy }}
@@ -1142,7 +1142,7 @@ automation:
                   {% set need = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
                   {% set per_h = need / hours if hours > 0 else 0 %}
                   {% set batt = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.15 %}
+                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
                   {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
                   {% set start_save = start - timedelta(hours=hours_before) %}
 
