@@ -17,7 +17,7 @@ a) Installera och konfigurera [Huawei Solar Integrationen](https://github.com/wl
 b) Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
 Lägg till din plats och namnge din nya sensor med home (vilket ger följande enhetsnamn weather.smhi_home) 
 
-c) Installera och konfiguera [Nordpool Integrationen](https://www.home-assistant.io/integrations/nordpool/). Paketet fungerar även med Nordpool Integrationen från HACS. [Nordpool HACS Integrationen](https://github.com/custom-components/nordpool)
+c) Installera och konfiguera [Nordpool Integrationen](https://www.home-assistant.io/integrations/nordpool/). Paketet fungerar även med Nordpool Integrationen från HACS. [Nordpool HACS Integrationen](https://github.com/custom-components/nordpool). I mitt paket har jag utgått från SEK/kWh. 
 
 ### Steg 2
 Installera följande från HACS:
