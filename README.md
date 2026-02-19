@@ -70,7 +70,7 @@ a) Leta upp din nya mapp (packages) i listan och gå in i den. Skapa en ny mapp 
 
 b) Ladda ner och packa upp innehållet från github på din dator. Klicka på länken nedan för att ladda ner innehållet.  
 
-https://github.com/Henrik1986/huawei-energy-managment/archive/fb39a1732d69ab12b96c7f657dad6f1d15df60d1.zip
+https://github.com/Henrik1986/huawei-energy-managment/archive/refs/heads/main.zip
 
 c) Ladda upp innehållet som ligger i mappen sem (från din dator) till mappen sem på din home assistant. 
 
