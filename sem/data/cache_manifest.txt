@@ -1,6 +1,6 @@
 {
-    "manifest_version": 2,
-    "generated": "2025-10-15T12:34:56Z",
+    "manifest_version": 3,
+    "generated": "2026-02-20T15:15:56Z",
     "files": [
       {"name": "indexmap.yaml", "sha": "a1b2c3d4"},
       {"name": "statecache.conf", "sha": "e5f6g7h8"},
