@@ -1,5 +1,5 @@
 auth_index:
-  last_sync: "2025-10-14T22:00:00Z"
+  last_sync: "2026-02-20T22:00:00Z"
   provider: "internal"
   tokens:
     - id: "TKN-01"
