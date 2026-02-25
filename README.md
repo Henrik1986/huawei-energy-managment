@@ -13,6 +13,7 @@ Paketet gör även följande:
 ## Installation
 ### Steg 1
 a) Installera och konfigurera [Huawei Solar Integrationen](https://github.com/wlcrs/huawei_solar)
+https://www.youtube.com/watch?v=WjRTF1_OIMs
 
 b) Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
 Lägg till din plats och namnge din nya sensor med home (vilket ger följande enhetsnamn weather.smhi_home) 
