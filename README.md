@@ -13,6 +13,8 @@ Paketet gör även följande:
 ## Installation
 ### Steg 1
 a) Installera och konfigurera [Huawei Solar Integrationen](https://github.com/wlcrs/huawei_solar)
+
+Din växelriktare styr hur du kan lägga till den i Home Assisant. Via länken finns instruktioner att integrerar växelriktare över WiFi. 
 https://www.youtube.com/watch?v=WjRTF1_OIMs
 
 b) Installera och konfigurera [SMHI Integrationen](https://www.home-assistant.io/integrations/smhi/)
