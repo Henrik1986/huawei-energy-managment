@@ -15,6 +15,16 @@ template:
             🎉 Uppdatering tillgänglig
           {% endif %}
 
+# SYSTEM PLAN
+      - name: "sem_system_plan"
+        state: >
+          {% set h = now().hour %}
+          {% if h >= 4 and h < 16 %}
+            1
+          {% else %}
+            2
+          {% endif %}
+
 ####################################### WALLBOX ####################################################
 #SHOWS CHARGEBOX STATE 1
       - name: "sem_ev_sensor_state"
@@ -539,6 +549,7 @@ template:
           {% else %}
             0
           {% endif %}
+
 
 
 
@@ -2067,6 +2078,240 @@ template:
               {{ ns.total | round(2) }}
             {% endif %}
 
+
+# CALCULATES HOW THE BATTERY SHOULD DISCHARGE 12-00
+  - trigger:
+      - trigger: state
+        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
+        to: 'on'
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now()).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now() - timedelta(minutes=30)).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now() - timedelta(hours=1)).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now() - timedelta(hours=2)).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+    sensor:
+      - name: "sem_battery_use_interval_1"
+        unique_id: sem_battery_use_interval_1
+        state: >           
+          {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+          {% if ' - ' not in raw %}
+            unknown
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set end   = as_datetime(raw.split(' - ')[1]) %}
+
+            {% set hours = (end - start).total_seconds() / 3600 %}
+
+            {% set need   = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+            {% set batt   = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+            {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %}
+
+            {% if hours <= 0 or need <= 0 %}
+              {{ start.isoformat() }} - {{ end.isoformat() }}
+            {% else %}
+              {% set per_h = need / hours %}
+              {% set usable = batt - buffer %}
+
+              {% if usable <= 0 %}
+                {{ end.isoformat() }} - {{ end.isoformat() }}
+              {% else %}
+                {% set max_hours = usable / per_h %}
+                {% set delta = max_hours - hours %}
+                {% set shift = delta / 2 %}
+
+                {% set new_start = start - timedelta(hours=shift) %}
+                {% set new_end   = end   + timedelta(hours=shift) %}
+
+                {{ new_start.isoformat() }} - {{ new_end.isoformat() }}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        attributes:
+          now: >
+            {{ now().isoformat() }}
+          expensive_start: >
+            {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+            {{ raw.split(' - ')[0] if raw and ' - ' in raw else none }}
+          expensive_end: >
+            {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+            {{ raw.split(' - ')[1] if raw and ' - ' in raw else none }}
+          start_save: >
+            {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+            {% if ' - ' not in raw %}
+              none
+            {% else %}
+              {% set start = as_datetime(raw.split(' - ')[0]) %}
+              {% set end = as_datetime(raw.split(' - ')[1]) %}
+              {% set hours = (end - start).total_seconds() / 3600 %}
+              {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+              {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+              {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %}
+              {% set per_h = need / hours if hours > 0 else 0 %}
+              {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
+              {{ (start - timedelta(hours=hours_before)).isoformat() }}
+            {% endif %}
+          battery_kwh: >
+            {{ state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) }}
+
+          required_kwh: >
+            {{ state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) }}
+          buffer_kwh: >
+            {{ states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 }}
+          energy_surplus: >
+            {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+            {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+            {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %}
+            {{ batt > need + buffer }}
+          window_active: >
+            {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+            {% if ' - ' not in raw %}
+              false
+            {% else %}
+              {% set start = as_datetime(raw.split(' - ')[0]) %}
+              {% set end = as_datetime(raw.split(' - ')[1]) %}
+              {% set hours = (end - start).total_seconds() / 3600 %}
+              {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+              {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+              {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %}
+              {% set per_h = need / hours if hours > 0 else 0 %}
+              {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
+              {% set start_save = start - timedelta(hours=hours_before) %}
+              {{ now() >= start_save and now() < start }}
+            {% endif %}
+          allow_discharge: >
+            {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+            {% if ' - ' not in raw %}
+              false
+            {% else %}
+              {% set start = as_datetime(raw.split(' - ')[0]) %}
+              {% set end = as_datetime(raw.split(' - ')[1]) %}
+              {% set hours = (end - start).total_seconds() / 3600 %}
+              {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
+              {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+              {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %}
+              {% set per_h = need / hours if hours > 0 else 0 %}
+              {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
+              {% set start_save = start - timedelta(hours=hours_before) %}
+              {{ now() >= start_save and now() < start and batt > need + buffer }}
+            {% endif %}
+
+# CALCULATES HOW THE BATTERY SHOULD DISCHARGE 00-12
+  - trigger:
+      - trigger: state
+        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
+        to: 'on'
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now()).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now() - timedelta(minutes=30)).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now() - timedelta(hours=1)).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+      - trigger: template
+        value_template: >
+          {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+          {% if ' - ' not in raw %}
+            false
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set diff_min = (start - now() - timedelta(hours=2)).total_seconds() / 60 %}
+            {{ 0 <= diff_min < 1 }}
+          {% endif %}
+    sensor:
+      - name: "sem_battery_use_interval_2"
+        unique_id: sem_battery_use_interval_2
+        state: >           
+          {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+          {% if ' - ' not in raw %}
+            unknown
+          {% else %}
+            {% set start = as_datetime(raw.split(' - ')[0]) %}
+            {% set end   = as_datetime(raw.split(' - ')[1]) %}
+
+            {% set hours = (end - start).total_seconds() / 3600 %}
+
+            {% set need   = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
+            {% set batt   = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
+            {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %}
+
+            {% if hours <= 0 or need <= 0 %}
+              {{ start.isoformat() }} - {{ end.isoformat() }}
+            {% else %}
+              {% set per_h = need / hours %}
+              {% set usable = batt - buffer %}
+
+              {% if usable <= 0 %}
+                {{ end.isoformat() }} - {{ end.isoformat() }}
+              {% else %}
+                {% set max_hours = usable / per_h %}
+                {% set delta = max_hours - hours %}
+                {% set shift = delta / 2 %}
+
+                {% set new_start = start - timedelta(hours=shift) %}
+                {% set new_end   = end   + timedelta(hours=shift) %}
+
+                {{ new_start.isoformat() }} - {{ new_end.isoformat() }}
+              {% endif %}
+            {% endif %}
+          {% endif %}
 
 # BUILDS A NORDPOOL SENSOR WITH THE OFFICIAL INTEGRATION
   - trigger:
