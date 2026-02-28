@@ -681,8 +681,7 @@ automation:
                 target:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
-                  value: >
-                    {{ (states('sensor.sem_house_power') | float(0)) * 1000 }}
+                  value: 0
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_ev_charging_protection_status
@@ -914,8 +913,8 @@ automation:
         entity_id: input_boolean.sem_ev_charged_today
 
 
-# EXPENSIVE WINDOW BETWEEN 12-24
-  - alias: "SEM - Waitmode before expensive interval 12-24"
+# BATTERY USE BETWEEN 12-00
+  - alias: "SEM - Battery use between 12-00"
     triggers:
       - trigger: time_pattern
         minutes: "/15" 
@@ -938,22 +937,16 @@ automation:
         before: "23:59:59"
     action:
       - choose:
-          # 1a. PRE-INTERVAL: CONTROL WAITMODE BEFORE EXPENSIVE INTERVAL
+          # PRE-INTERVAL: CONTROL DISCHARGE BATTERY BEFORE BATTERY INTERVAL
           - conditions:
               - condition: template
                 value_template: >
-                  {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+                  {% set raw = states('sensor.sem_battery_use_interval_1') %}
                   {% if ' - ' not in raw %}
-                    Ingen giltig prisintervall
+                    false
                   {% else %}
-                  {% set start = as_datetime(raw.split(' - ')[0]) %}
-                  {% set end = as_datetime(raw.split(' - ')[1]) %}
-                  {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
-                  {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
-                  {% set before_peak = now() < start %}
-                  {% set not_enough_energy = batt <= need + buffer %}
-                  {{ before_peak and not_enough_energy }}
+                    {% set start = as_datetime(raw.split(' - ')[0]) %}
+                    {{ now() < start }}
                   {% endif %}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
@@ -970,85 +963,16 @@ automation:
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
-
-          # 1b. PRE-INTERVAL CONSTROL DISCHARGE BEFORE EXPENSIVE
+          # USE-INTERVAL: ALLOWS DISCHARGE IN BATTERY INTERVAL
           - conditions:
               - condition: template
                 value_template: >
-                  {% set raw = states('sensor.sem_relative_expensive_price_1') %}
+                  {% set raw = states('sensor.sem_battery_use_interval_1') %}
                   {% if ' - ' not in raw %}
-                    Ingen giltig prisintervall
-                  {% else %}
-                  {% set start = as_datetime(raw.split(' - ')[0]) %}
-                  {% set end = as_datetime(raw.split(' - ')[1]) %}
-                  {% set hours = (end - start).total_seconds() / 3600 %}
-                  {% set need = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %}
-                  {% set per_h = need / hours if hours > 0 else 0 %}
-                  {% set batt = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
-                  {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
-                  {% set start_save = start - timedelta(hours=hours_before) %}
-
-                  {{ now() >= start_save and now() < start and batt > need + buffer }}
-
-                  {% endif %}
-              - condition: state
-                entity_id: input_boolean.sem_battery_cheap_mode
-                state: "off"
-              - condition: state
-                entity_id: input_boolean.sem_battery_save
-                state: "on"
-            sequence:
-              - action: number.set_value
-                target:
-                  entity_id: number.batteries_maximum_discharging_power
-                data:
-                  value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
-              - action: input_boolean.turn_off
-                target:
-                  entity_id: input_boolean.sem_battery_save
-
-
-          # 2. INTERVAL: ALLOWS DISCHARGE WHEN IN EXPENSIVE INTERVAL
-          - conditions:
-              - condition: template
-                value_template: >
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_1') %}
-                  {% set now_dt = now() %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
-                    {% set interval_end = as_datetime(raw_interval.split(' - ')[1]) %}
-                    {{ now_dt >= interval_start and now_dt <= interval_end }}
-                  {% else %}
                     false
-                  {% endif %}
-              - condition: state
-                entity_id: input_boolean.sem_battery_cheap_mode
-                state: "off"
-              - condition: state
-                entity_id: input_boolean.sem_battery_save
-                state: "on"
-            sequence:
-              - action: number.set_value
-                target:
-                  entity_id: number.batteries_maximum_discharging_power
-                data:
-                  value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
-              - action: input_boolean.turn_off
-                target:
-                  entity_id: input_boolean.sem_battery_save
-
-          # 3. POST-INTERVAL: RESETS WAITMODE AFTER EXPENSIVE INTEREVAL
-          - conditions:
-              - condition: template
-                value_template: >
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_1') %}
-                  {% set now_dt = now() %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_end = as_datetime(raw_interval.split(' - ')[1]) %}
-                    {{ now_dt > interval_end }}
                   {% else %}
-                    false
+                    {% set start = as_datetime(raw.split(' - ')[0]) %}
+                    {{ now() >= start }}
                   {% endif %}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
@@ -1062,7 +986,6 @@ automation:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
                   value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
-
               - action: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.sem_battery_save
@@ -1071,8 +994,8 @@ automation:
 
 
 
-# EXPENSIVE WINDOW BETWEEN 00-12
-  - alias: "SEM - Waitmode before expensive interval 00-12"
+# BATTERY USE BETWEEN 00-12
+  - alias: "SEM - Battery use between 00-12"
     triggers:
       - trigger: time_pattern
         minutes: "/15" 
@@ -1095,22 +1018,16 @@ automation:
         before: "12:00:00"
     action:
       - choose:
-          # 1a. PRE-INTERVAL: CONTROL WAITMODE BEFORE EXPENSIVE INTERVAL
+          # PRE-INTERVAL: CONTROL DISCHARGE BATTERY BEFORE BATTERY INTERVAL
           - conditions:
               - condition: template
                 value_template: >
-                  {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+                  {% set raw = states('sensor.sem_battery_use_interval_2') %}
                   {% if ' - ' not in raw %}
-                    Ingen giltig prisintervall
+                    false
                   {% else %}
-                  {% set start = as_datetime(raw.split(' - ')[0]) %}
-                  {% set end = as_datetime(raw.split(' - ')[1]) %}
-                  {% set need = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
-                  {% set batt = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
-                  {% set before_peak = now() < start %}
-                  {% set not_enough_energy = batt <= need + buffer %}
-                  {{ before_peak and not_enough_energy }}
+                    {% set start = as_datetime(raw.split(' - ')[0]) %}
+                    {{ now() < start }}
                   {% endif %}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
@@ -1127,58 +1044,16 @@ automation:
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
-
-          # 1b. PRE-INTERVAL CONSTROL DISCHARGE BEFORE EXPENSIVE
-          - conditions:
+          # USE-INTERVAL: ALLOWS DISCHARGE IN BATTERY INTERVAL
+          - conditions:        
               - condition: template
                 value_template: >
-                  {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+                  {% set raw = states('sensor.sem_battery_use_interval_2') %}
                   {% if ' - ' not in raw %}
-                    Ingen giltig prisintervall
-                  {% else %}
-                  {% set start = as_datetime(raw.split(' - ')[0]) %}
-                  {% set end = as_datetime(raw.split(' - ')[1]) %}
-                  {% set hours = (end - start).total_seconds() / 3600 %}
-                  {% set need = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
-                  {% set per_h = need / hours if hours > 0 else 0 %}
-                  {% set batt = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
-                  {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.05 %}
-                  {% set hours_before = max(0, (batt - buffer - need) / per_h) if per_h > 0 else 0 %}
-                  {% set start_save = start - timedelta(hours=hours_before) %}
-
-                  {{ now() >= start_save and now() < start and batt > need + buffer }}
-
-                  {% endif %}
-              - condition: state
-                entity_id: input_boolean.sem_battery_cheap_mode
-                state: "off"
-              - condition: state
-                entity_id: input_boolean.sem_battery_save
-                state: "on"
-            sequence:
-              - action: number.set_value
-                target:
-                  entity_id: number.batteries_maximum_discharging_power
-                data:
-                  value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
-              - action: input_boolean.turn_off
-                target:
-                  entity_id: input_boolean.sem_battery_save
-
-
-
-          # 2. INTERVAL: ALLOWS DISCHARGE WHEN IN EXPENSIVE INTERVAL
-          - conditions:
-              - condition: template
-                value_template: >
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_2') %}
-                  {% set now_dt = now() %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_start = as_datetime(raw_interval.split(' - ')[0]) %}
-                    {% set interval_end = as_datetime(raw_interval.split(' - ')[1]) %}
-                    {{ now_dt >= interval_start and now_dt <= interval_end }}
-                  {% else %}
                     false
+                  {% else %}
+                    {% set start = as_datetime(raw.split(' - ')[0]) %}
+                    {{ now() >= start }}
                   {% endif %}
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
@@ -1196,33 +1071,7 @@ automation:
                 target:
                   entity_id: input_boolean.sem_battery_save
 
-          # 3. POST-INTERVAL: RESETS WAITMODE AFTER EXPENSIVE INTEREVAL
-          - conditions:
-              - condition: template
-                value_template: >
-                  {% set raw_interval = states('sensor.sem_relative_expensive_price_2') %}
-                  {% set now_dt = now() %}
-                  {% if ' - ' in raw_interval %}
-                    {% set interval_end = as_datetime(raw_interval.split(' - ')[1]) %}
-                    {{ now_dt > interval_end }}
-                  {% else %}
-                    false
-                  {% endif %}
-              - condition: state
-                entity_id: input_boolean.sem_battery_save
-                state: "on"
-              - condition: state
-                entity_id: input_boolean.sem_battery_cheap_mode
-                state: "off"
-            sequence:
-              - action: number.set_value
-                target:
-                  entity_id: number.batteries_maximum_discharging_power
-                data:
-                  value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
-              - action: input_boolean.turn_off
-                target:
-                  entity_id: input_boolean.sem_battery_save
+
 
   - alias: "SEM - New user"
     triggers:
