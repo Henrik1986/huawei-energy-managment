@@ -57,6 +57,9 @@ sections:
             state_content:
               - name
               - state
+        tap_action:
+          action: navigate
+          navigation_path: "#system_plan"
       - type: custom:vertical-stack-in-card
         cards:
           - type: custom:apexcharts-card
@@ -313,11 +316,11 @@ sections:
                   extremas: false
                   in_brush: false
                   in_legend: true
-              - entity: sensor.sem_relative_expensive_price_1
+              - entity: sensor.sem_battery_use_interval_1
                 yaxis_id: charge/expensive
-                name: Pristopp
-                opacity: 0.7
-                color: pink
+                name: Prioterad batteridrift
+                opacity: 0.4
+                color: lime
                 type: area
                 data_generator: |
                   const data = [];
@@ -340,11 +343,11 @@ sections:
                   extremas: false
                   in_brush: false
                   in_legend: true
-              - entity: sensor.sem_relative_expensive_price_2
+              - entity: sensor.sem_battery_use_interval_2
                 yaxis_id: charge/expensive
-                name: Pristopp
-                opacity: 0.7
-                color: pink
+                name: Prioterad batteridrift
+                opacity: 0.4
+                color: lime
                 type: area
                 data_generator: |
                   const data = [];
@@ -421,8 +424,10 @@ sections:
                   extremas: false
                   in_brush: false
                   in_legend: false
+          - type: custom:vertical-stack-in-card
+            cards: []
         grid_options:
-          columns: 24
+          columns: full
           rows: auto
     column_span: 2
   - type: grid
@@ -648,7 +653,7 @@ sections:
                 type: custom:vertical-stack-in-card
                 cards:
                   - type: markdown
-                    content: |2+
+                    content: |2
                         {% set interval = states('sensor.sem_battery_charge_window_cheapest_2') %}
                         {% set energy = states('sensor.sem_battery_charge_energy_2_1b') %}
                         {% if ' - ' in interval %}
@@ -666,12 +671,9 @@ sections:
                         {% else %}
                           Ingen tid tillgänglig  
                         {% endif %}
-
-            grid_options:
-              columns: 12
-              rows: 1
-            view_layout:
-              position: sidebar
+                    tap_action:
+                      action: navigate
+                      navigation_path: "#settings"
           - type: conditional
             conditions: []
             card:
@@ -704,398 +706,12 @@ sections:
                         {% else %}
                           Ingen tid tillgänglig  
                         {% endif %}
-            view_layout:
-              position: sidebar
-  - type: grid
-    cards:
-      - type: vertical-stack
-        cards:
-          - type: heading
-            icon: mdi:account
-            heading: Mitt system
-            heading_style: title
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#settings"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: mdi:text-box
-                heading_style: subtitle
-                heading: Version
-              - type: tile
-                entity: sensor.sem_version
-                name: Installerad version
-                icon: mdi:laptop
-                vertical: false
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-                features_position: bottom
-              - type: tile
-                entity: sensor.sem_github_latest_release
-                name: Senaste version på Github
-                icon: mdi:github
-                vertical: false
-                tap_action:
-                  action: none
-                icon_tap_action:
-                  action: none
-                features_position: bottom
-          - type: conditional
-            conditions:
-              - condition: state
-                entity: input_boolean.manual_update_packages
-                state: "off"
-            card:
-              type: custom:vertical-stack-in-card
-              cards:
-                - type: heading
-                  icon: mdi:update
-                  heading: Uppdatera
-                  heading_style: subtitle
-                - type: tile
-                  entity: input_boolean.manual_update_packages
-                  name: Uppdatera
-                  icon: mdi:cloud-download
-                  color: indigo
-                  hide_state: true
-                  vertical: true
-                  tap_action:
-                    action: toggle
-                  icon_tap_action:
-                    action: toggle
-                  features_position: bottom
-                - type: markdown
-                  content: >-
-                    **ℹ️Information**
-
-                    Uppdatera systemet genom att klicka på uppdatera. Då laddas
-                    och installeras den senste versionen. **Starta om Home
-                    Assistant efter installationen.**
-                  text_only: true
-          - type: conditional
-            conditions:
-              - condition: state
-                entity: input_boolean.sem_download
-                state: "on"
-            card:
-              type: custom:vertical-stack-in-card
-              cards:
-                - type: heading
-                  icon: mdi:update
-                  heading: Uppdatera
-                  heading_style: subtitle
-                - type: tile
-                  entity: input_boolean.sem_download
-                  name: Vänligen vänta ...
-                  icon: mdi:clock-time-eight-outline
-                  color: amber
-                  hide_state: true
-                  vertical: true
-                  tap_action:
-                    action: none
-                  icon_tap_action:
-                    action: none
-                  features_position: bottom
-                - type: markdown
-                  content: >-
-                    **ℹ️Information**
-
-                    Den senaste versionen laddas hem och installeras - Vänligen
-                    vänta ...
-                  text_only: true
-          - type: conditional
-            conditions:
-              - condition: state
-                entity: input_boolean.sem_download_finished
-                state: "on"
-            card:
-              type: custom:vertical-stack-in-card
-              cards:
-                - type: heading
-                  icon: mdi:update
-                  heading: Uppdatera
-                  heading_style: subtitle
-                - type: tile
-                  entity: input_boolean.sem_download_finished
-                  name: Färdigt
-                  icon: mdi:check-circle-outline
-                  color: green
-                  hide_state: true
-                  vertical: true
-                  tap_action:
-                    action: none
-                  icon_tap_action:
-                    action: none
-                  features_position: bottom
-                - type: markdown
-                  content: >-
-                    **ℹ️Information**
-
-                    Uppdateringen färdig ✅ 
-
-
-                    För att slutföra måste du starta om Home Assistant. 
-
-
-                    💻 Uppdatera även hemvyn genom att klistra in koden från
-                    filen admin_view via github. 
-                  text_only: true
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: mdi:account-cog
-                heading: "Konfigurera "
-                heading_style: subtitle
-              - type: tile
-                entity: input_button.sem_config_1
-                name: Konfiguera
-                icon: mdi:cog
-                color: green
-                hide_state: true
-                vertical: true
-                tap_action:
-                  action: navigate
-                  navigation_path: "#config_1"
-                icon_tap_action:
-                  action: navigate
-                  navigation_path: "#config_1"
-                features_position: bottom
-              - type: markdown
-                content: >-
-                  **ℹ️Information**
-
-                  Anpassa systemet till din anläggning och din plats. Observera
-                  att systemet behöver minst **sju dagar** för att
-                  energiberäkningarna ska stå i relation till  verkligheten.   
-                text_only: true
-          - type: heading
-            icon: mdi:face-agent
-            heading_style: title
-            heading: Support
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: mdi:account-tag
-                heading: Användarkod
-                heading_style: subtitle
-              - type: tile
-                entity: input_button.sem_buy_key
-                name: Köp användarkod
-                icon: mdi:key-chain-variant
-                color: deep-orange
-                hide_state: true
-                vertical: true
-                tap_action:
-                  action: navigate
-                  navigation_path: "#buy_key"
-                icon_tap_action:
-                  action: navigate
-                  navigation_path: "#buy_key"
-                features_position: bottom
-              - type: markdown
-                content: >-
-                  **ℹ️Information**  
-
-                  Köp din användarkod genom att klicka på knappen **köp
-                  användarkod**.
-                text_only: true
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: mdi:code-json
-                heading_style: subtitle
-                heading: Kontakta utvecklaren
-              - type: markdown
-                content: >-
-                  🪲[Anmäl ett
-                  fel](https://github.com/Henrik1986/huawei-energy-managment/issues)
-                  på Github. 
-
-                  ✨Önska [ny
-                  funktion](https://github.com/Henrik1986/huawei-energy-managment/discussions)
-                  på Github
-      - type: vertical-stack
-        cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#buy_key"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              action: navigate
-              navigation_path: "#settings"
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: mdi:key-chain
-                heading: Köp användarkod
-                heading_style: title
-              - type: markdown
-                content: >-
-                  **Hej,**
-
-
-                  Kul att du vill prova mitt paket för att styra ditt
-                  Huawei-system.
-
-                  Detta är ett hobbyprojekt, men för att kunna vidareutveckla
-                  systemet och erbjuda ett modernt och lokalt sätt att styra
-                  ditt Huawei-system krävs en användarkod. Priset är **399 kr
-                  per år.**
-
-
-                  För att få en användarkod fyller du i för- och efternamn samt
-                  din epost och klickar på ansök. När jag fått din ansökan
-                  kommer jag höra av mig till dig. 
-
-
-                  Är du osäker på om paketet passar dig? Då kan du få en demokod
-                  som gäller i 30 dagar. 
-
-
-                  Vänligen,
-
-                  Henrik
-              - type: conditional
-                conditions:
-                  - condition: state
-                    entity: input_boolean.sem_submit_user_info
-                    state: "off"
-                card:
-                  type: custom:vertical-stack-in-card
-                  cards:
-                    - type: heading
-                      icon: mdi:form-select
-                      heading: Ansök om användarkod
-                      heading_style: subtitle
-                    - type: conditional
-                      conditions:
-                        - condition: state
-                          entity: input_boolean.sem_submit_user_info
-                          state: "off"
-                      card:
-                        type: entities
-                        entities:
-                          - entity: input_text.sem_name
-                            name: För- och efternamn
-                            icon: mdi:account
-                          - entity: input_text.sem_epost
-                            icon: mdi:email
-                    - type: tile
-                      entity: input_boolean.sem_submit_user_info
-                      name: Ansök
-                      icon: mdi:email-fast
-                      hide_state: true
-                      vertical: true
-                      features_position: bottom
-              - type: conditional
-                conditions:
-                  - condition: state
-                    entity: input_boolean.sem_submit_user_info
-                    state: "on"
-                card:
-                  type: custom:vertical-stack-in-card
-                  cards:
-                    - type: heading
-                      icon: mdi:check-circle
-                      heading: Din ansökan är inskickad
-                      heading_style: title
-                    - type: markdown
-                      content: >-
-                        Vidare instruktioner kommer att skickas till din angivna
-                        epost. Tack för att du stöttar mitt arbete. 
-
-
-                        Vänligen, 
-
-                        Henrik
-                      text_only: true
-      - type: vertical-stack
-        cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#settings_fast"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
-          - type: heading
-            icon: mdi:order-bool-descending
-            heading: Snabbval
-            heading_style: title
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: ""
-                heading_style: subtitle
-                heading: "Ladda manuellt "
-              - type: entities
-                entities:
-                  - entity: input_number.sem_max_charge_manual_charging
-                    name: Laddningseffekt
-                    icon: mdi:lightning-bolt-circle
-                    secondary_info: none
                     tap_action:
-                      action: nothing
-                    icon_tap_action:
-                      action: nothing
-                  - entity: input_number.sem_manual_charge_duration
-                    icon: mdi:clock
-                    tap_action:
-                      action: nothing
-                    icon_tap_action:
-                      action: nothing
-                  - entity: input_boolean.sem_manual_charge
-                    icon: mdi:power-plug-battery
-                    name: Ladda nu
-                    tap_action:
-                      action: nothing
-                    icon_tap_action:
-                      action: nothing
-                show_header_toggle: false
-              - type: markdown
-                content: >-
-                  **ℹ️Information**
-
-                  Under **ladda manuellt** kan du starta en laddning på egen
-                  hand. Välj laddningseffekt och tid för att sen aktivera
-                  laddningen genom reglaget på **ladda nu**.
-              - type: heading
-                icon: ""
-                heading_style: subtitle
-                heading: Extra kWh
-              - type: entities
-                entities:
-                  - entity: input_number.extra_1
-                    name: Tillfälle 1 (9-16)
-                    icon: mdi:battery-plus
-                    secondary_info: none
-                    tap_action:
-                      action: nothing
-                    icon_tap_action:
-                      action: nothing
-                  - entity: input_number.extra_2
-                    name: Tillfälle 2 (23-05)
-                    icon: mdi:battery-plus
-                    tap_action:
-                      action: nothing
-                    icon_tap_action:
-                      action: nothing
-              - type: markdown
-                content: >-
-                  **ℹ️Information**
-
-                  Under **extra kWh** kan du lägga till extra kWh på ett
-                  laddningstillfälle. Detta kan vara användbart om du vill ladda
-                  mer än vad systemet föreslår. 
+                      action: navigate
+                      navigation_path: "#settings"
+            grid_options:
+              columns: 12
+              rows: 1
   - type: grid
     cards:
       - type: vertical-stack
@@ -1163,6 +779,10 @@ sections:
 
                   {% set e6 = 'select.batteries_working_mode' %}
 
+                  {% set e7 = 'number.batteries_grid_charge_maximum_power' %}
+
+                  {% set e8 = 'number.batteries_maximum_discharging_power' %}
+
 
                   {# Hämta states #}
 
@@ -1178,20 +798,31 @@ sections:
 
                   {% set s6 = states(e6) %}
 
+                  {% set s7 = states(e7) %}
+
+                  {% set s8 = states(e8) %}
+
 
                   {# Definiera vad som räknas som otillgängligt #}
 
                   {% set bad = ['unknown', 'unavailable', '', None] %}
 
 
-                  {# Räkna antal otillgängliga utan append() #}
+                  {# Räkna antal otillgängliga #}
 
-                  {% set cnt = ((s1 in bad) | int) + ((s2 in bad) | int) + ((s3
-                  in bad) | int) + ((s4 in bad) | int) + ((s5 in bad) | int) +
-                  ((s6 in bad) | int) %}
+                  {% set cnt =
+                    ((s1 in bad) | int) +
+                    ((s2 in bad) | int) +
+                    ((s3 in bad) | int) +
+                    ((s4 in bad) | int) +
+                    ((s5 in bad) | int) +
+                    ((s6 in bad) | int) +
+                    ((s7 in bad) | int) +
+                    ((s8 in bad) | int)
+                  %}
 
 
-                  {# Utdatat: endast otillgängliga enheter #}
+                  {# Utdatat #}
 
                   {% if cnt == 0 %}
 
@@ -1205,19 +836,24 @@ sections:
 
                   ❌ Enheter saknas eller har felaktigt namn ({{ cnt }})
 
-                  {% if s1 in bad %}- {{ e1 }} {% endif %}
+                  {% if s1 in bad %}- {{ e1 }}{% endif %}
 
-                  {% if s2 in bad %}- {{ e2 }} {% endif %}
+                  {% if s2 in bad %}- {{ e2 }}{% endif %}
 
-                  {% if s3 in bad %}- {{ e3 }} {% endif %}
+                  {% if s3 in bad %}- {{ e3 }}{% endif %}
 
-                  {% if s4 in bad %}- {{ e4 }} {% endif %}
+                  {% if s4 in bad %}- {{ e4 }}{% endif %}
 
-                  {% if s5 in bad %}- {{ e5 }} {% endif %}
+                  {% if s5 in bad %}- {{ e5 }}{% endif %}
 
-                  {% if s6 in bad %}- {{ e6 }} {% endif %}
+                  {% if s6 in bad %}- {{ e6 }}{% endif %}
+
+                  {% if s7 in bad %}- {{ e7 }}{% endif %}
+
+                  {% if s8 in bad %}- {{ e8 }}{% endif %}
 
                   {% endif %}
+
 
 
                   {% if states('weather.smhi_home') not in ['unknown',
@@ -2181,52 +1817,99 @@ sections:
             heading: Batteriet
           - type: custom:vertical-stack-in-card
             cards:
-              - square: false
-                type: grid
-                cards:
-                  - type: tile
-                    entity: sensor.sem_battery_mode
-                    name: Arbetsläge
-                    icon: mdi:auto-mode
-                    color: indigo
-                    hide_state: false
-                    vertical: false
-                    tap_action:
-                      action: navigate
-                      navigation_path: "#battery"
-                    icon_tap_action:
-                      action: navigate
-                      navigation_path: "#battery"
-                    features_position: bottom
-                  - type: tile
-                    entity: sensor.batteries_charge_discharge_power
-                    name: Batteri
-                    icon: mdi:battery-charging-100
-                    color: indigo
-                    vertical: false
-                    tap_action:
-                      action: navigate
-                      navigation_path: "#battery"
-                    icon_tap_action:
-                      action: navigate
-                      navigation_path: "#battery"
-                    features_position: inline
-                  - type: tile
-                    entity: sensor.batteries_state_of_capacity
-                    name: Nivå
-                    icon: mdi:battery
-                    color: indigo
-                    show_entity_picture: false
-                    hide_state: false
-                    vertical: false
-                    tap_action:
-                      action: navigate
-                      navigation_path: "#battery"
-                    icon_tap_action:
-                      action: navigate
-                      navigation_path: "#battery"
-                    features_position: inline
-                columns: 3
+              - type: heading
+                icon: mdi:clock
+                heading_style: subtitle
+                heading: Senaste dygnet
+              - type: custom:apexcharts-card
+                update_interval: 5 min
+                graph_span: 24h
+                header:
+                  title: Batteri
+                  show: false
+                  show_states: true
+                  colorize_states: true
+                hours_12: false
+                stacked: false
+                experimental:
+                  color_threshold: true
+                yaxis:
+                  - id: batteri_capacity
+                    opposite: false
+                    show: true
+                    decimals: 1
+                    min: 0
+                    apex_config:
+                      title:
+                        text: Procent
+                series:
+                  - entity: sensor.batteries_state_of_capacity
+                    type: area
+                    name: SOC
+                    stroke_width: 1
+                    opacity: 0.6
+                    yaxis_id: batteri_capacity
+                    color: blue
+                    color_threshold:
+                      - value: 0
+                        color: "#cce5ff"
+                      - value: 2
+                        color: "#3399ff"
+                      - value: 5
+                        color: "#003366"
+                    group_by:
+                      duration: 15m
+                      func: last
+                apex_config:
+                  chart:
+                    height: 190px
+                    animations:
+                      enabled: true
+                      easing: easeinout
+                      speed: 800
+                      animateGradually:
+                        enabled: true
+                        delay: 150
+                  legend:
+                    show: true
+                    floating: false
+                    offsetY: 5
+                    position: bottom
+                    fontSize: 10px
+                  tooltip:
+                    enabled: false
+                  xaxis:
+                    labels:
+                      show: true
+                      rotate: 0
+                      rotateAlways: true
+                      logarithmic: false
+                  stroke:
+                    width: 1
+                  plotOptions:
+                    candlestick:
+                      colors:
+                        upward: "#00B746"
+                        downward: "#EF403C"
+                      wick:
+                        useFillColor: true
+                  grid:
+                    show: true
+                    strokeDashArray: 1
+                    position: front
+                    xaxis:
+                      lines:
+                        show: false
+                all_series_config:
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    in_brush: false
+                  float_precision: 3
+                  invert: false
+                  fill_raw: last
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: entities
                 entities:
                   - entity: select.batteries_working_mode
@@ -2627,6 +2310,1281 @@ sections:
                   system**. På hemskärmens kan du se om den smarta funktionen är
                   aktiv. 
                 text_only: true
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#charge_information_1"
+            show_header: false
+          - type: heading
+            icon: mdi:battery-clock
+            heading: Nästa laddning
+            heading_style: title
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: custom:mushroom-template-card
+                primary: >
+                  {% set raw =
+                  states('sensor.sem_battery_charge_window_cheapest_1a') %}
+
+                  {% set start, end = (raw.split(' - ') if raw and ' - ' in raw
+                  else [None, None]) %}
+
+                  {% if start and end %}
+                    Nästa laddning {{ start[11:16] }}–{{ end[11:16] }}
+                  {% else %}
+                    Ingen giltig laddningstid
+                  {% endif %}
+                icon: mdi:battery-clock
+                icon_color: >
+                  {% set now = now() %}
+
+                  {% set raw =
+                  states('sensor.sem_battery_charge_window_cheapest_1a') %}
+
+                  {% set start, end = (raw.split(' - ') if raw and ' - ' in raw
+                  else [None, None]) %}
+
+                  {% set end_dt = as_datetime(end) if end else none %}
+
+
+                  {% set energy = 0 %}
+
+                  {% if end_dt and now <= (end_dt + timedelta(minutes=30)) %}
+                    {% set energy = states('sensor.sem_battery_charge_energy_1a_2') | float %}
+                  {% endif %}
+
+
+                  {% if energy <= 5 %}
+                    green
+                  {% elif energy <= 10 %}
+                    orange
+                  {% else %}
+                    red
+                  {% endif %}
+                grid_options:
+                  columns: 12
+                  rows: 2
+                secondary: >+
+                  {% set now = now() %}
+
+                  {% set raw =
+                  states('sensor.sem_battery_charge_window_cheapest_1a') %}
+
+                  {% set start, end = (raw.split(' - ') if raw and ' - ' in raw
+                  else [None, None]) %}
+
+                  {% set end_dt = as_datetime(end) if end else none %}
+
+                  {% set tomorrow_prices =
+                  states('binary_sensor.sem_nordpool_tomorrow_prices_available')
+                  %}
+
+
+                  {% if end_dt and now <= (end_dt + timedelta(minutes=30)) %}
+                    {{ states('sensor.sem_battery_charge_energy_1a_2') }} kWh
+                  {% elif tomorrow_prices == 'off' %}
+                    Beräknar energibehovet
+                  {% else %}
+                    {{ states('sensor.sem_battery_charge_energy_1a_2') }} kWh
+                  {% endif %}
+
+                layout: vertical
+                multiline_secondary: true
+                fill_container: false
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+              - type: markdown
+                content: >+
+                  <center><ha-icon icon="mdi:battery-charging"></ha-icon>
+                  Energibehov:
+                  {{(state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval')
+                  +
+                  state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval')
+                  +
+                  state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity')
+                  +
+                  state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge'))
+                  | round(2) }} kWh
+
+
+                  <i>Soltimmar:
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval')
+                  }} kWh </i>
+
+                  <i>Solfria timmar:
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval')
+                  }} kWh </i>
+
+                  <i>Superbilligt:
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge')
+                  }} kWh </i>
+
+                  <i>Buffert:
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity')
+                  }} kWh </i>
+
+
+                  <ha-icon icon="mdi:solar-power-variant"></ha-icon> Solel:
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2',
+                  'estimated_solar_energy') | round(2) }} kWh 
+
+
+                  <ha-icon icon="mdi:home-battery"></ha-icon> Batterikapacitet:
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2',
+                  'battery_capacity') | round(2) }} kWh
+
+
+                  ---------------------------------------------
+
+                  <ha-icon icon="mdi:calculator"></ha-icon>  Beräkning nästa
+                  laddning (kWh)
+
+                  =
+                  ({{state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval')
+                  }} + (
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval')
+                  }}  - {{state_attr('sensor.sem_battery_charge_energy_1a_2',
+                  'estimated_solar_energy') | round(2) }} )  +
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2',
+                  'battery_capacity') | round(2) }} -
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2',
+                  'battery_capacity') | round(2) }}) +
+                  {{state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge')
+                  }}
+
+
+                  <b>Förklaring</b>
+
+                  <i> Energibehovet för solfria timmar isoleras och
+                  energibehovet för soltimmar beräknas i relation till prognosen
+                  för solel. Är solelen större än energibehovet för soltimmarna
+                  är summan 0 kWh. Bufferten läggs till och slutligen dras
+                  aktuell batterinivå av vilket inkluderar den totala mängden
+                  sparad el för att beräkna nästa laddning.</i>  
+
+
+
+  - type: grid
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: heading
+            icon: mdi:account
+            heading: Mitt system
+            heading_style: title
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#settings"
+            show_header: false
+            background_update: false
+            width_desktop: 600px
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:text-box
+                heading_style: subtitle
+                heading: Version
+              - type: tile
+                entity: sensor.sem_version
+                name: Installerad version
+                icon: mdi:laptop
+                vertical: false
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+                features_position: bottom
+              - type: tile
+                entity: sensor.sem_github_latest_release
+                name: Senaste version på Github
+                icon: mdi:github
+                vertical: false
+                tap_action:
+                  action: none
+                icon_tap_action:
+                  action: none
+                features_position: bottom
+              - type: markdown
+                content: >-
+                  Läs mer om den senaste versionen
+                  [här](https://github.com/Henrik1986/huawei-energy-managment/releases).
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.manual_update_packages
+                state: "off"
+            card:
+              type: custom:vertical-stack-in-card
+              cards:
+                - type: heading
+                  icon: mdi:update
+                  heading: Uppdatera
+                  heading_style: subtitle
+                - type: tile
+                  entity: input_boolean.manual_update_packages
+                  name: Uppdatera
+                  icon: mdi:cloud-download
+                  color: indigo
+                  hide_state: true
+                  vertical: true
+                  tap_action:
+                    action: toggle
+                  icon_tap_action:
+                    action: toggle
+                  features_position: bottom
+                - type: markdown
+                  content: >-
+                    **ℹ️Information**
+
+                    Uppdatera systemet genom att klicka på uppdatera. Då laddas
+                    och installeras den senste versionen. **Starta om Home
+                    Assistant efter installationen.**
+                  text_only: true
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.sem_download
+                state: "on"
+            card:
+              type: custom:vertical-stack-in-card
+              cards:
+                - type: heading
+                  icon: mdi:update
+                  heading: Uppdatera
+                  heading_style: subtitle
+                - type: tile
+                  entity: input_boolean.sem_download
+                  name: Vänligen vänta ...
+                  icon: mdi:clock-time-eight-outline
+                  color: amber
+                  hide_state: true
+                  vertical: true
+                  tap_action:
+                    action: none
+                  icon_tap_action:
+                    action: none
+                  features_position: bottom
+                - type: markdown
+                  content: >-
+                    **ℹ️Information**
+
+                    Den senaste versionen laddas hem och installeras - Vänligen
+                    vänta ...
+                  text_only: true
+          - type: conditional
+            conditions:
+              - condition: state
+                entity: input_boolean.sem_download_finished
+                state: "on"
+            card:
+              type: custom:vertical-stack-in-card
+              cards:
+                - type: heading
+                  icon: mdi:update
+                  heading: Uppdatera
+                  heading_style: subtitle
+                - type: tile
+                  entity: input_boolean.sem_download_finished
+                  name: Färdigt
+                  icon: mdi:check-circle-outline
+                  color: green
+                  hide_state: true
+                  vertical: true
+                  tap_action:
+                    action: none
+                  icon_tap_action:
+                    action: none
+                  features_position: bottom
+                - type: markdown
+                  content: >-
+                    **ℹ️Information**
+
+                    Uppdateringen färdig ✅ 
+
+
+                    För att slutföra måste du starta om Home Assistant. 
+
+
+                    💻 Uppdatera även hemvyn genom att klistra in koden från
+                    filen admin_view via github. 
+                  text_only: true
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:account-cog
+                heading: "Konfigurera "
+                heading_style: subtitle
+              - type: tile
+                entity: input_button.sem_config_1
+                name: Konfiguera
+                icon: mdi:cog
+                color: green
+                hide_state: true
+                vertical: true
+                tap_action:
+                  action: navigate
+                  navigation_path: "#config_1"
+                icon_tap_action:
+                  action: navigate
+                  navigation_path: "#config_1"
+                features_position: bottom
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Anpassa systemet till din anläggning och din plats. Observera
+                  att systemet behöver minst **sju dagar** för att
+                  energiberäkningarna ska stå i relation till  verkligheten.   
+                text_only: true
+          - type: heading
+            icon: mdi:face-agent
+            heading_style: title
+            heading: Support
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:account-tag
+                heading: Användarkod
+                heading_style: subtitle
+              - type: tile
+                entity: input_button.sem_buy_key
+                name: Köp användarkod
+                icon: mdi:key-chain-variant
+                color: deep-orange
+                hide_state: true
+                vertical: true
+                tap_action:
+                  action: navigate
+                  navigation_path: "#buy_key"
+                icon_tap_action:
+                  action: navigate
+                  navigation_path: "#buy_key"
+                features_position: bottom
+              - type: markdown
+                content: >-
+                  **ℹ️Information**  
+
+                  Köp din användarkod genom att klicka på knappen **köp
+                  användarkod**.
+                text_only: true
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:code-json
+                heading_style: subtitle
+                heading: Kontakta utvecklaren
+              - type: markdown
+                content: >-
+                  🪲[Anmäl ett
+                  fel](https://github.com/Henrik1986/huawei-energy-managment/issues)
+                  på Github. 
+
+                  ✨Önska [ny
+                  funktion](https://github.com/Henrik1986/huawei-energy-managment/discussions)
+                  på Github
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#buy_key"
+            show_header: false
+            background_update: false
+            width_desktop: 600px
+            close_action:
+              action: navigate
+              navigation_path: "#settings"
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: mdi:key-chain
+                heading: Köp användarkod
+                heading_style: title
+              - type: markdown
+                content: >-
+                  **Hej,**
+
+
+                  Kul att du vill prova mitt paket för att styra ditt
+                  Huawei-system.
+
+                  Detta är ett hobbyprojekt, men för att kunna vidareutveckla
+                  systemet och erbjuda ett modernt och lokalt sätt att styra
+                  ditt Huawei-system krävs en användarkod. Priset är **399 kr
+                  per år.**
+
+
+                  För att få en användarkod fyller du i för- och efternamn samt
+                  din epost och klickar på ansök. När jag fått din ansökan
+                  kommer jag höra av mig till dig. 
+
+
+                  Är du osäker på om paketet passar dig? Då kan du få en demokod
+                  som gäller i 30 dagar. 
+
+
+                  Vänligen,
+
+                  Henrik
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_submit_user_info
+                    state: "off"
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: heading
+                      icon: mdi:form-select
+                      heading: Ansök om användarkod
+                      heading_style: subtitle
+                    - type: conditional
+                      conditions:
+                        - condition: state
+                          entity: input_boolean.sem_submit_user_info
+                          state: "off"
+                      card:
+                        type: entities
+                        entities:
+                          - entity: input_text.sem_name
+                            name: För- och efternamn
+                            icon: mdi:account
+                          - entity: input_text.sem_epost
+                            icon: mdi:email
+                    - type: tile
+                      entity: input_boolean.sem_submit_user_info
+                      name: Ansök
+                      icon: mdi:email-fast
+                      hide_state: true
+                      vertical: true
+                      features_position: bottom
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_submit_user_info
+                    state: "on"
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: heading
+                      icon: mdi:check-circle
+                      heading: Din ansökan är inskickad
+                      heading_style: title
+                    - type: markdown
+                      content: >-
+                        Vidare instruktioner kommer att skickas till din angivna
+                        epost. Tack för att du stöttar mitt arbete. 
+
+
+                        Vänligen, 
+
+                        Henrik
+                      text_only: true
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#settings_fast"
+            show_header: false
+            background_update: false
+            width_desktop: 600px
+            close_action:
+              navigation_path: "#settings"
+          - type: heading
+            icon: mdi:order-bool-descending
+            heading: Snabbval
+            heading_style: title
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: ""
+                heading_style: subtitle
+                heading: "Ladda manuellt "
+              - type: entities
+                entities:
+                  - entity: input_number.sem_max_charge_manual_charging
+                    name: Laddningseffekt
+                    icon: mdi:lightning-bolt-circle
+                    secondary_info: none
+                    tap_action:
+                      action: nothing
+                    icon_tap_action:
+                      action: nothing
+                  - entity: input_number.sem_manual_charge_duration
+                    icon: mdi:clock
+                    tap_action:
+                      action: nothing
+                    icon_tap_action:
+                      action: nothing
+                  - entity: input_boolean.sem_manual_charge
+                    icon: mdi:power-plug-battery
+                    name: Ladda nu
+                    tap_action:
+                      action: nothing
+                    icon_tap_action:
+                      action: nothing
+                show_header_toggle: false
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Under **ladda manuellt** kan du starta en laddning på egen
+                  hand. Välj laddningseffekt och tid för att sen aktivera
+                  laddningen genom reglaget på **ladda nu**.
+              - type: heading
+                icon: ""
+                heading_style: subtitle
+                heading: Extra kWh
+              - type: entities
+                entities:
+                  - entity: input_number.extra_1
+                    name: Tillfälle 1 (9-16)
+                    icon: mdi:battery-plus
+                    secondary_info: none
+                    tap_action:
+                      action: nothing
+                    icon_tap_action:
+                      action: nothing
+                  - entity: input_number.extra_2
+                    name: Tillfälle 2 (23-05)
+                    icon: mdi:battery-plus
+                    tap_action:
+                      action: nothing
+                    icon_tap_action:
+                      action: nothing
+              - type: markdown
+                content: >-
+                  **ℹ️Information**
+
+                  Under **extra kWh** kan du lägga till extra kWh på ett
+                  laddningstillfälle. Detta kan vara användbart om du vill ladda
+                  mer än vad systemet föreslår. 
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#system_plan"
+            show_header: false
+            width_desktop: 700px
+          - type: heading
+            icon: mdi:calendar-clock
+            heading_style: title
+            heading: Systemets driftplan
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: custom:apexcharts-card
+                update_interval: 1 min
+                graph_span: 48h
+                cache: false
+                span:
+                  start: day
+                  offset: +0H
+                header:
+                  title: Systemets driftplan
+                  show: false
+                  show_states: false
+                  colorize_states: true
+                hours_12: false
+                stacked: false
+                experimental:
+                  color_threshold: true
+                yaxis:
+                  - id: spotpris
+                    opposite: false
+                    show: false
+                    decimals: 1
+                    min: 0
+                    apex_config:
+                      title:
+                        text: Elpris (SEK/kWh)
+                  - id: solar_power
+                    opposite: true
+                    show: true
+                    apex_config:
+                      title:
+                        text: Solel (kWh)
+                  - id: charge/expensive
+                    opposite: true
+                    show: false
+                apex_config:
+                  chart:
+                    height: 320
+                    animations:
+                      enabled: true
+                      easing: easeinout
+                      speed: 800
+                      animateGradually:
+                        enabled: true
+                        delay: 150
+                  legend:
+                    show: true
+                    floating: false
+                    offsetY: 5
+                    position: bottom
+                    fontSize: 10px
+                  tooltip:
+                    enabled: true
+                  xaxis:
+                    labels:
+                      show: true
+                      rotate: 0
+                      rotateAlways: true
+                      logarithmic: false
+                      datetimeUTC: false
+                  stroke:
+                    width: 1
+                  plotOptions:
+                    candlestick:
+                      colors:
+                        upward: "#00B746"
+                        downward: "#EF403C"
+                      wick:
+                        useFillColor: true
+                all_series_config:
+                  show:
+                    legend_value: false
+                    datalabels: false
+                    in_brush: false
+                  float_precision: 3
+                  invert: false
+                  fill_raw: last
+                now:
+                  show: true
+                  label: NU
+                  color: red
+                series:
+                  - entity: sensor.sem_battery_charge_window_cheapest_1a
+                    yaxis_id: charge/expensive
+                    name: Laddningsfönster
+                    opacity: 0.7
+                    color: "#00406c"
+                    type: area
+                    data_generator: |
+                      const data = [];
+                      const sensorData = entity.state.split(' - ');
+                      function parseLocalTime(str) {
+                        const parts = str.split(/[- :T]/).map(Number);
+                        const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                        return date.getTime();
+                      }
+                      const startTime = parseLocalTime(sensorData[0]);
+                      const endTime = parseLocalTime(sensorData[1]);
+                      data.push([startTime, 1]);
+                      data.push([startTime, 1]);
+                      data.push([endTime, 1]);
+                      data.push([endTime, 0]);
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: false
+                      in_brush: false
+                      in_legend: true
+                  - entity: sensor.sem_battery_charge_window_cheapest_2
+                    yaxis_id: charge/expensive
+                    name: Laddningsfönster 2
+                    opacity: 0.7
+                    color: "#00406c"
+                    type: area
+                    data_generator: |
+                      const data = [];
+                      const sensorData = entity.state.split(' - ');
+                      function parseLocalTime(str) {
+                        const parts = str.split(/[- :T]/).map(Number);
+                        const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                        return date.getTime();
+                      }
+                      const startTime = parseLocalTime(sensorData[0]);
+                      const endTime = parseLocalTime(sensorData[1]);
+                      data.push([startTime, 1]);
+                      data.push([startTime, 1]);
+                      data.push([endTime, 1]);
+                      data.push([endTime, 0]);
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: false
+                      in_brush: false
+                      in_legend: false
+                  - entity: sensor.sem_battery_cheap_interval_2_1a
+                    yaxis_id: charge/expensive
+                    name: Viloläge
+                    opacity: 0.7
+                    color: "#D3D3D3"
+                    type: area
+                    data_generator: |
+                      const data = [];
+                      const sensorData = entity.state.split(' - ');
+                      function parseLocalTime(str) {
+                        const parts = str.split(/[- :T]/).map(Number);
+                        const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                        return date.getTime();
+                      }
+                      const startTime = parseLocalTime(sensorData[0]);
+                      const endTime = parseLocalTime(sensorData[1]);
+                      data.push([startTime, 0.8]);
+                      data.push([startTime, 0.8]);
+                      data.push([endTime, 0.8]);
+                      data.push([endTime, 0]);
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: false
+                      in_brush: false
+                      in_legend: true
+                  - entity: sensor.sem_battery_cheap_interval_1a_2
+                    yaxis_id: charge/expensive
+                    name: Viloläge
+                    opacity: 0.7
+                    color: "#D3D3D3"
+                    type: area
+                    data_generator: |
+                      const data = [];
+                      const sensorData = entity.state.split(' - ');
+                      function parseLocalTime(str) {
+                        const parts = str.split(/[- :T]/).map(Number);
+                        const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                        return date.getTime();
+                      }
+                      const startTime = parseLocalTime(sensorData[0]);
+                      const endTime = parseLocalTime(sensorData[1]);
+                      data.push([startTime, 0.8]);
+                      data.push([startTime, 0.8]);
+                      data.push([endTime, 0.8]);
+                      data.push([endTime, 0]);
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: false
+                      in_brush: false
+                      in_legend: false
+                  - entity: sensor.sem_export_limit
+                    yaxis_id: charge/expensive
+                    name: Begränsar solexport
+                    opacity: 0.7
+                    color: BBCDDD
+                    type: area
+                    data_generator: |
+                      const data = [];
+                      const sensorData = entity.state.split(' - ');
+                      function parseLocalTime(str) {
+                        const parts = str.split(/[- :T]/).map(Number);
+                        const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                        return date.getTime();
+                      }
+                      const startTime = parseLocalTime(sensorData[0]);
+                      const endTime = parseLocalTime(sensorData[1]);
+                      data.push([startTime, 0.6]);
+                      data.push([startTime, 0.6]);
+                      data.push([endTime, 0.6]);
+                      data.push([endTime, 0]);
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: false
+                      in_brush: false
+                      in_legend: true
+                  - entity: sensor.sem_battery_use_interval_1
+                    yaxis_id: charge/expensive
+                    name: Prioterad batteridrift
+                    opacity: 0.4
+                    color: lime
+                    type: area
+                    data_generator: |
+                      const data = [];
+                      const sensorData = entity.state.split(' - ');
+                      function parseLocalTime(str) {
+                        const parts = str.split(/[- :T]/).map(Number);
+                        const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                        return date.getTime();
+                      }
+                      const startTime = parseLocalTime(sensorData[0]);
+                      const endTime = parseLocalTime(sensorData[1]);
+                      data.push([startTime, 0.4]);
+                      data.push([startTime, 0.4]);
+                      data.push([endTime, 0.4]);
+                      data.push([endTime, 0]);
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: false
+                      in_brush: false
+                      in_legend: true
+                  - entity: sensor.sem_battery_use_interval_2
+                    yaxis_id: charge/expensive
+                    name: Prioterad batteridrift
+                    opacity: 0.4
+                    color: lime
+                    type: area
+                    data_generator: |
+                      const data = [];
+                      const sensorData = entity.state.split(' - ');
+                      function parseLocalTime(str) {
+                        const parts = str.split(/[- :T]/).map(Number);
+                        const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                        return date.getTime();
+                      }
+                      const startTime = parseLocalTime(sensorData[0]);
+                      const endTime = parseLocalTime(sensorData[1]);
+                      data.push([startTime, 0.4]);
+                      data.push([startTime, 0.4]);
+                      data.push([endTime, 0.4]);
+                      data.push([endTime, 0]);
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: false
+                      in_brush: false
+                      in_legend: false
+                  - entity: sensor.sem_nordpool_active
+                    yaxis_id: spotpris
+                    type: line
+                    name: Elpris
+                    opacity: 0.7
+                    color: black
+                    extend_to: false
+                    data_generator: >
+                      const data = entity.attributes.raw_today.map((start,
+                      index) => {
+                        return [new Date(start["start"]).getTime(), start["value"]];
+                      });
+
+                      const last = entity.attributes.raw_today.slice(-1)[0];
+
+                      const lastTime = new Date(last["start"]).getTime();
+
+                      data.push([lastTime + 3600000, last["value"]]); // 
+
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: true
+                      in_brush: false
+                      in_legend: true
+                  - entity: sensor.sem_nordpool_active
+                    yaxis_id: spotpris
+                    name: Imorgon
+                    type: line
+                    opacity: 0.7
+                    color: black
+                    data_generator: >
+                      const data = entity.attributes.raw_tomorrow.map((start,
+                      index) => {
+                        return [new Date(start["start"]).getTime(), start["value"]];
+                      });
+
+                      const last = entity.attributes.raw_tomorrow.slice(-1)[0];
+                      const lastTime = new Date(last["start"]).getTime();
+
+                      data.push([lastTime + 3600000, last["value"]]);
+
+                      return data;
+                    show:
+                      legend_value: false
+                      datalabels: false
+                      extremas: true
+                      in_brush: false
+                      in_legend: false
+              - type: custom:vertical-stack-in-card
+                cards: []
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: sensor.sem_system_plan
+                    state: "2"
+                card:
+                  type: markdown
+                  content: >+
+                    📊 **Aktuella beslut av systemet** 
+
+                    *Nya beslut kommer klockan 04:00*
+
+
+                    🔋 **Laddning:{% set raw =
+                    states('sensor.sem_battery_charge_window_cheapest_2') %} {%
+                    if ' - ' in raw %} {% set start = as_datetime(raw.split(' -
+                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
+                    {{ start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}{%
+                    else %} Ej tillgänglig{% endif %}**   
+
+
+                    {% set profit =
+                    state_attr('sensor.sem_battery_charge_energy_2_1b',
+                    'profit') | float(-1) %}
+
+                    {% set profit_threshold =
+                    states('input_number.sem_charge_profit_threshold') |
+                    float(0.20) %}
+
+                    {% set avg_price =
+                    state_attr('sensor.sem_battery_charge_energy_2_1b',
+                    'avg_window') | float(999) %}
+
+                    {% set supercheap =
+                    states('input_number.sem_price_limit_supercheap') |
+                    float(0.20) %}
+
+
+                    {% set should_charge = (profit >= profit_threshold) or
+                    (avg_price <= supercheap) %} - **Laddningspris:** ~{{
+                    avg_price | round(2) }} kr/kWh  
+
+                    - **Ditt vinstkrav:** >{{ profit_threshold | round(2) }}
+                    kr/kWh  
+
+                    - **Beräknad vinst:** {{ profit | round(2) }} kr/kWh
+
+                    - **Beslut:** {% if should_charge %}Ladda{% else %}Ladda
+                    ej{% endif %} 
+
+                     
+                    {% set raw = states('sensor.sem_relative_expensive_price_1')
+                    %} {% if ' - ' in raw %}
+                      {% set start = as_datetime(raw.split(' - ')[0]) %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{% set hours = (end - start).total_seconds() / 3600 %} {% set need   = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %} {% set batt   = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %} {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %} {% set per_h = hours > 0 and need / hours or 0 %} {% set usable = batt - buffer %} {% if usable > 0 and hours > 0 %} {% set max_hours = usable / per_h %} {% set delta = max_hours - hours %} {% set shift = delta / 2 %} {% set new_start = start - timedelta(hours=shift) %} {% set new_end   = end + timedelta(hours=shift) %} {% else %} {% set new_start = start %} {% set new_end   = end %} {% endif %}
+
+                    🔋 **Prioriterad batteridrift: {{new_start.strftime('%H:%M')
+                    }}–{{ new_end.strftime('%H:%M') }}** 
+
+                    - **Energibehov:** {{ need | round(2) }} kWh
+
+                    - **Batterikapacitet:** {{ batt | round(2) }} kWh
+
+                    - **Energi per timme:** ~{{ per_h | round(2) }} kWh/h{% else
+                    %}Ej tillgänglig{% endif %}
+
+                    - **Dyrt prisintervall:** {% set raw =
+                    states('sensor.sem_relative_expensive_price_1') %} {% if ' -
+                    ' in raw %} {% set start = as_datetime(raw.split(' - ')[0])
+                    %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{{
+                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}
+
+                    {% else %}
+
+                    Ej tillgänglig
+
+                    {% endif %}
+
+
+                    🌞 **Begränsa solexport:** {% set raw =
+                    states('sensor.sem_export_limit') %} {% if raw not in ['',
+                    'unknown', 'unavailable'] and ' - ' in raw %} {% set start =
+                    as_datetime(raw.split(' - ')[0]) %} {% set end =
+                    as_datetime(raw.split(' - ')[1]) %} {{
+                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }} {%
+                    else %} **Ingen planerat** {% endif %}
+
+                    {% set price_threshold = 0 %}
+
+                    {% set all_prices =
+                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
+                    []) +
+                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                    {% set start = namespace(value=None) %}
+
+                    {% set end = namespace(value=None) %}
+
+                    {% set hours = namespace(count=0) %}
+
+                    {% set lowest = namespace(value=999) %}
+
+
+                    {% for entry in all_prices %}
+                      {% set price = entry['value'] | float %}
+                      {% set time_start = entry['start'] %}
+                      {% set time_end = entry['end'] %}
+
+                      {% if price < lowest.value %}
+                        {% set lowest.value = price %}
+                      {% endif %}
+
+                      {% if price <= price_threshold %}
+                        {% if start.value is none %}
+                          {% set start.value = time_start %}
+                        {% endif %}
+                        {% set end.value = time_end %}
+                        {% set hours.count = hours.count + 1 %}
+                      {% endif %}
+                    {% endfor %}
+
+
+                    {% if start.value is not none and end.value is not none %}
+
+                    Aktiv {{ as_datetime(start.value).strftime('%H:%M') }}–{{
+                    as_datetime(end.value).strftime('%H:%M') }}
+
+                    - **Prisgräns:** ≤ {{ price_threshold }} kr/kWh
+
+                    - **Timmar under gräns:** {{ hours.count }} h
+
+                    - **Lägsta pris:** {{ lowest.value | round(2) }} kr/kWh
+
+                    {% else %}
+
+                    - **Period under ≤ {{ price_threshold }} kr/kWh:** Ingen
+
+                    - **Lägsta pris idag/imorgon:** {{ lowest.value | round(2)
+                    }} kr/kWh
+
+                    {% endif %}
+
+
+
+
+
+                    💤 **Viloläge (lågt elpris):** {% set raw =
+                    states('sensor.sem_battery_cheap_interval_1a_2') %} {% if '
+                    - ' in raw %} {% set start = as_datetime(raw.split(' -
+                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
+                    {% if start.year == 1970 %} **Inget planerat** {% else %} {{
+                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }} {%
+                    endif %} {% else %}**Inget planerat**{% endif %} 
+
+
+                    {% set threshold =
+                    states('input_number.sem_low_price_threshold') | float %}
+
+                    {% set all_prices =
+                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
+                    []) +
+                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                    {% set now_dt = now() %}
+
+                    {% set start_ts = as_timestamp(now_dt.replace(hour=18,
+                    minute=0, second=0, microsecond=0)) %}
+
+                    {% set end_ts = as_timestamp((now_dt +
+                    timedelta(days=1)).replace(hour=6, minute=0, second=0,
+                    microsecond=0)) %}
+
+
+                    {% set ns = namespace(lowest=999) %}
+
+
+                    {% for entry in all_prices %}
+                      {% if entry.start is defined and entry.value is defined %}
+                        {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
+                        {% if start_ts <= entry_ts <= end_ts %}
+                          {% set price = entry.value | float %}
+                          {% if price < ns.lowest %}
+                            {% set ns.lowest = price %}
+                          {% endif %}
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+
+                    - **Lägsta pris**:{{ ns.lowest | round(3) }} kr/kWh  
+
+                    - **Din prisgräns:** ≤ {{ threshold }} kr/kWh
+
+
+                  text_only: true
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: sensor.sem_system_plan
+                    state: "1"
+                card:
+                  type: markdown
+                  content: >+
+                    📊 **Aktuella beslut av systemet**
+
+                    *Nya beslut kommer klockan 16:00*
+
+
+                    🔋 **Laddning:{% set raw =
+                    states('sensor.sem_battery_charge_window_cheapest_1a') %} {%
+                    if ' - ' in raw %} {% set start = as_datetime(raw.split(' -
+                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
+                    {{ start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}{%
+                    else %} Ej tillgänglig{% endif %}**   
+
+
+                    {% set profit =
+                    state_attr('sensor.sem_battery_charge_energy_1a_2',
+                    'profit') | float(-1) %}
+
+                    {% set profit_threshold =
+                    states('input_number.sem_charge_profit_threshold') |
+                    float(0.20) %}
+
+                    {% set avg_price =
+                    state_attr('sensor.sem_battery_charge_energy_1a_2',
+                    'avg_window') | float(999) %}
+
+                    {% set supercheap =
+                    states('input_number.sem_price_limit_supercheap') |
+                    float(0.20) %}
+
+
+                    {% set should_charge = (profit >= profit_threshold) or
+                    (avg_price <= supercheap) %} - **Laddningspris:** ~{{
+                    avg_price | round(2) }} kr/kWh  
+
+                    - **Ditt vinstkrav:** >{{ profit_threshold | round(2) }}
+                    kr/kWh  
+
+                    - **Beräknad vinst:** {{ profit | round(2) }} kr/kWh
+
+                    - **Beslut:** {% if should_charge %}Ladda{% else %}Ladda
+                    ej{% endif %} 
+
+                     
+                    {% set raw = states('sensor.sem_relative_expensive_price_2')
+                    %} {% if ' - ' in raw %}
+                      {% set start = as_datetime(raw.split(' - ')[0]) %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{% set hours = (end - start).total_seconds() / 3600 %} {% set need   = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %} {% set batt   = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %} {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %} {% set per_h = hours > 0 and need / hours or 0 %} {% set usable = batt - buffer %} {% if usable > 0 and hours > 0 %} {% set max_hours = usable / per_h %} {% set delta = max_hours - hours %} {% set shift = delta / 2 %} {% set new_start = start - timedelta(hours=shift) %} {% set new_end   = end + timedelta(hours=shift) %} {% else %} {% set new_start = start %} {% set new_end   = end %} {% endif %}
+
+                    🔋 **Prioriterad batteridrift: {{new_start.strftime('%H:%M')
+                    }}–{{ new_end.strftime('%H:%M') }}** 
+
+                    - **Energibehov:** {{ need | round(2) }} kWh
+
+                    - **Batterikapacitet:** {{ batt | round(2) }} kWh
+
+                    - **Energi per timme:** ~{{ per_h | round(2) }} kWh/h{% else
+                    %}Ej tillgänglig{% endif %}
+
+                    - **Dyrt prisintervall:** {% set raw =
+                    states('sensor.sem_relative_expensive_price_2') %} {% if ' -
+                    ' in raw %} {% set start = as_datetime(raw.split(' - ')[0])
+                    %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{{
+                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}
+
+                    {% else %}
+
+                    Ej tillgänglig
+
+                    {% endif %}
+
+
+                    🌞 **Begränsa solexport:** {% set raw =
+                    states('sensor.sem_export_limit') %} {% if raw not in ['',
+                    'unknown', 'unavailable'] and ' - ' in raw %} {% set start =
+                    as_datetime(raw.split(' - ')[0]) %} {% set end =
+                    as_datetime(raw.split(' - ')[1]) %} {{
+                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }} {%
+                    else %} **Ingen planerat** {% endif %}
+
+                    {% set price_threshold = 0 %}
+
+                    {% set all_prices =
+                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
+                    []) +
+                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                    {% set start = namespace(value=None) %}
+
+                    {% set end = namespace(value=None) %}
+
+                    {% set hours = namespace(count=0) %}
+
+                    {% set lowest = namespace(value=999) %}
+
+
+                    {% for entry in all_prices %}
+                      {% set price = entry['value'] | float %}
+                      {% set time_start = entry['start'] %}
+                      {% set time_end = entry['end'] %}
+
+                      {% if price < lowest.value %}
+                        {% set lowest.value = price %}
+                      {% endif %}
+
+                      {% if price <= price_threshold %}
+                        {% if start.value is none %}
+                          {% set start.value = time_start %}
+                        {% endif %}
+                        {% set end.value = time_end %}
+                        {% set hours.count = hours.count + 1 %}
+                      {% endif %}
+                    {% endfor %}
+
+
+                    {% if start.value is not none and end.value is not none %}
+
+                    Aktiv {{ as_datetime(start.value).strftime('%H:%M') }}–{{
+                    as_datetime(end.value).strftime('%H:%M') }}
+
+                    - **Prisgräns:** ≤ {{ price_threshold }} kr/kWh
+
+                    - **Timmar under gräns:** {{ hours.count }} h
+
+                    - **Lägsta pris:** {{ lowest.value | round(2) }} kr/kWh
+
+                    {% else %}
+
+                    - **Period under ≤ {{ price_threshold }} kr/kWh:** Ingen
+
+                    - **Lägsta pris idag/imorgon:** {{ lowest.value | round(2)
+                    }} kr/kWh
+
+                    {% endif %}
+
+
+
+
+
+                    💤 **Viloläge (lågt elpris):** {% set raw =
+                    states('sensor.sem_battery_cheap_interval_2_1a') %} {% if '
+                    - ' in raw %} {% set start = as_datetime(raw.split(' -
+                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
+                    {% if start.year == 1970 %} **Inget planerat** {% else %} {{
+                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }} {%
+                    endif %} {% else %}**Inget planerat**{% endif %} 
+
+
+                    {% set threshold =
+                    states('input_number.sem_low_price_threshold') | float %}
+
+                    {% set all_prices =
+                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
+                    []) +
+                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                    {% set now_dt = now() %}
+
+                    {% set start_ts = as_timestamp(now_dt.replace(hour=18,
+                    minute=0, second=0, microsecond=0)) %}
+
+                    {% set end_ts = as_timestamp((now_dt +
+                    timedelta(days=1)).replace(hour=6, minute=0, second=0,
+                    microsecond=0)) %}
+
+
+                    {% set ns = namespace(lowest=999) %}
+
+
+                    {% for entry in all_prices %}
+                      {% if entry.start is defined and entry.value is defined %}
+                        {% set entry_ts = as_timestamp(as_datetime(entry.start)) %}
+                        {% if start_ts <= entry_ts <= end_ts %}
+                          {% set price = entry.value | float %}
+                          {% if price < ns.lowest %}
+                            {% set ns.lowest = price %}
+                          {% endif %}
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+
+                    - **Lägsta pris**:{{ ns.lowest | round(3) }} kr/kWh  
+
+                    - **Din prisgräns:** ≤ {{ threshold }} kr/kWh
+
+
 badges:
   - type: entity
     show_name: true
@@ -2641,7 +3599,9 @@ badges:
     icon: mdi:weather-sunny-off
     tap_action:
       action: none
-    color: green
+    color: primary
+    hold_action:
+      action: more-info
   - type: entity
     show_name: true
     show_state: true
@@ -2655,7 +3615,9 @@ badges:
     icon: mdi:battery-negative
     tap_action:
       action: none
-    color: green
+    color: primary
+    hold_action:
+      action: more-info
   - type: entity
     show_name: true
     show_state: true
@@ -2667,9 +3629,11 @@ badges:
     entity: input_boolean.sem_ev_charging_protection_status
     name: Skydd vid elbilsladdning
     icon: mdi:ev-plug-type2
-    color: green
+    color: primary
     tap_action:
       action: none
+    hold_action:
+      action: more-info
   - type: entity
     show_name: true
     show_state: true
@@ -2680,7 +3644,11 @@ badges:
       - condition: state
         entity: input_boolean.sem_manual_charge
         state: "on"
-    color: green
+    color: primary
+    tap_action:
+      action: none
+    hold_action:
+      action: more-info
   - type: entity
     show_name: true
     show_state: true
@@ -2690,7 +3658,9 @@ badges:
     icon: mdi:sleep
     tap_action:
       action: none
-    color: green
+    color: primary
+    hold_action:
+      action: more-info
   - type: entity
     show_name: true
     show_state: true
@@ -2699,6 +3669,9 @@ badges:
     name: Viloläge (Innan pristopp)
     icon: mdi:sleep
     tap_action:
+      action: none
+    color: primary
+    hold_action:
       action: more-info
   - type: entity
     show_name: true
