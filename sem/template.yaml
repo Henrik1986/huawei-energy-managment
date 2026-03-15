@@ -97,7 +97,16 @@ template:
           {{ v not in ['unknown', 'unavailable', ''] and v.startswith('sensor.') }}
 
 
-
+# ADDS USERS CAR BATTERY PROCENT
+      - name: Car Battery Level
+        unit_of_measurement: "%"
+        state: >
+          {% set sensor = states('input_text.car_battery_sensor') %}
+          {% if sensor not in ['unknown','unavailable',''] %}
+            {{ states(sensor) | float(0) }}
+          {% else %}
+            0
+          {% endif %}
 
 
 
@@ -550,6 +559,51 @@ template:
             0
           {% endif %}
 
+#ADJUSTMENT FACTOR FOR ENERGY CALCULATION
+      - name: sem_energy_adjustment_morning
+        state: >
+          {% set d1 = states('sensor.sem_energy_avg_morning_1d') | float(0) %}
+          {% set d7 = states('sensor.sem_energy_avg_morning') | float(0) %}
+          {% if d7 > 0 %}
+            {% set ratio = d1 / d7 %}
+            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
+          {% else %}
+            1
+          {% endif %}
+
+      - name: sem_energy_adjustment_day
+        state: >
+          {% set d1 = states('sensor.sem_energy_avg_day_1d') | float(0) %}
+          {% set d7 = states('sensor.sem_energy_avg_day') | float(0) %}
+          {% if d7 > 0 %}
+            {% set ratio = d1 / d7 %}
+            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
+          {% else %}
+            1
+          {% endif %}
+
+      - name: sem_energy_adjustment_evening
+        state: >
+          {% set d1 = states('sensor.sem_energy_avg_evening_1d') | float(0) %}
+          {% set d7 = states('sensor.sem_energy_avg_evening') | float(0) %}
+          {% if d7 > 0 %}
+            {% set ratio = d1 / d7 %}
+            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
+          {% else %}
+            1
+          {% endif %}
+
+      - name: sem_energy_adjustment_night
+        state: >
+          {% set d1 = states('sensor.sem_energy_avg_night_1d') | float(0) %}
+          {% set d7 = states('sensor.sem_energy_avg_night') | float(0) %}
+          {% if d7 > 0 %}
+            {% set ratio = d1 / d7 %}
+            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
+          {% else %}
+            1
+          {% endif %}
+
 
 
 
@@ -558,27 +612,88 @@ template:
         unique_id: sem_battery_charge_energy_1a_2
         unit_of_measurement: "kWh"
         state: >
-          {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} 
-          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %} 
-          {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_1a_2','weather_buffer') | float(0) %} 
-          {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval') | float(0) %} 
-          {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_solar_energy') | float(0) %} 
-          {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval') | float(0) %} 
-          {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_1a_2','avg_price') | float(0) %} 
-          {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
-          {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') | float(0) %}
-          {% set extra = states('input_number.extra_1') | float(0) %}
-          {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
-          {% set ev_charge_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','ev_charge_factor') | float(0) %}
-          {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-        
+            {% set battery_solar_enough = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_solar_enough_today') %}
+            {% if battery_solar_enough %}
+              0
+            {% else %}
 
-          {% set solar_diff = [estimated_energy_sun_interval - ((estimated_solar_energy * adjustment_factor_solar_energy) * ev_charge_factor) , 0] | max %}
-          {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - battery_capacity %}
-          {% set total_energy_need = [raw_total, 0] | max %}
+              {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} 
+              {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %} 
+              {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_1a_2','weather_buffer') | float(0) %} 
+              {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval') | float(0) %} 
+              {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_solar_energy') | float(0) %} 
+              {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval') | float(0) %} 
+              {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_1a_2','avg_price') | float(0) %} 
+              {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
+              {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') | float(0) %}
+              {% set extra = states('input_number.extra_1') | float(0) %}
+              {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
+              {% set ev_charge_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','ev_charge_factor') | float(0) %}
+              {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_1a_2','solar_surplus') | float(0) %}
+              {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
+              
+              {# --- START BERÄKNING --- #}
+              {# --- Solel som går till batteriet efter husets behov --- #}
+              {% set solar_after_house = max(0, (estimated_solar_energy * adjustment_factor_solar_energy) - estimated_energy_sun_interval) %}
 
-          {{ (total_energy_need + supercheap_charge + extra, battery_max) | min  }}      
-#          {{ (total_energy_need + supercheap_charge + extra) | round(2) }}
+              {# --- Energibehov fram till nästa laddningsfönster (lookahead) --- #}
+              {% set energy_needed_until_next_window = estimated_energy_no_sun_interval + estimated_energy_sun_interval - solar_surplus %}
+
+              {# --- Batteriets deficit justerat med lookahead --- #}
+              {% if battery_capacity >= energy_needed_until_next_window %}
+                  {% set net_charge_needed = 0 %}
+              {% else %}
+                  {% set battery_deficit = max(0, battery_max - battery_capacity) %}
+                  {% set net_charge_needed = max(0, battery_deficit - solar_after_house) %}
+              {% endif %}
+
+              {# --- Total laddning under fönstret inklusive extra och superbillig el --- #}
+              {% set total_energy_need = net_charge_needed + supercheap_charge + extra %}
+              {{ [total_energy_need, battery_max] | min }}
+
+            {% endif %}
+
+
+#          {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} 
+#          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %} 
+#          {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_1a_2','weather_buffer') | float(0) %} 
+#          {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval') | float(0) %} 
+#          {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_solar_energy') | float(0) %} 
+#          {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval') | float(0) %} 
+#          {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_1a_2','avg_price') | float(0) %} 
+#          {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
+#          {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') | float(0) %}
+#          {% set extra = states('input_number.extra_1') | float(0) %}
+#          {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
+#          {% set ev_charge_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','ev_charge_factor') | float(0) %}
+#          {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_1a_2','solar_surplus') | float(0) %}
+#          {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
+
+
+#          {# --- Solel som går till batteriet efter husets behov --- #}
+#          {% set solar_after_house = max(0, (estimated_solar_energy * adjustment_factor_solar_energy) - estimated_energy_sun_interval) %}
+
+#          {# --- Energibehov fram till nästa laddningsfönster (lookahead) --- #}
+#          {% set energy_needed_until_next_window = estimated_energy_no_sun_interval + estimated_energy_sun_interval - solar_surplus %}
+
+#          {# --- Batteriets deficit justerat med lookahead --- #}
+#          {% if battery_capacity >= energy_needed_until_next_window %}
+#              {% set net_charge_needed = 0 %}
+#          {% else %}
+#              {% set battery_deficit = max(0, battery_max - battery_capacity) %}
+#              {% set net_charge_needed = max(0, battery_deficit - solar_after_house) %}
+#          {% endif %}
+
+#          {# --- Total laddning under fönstret inklusive extra och superbillig el --- #}
+#          {% set total_energy_need = net_charge_needed + supercheap_charge + extra %}
+#          {{ [total_energy_need, battery_max] | min }}
+################################################
+          
+#          {% set solar_diff = [estimated_energy_sun_interval - ((estimated_solar_energy * adjustment_factor_solar_energy) * ev_charge_factor) , 0] | max %}
+#          {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - (battery_capacity + solar_surplus) %}
+#          {% set total_energy_need = [raw_total, 0] | max %}
+
+#          {{ (total_energy_need + supercheap_charge + extra, battery_max) | min  }}      
         attributes:
             search_interval: >
                   {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_1a') %}
@@ -884,6 +999,46 @@ template:
                         {% endif %}
                   {% endif %}
                   {{ solar_kwh | round(2) }}
+            estimated_remaining_solar_today: >
+                  {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
+                  {% set t1 = states('sensor.sem_battery_charge_window_cheapest_1a').split(' - ')[0] %}
+                  {% set start = as_datetime(t1) %}
+                  {% set now_dt = now() %}
+                  {% set effective_start = [start, now_dt] | max %}
+                  {% set today = now().date() %}
+                  {% set solar = namespace(wh=0) %}
+
+                  {% if forecast and 'watt_hours_period' in forecast %}
+
+                  {% for e in forecast['watt_hours_period'] %}
+
+                    {% set dt = as_datetime(e['date']) %}
+
+                    {% if dt >= effective_start
+                          and dt.date() == today
+                          and e['values'] > 0 %}
+
+                      {% set solar.wh = solar.wh + e['values'] %}
+
+                    {% endif %}
+
+                  {% endfor %}
+
+                  {% endif %}
+
+                  {{ (solar.wh / 1000 * 0.85) | round(2) }}
+            solar_surplus: >
+                  {% set solar_production = state_attr('sensor.sem_battery_charge_energy_1a_2', 'estimated_solar_energy') | float(0) %}
+                  {% set house_demand = state_attr('sensor.sem_battery_charge_energy_1a_2', 'estimated_energy_sun_interval') | float(0) %}
+                  {% set solar_surplus_for_battery = [solar_production - house_demand, 0] | max %}
+                  {{ solar_surplus_for_battery | round(2) }}
+            battery_solar_enough_today: >
+                  {% set remaining_solar = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_remaining_solar_today') | float(0) %}
+                  {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
+                  {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
+                  {% set battery_remaining = battery_max - battery_capacity %}
+                  {% set solar_safe = remaining_solar * 0.70 %}
+                  {{ solar_safe >= battery_remaining }}
             ev_charge_factor: >
                   {% if is_state('input_boolean.sem_ev_charged_today', 'on') %}
                     0.5
@@ -1037,10 +1192,6 @@ template:
                   {% endif %}
                 {% endif %}
               {% endif %}
-
-
-
-
             avg_window: >
               {% set win_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
               {% if win_str in ['none','unknown',''] %}
@@ -1064,7 +1215,6 @@ template:
                   none
                 {% endif %}
               {% endif %}
-
             max_after_window: >
               {% set raw = states('sensor.sem_nordpool_active') %}
               {% if raw in ['unknown','unavailable','none'] %}
@@ -1115,23 +1265,40 @@ template:
                   {% endif %}
                 {% endif %}
               {% endif %}
+            battery_charge_profit: >
+              {% set profit = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
+              {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
 
-
-
-
+              {{ profit >= profit_threshold }}
             should_charge: >
+              {% set override = states('input_select.sem_battery_charge_override_1a_2') %}
+
+              {% set energy_needed = states('sensor.sem_battery_charge_energy_1a_2') | float(0) %}
+
               {% set profit = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
               {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
 
               {% set avg_price = state_attr('sensor.sem_battery_charge_energy_1a_2', 'avg_window') | float(999) %}
               {% set supercheap = states('input_number.sem_price_limit_supercheap') | float(0.20) %}
 
-              {{ profit >= profit_threshold or avg_price <= supercheap }}
+              {% set solar_enough = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_solar_enough_today') | string %}
 
-#              {% set diff = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
-#              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
-#              {{ diff >= threshold }}
+              {% if override == 'Ladda' %}
+                true
 
+              {% elif override == 'Ladda ej' %}
+                false
+
+              {% elif energy_needed <= 0 %}
+                false
+
+              {% elif solar_enough == 'true' %}
+                false
+
+              {% else %}
+                {{ profit >= profit_threshold or avg_price <= supercheap }}
+
+              {% endif %}
 
 
 # CALCULATES ENERGY BETWEEN 2 AND 1B
@@ -1140,8 +1307,8 @@ template:
         unit_of_measurement: "kWh"
         state: >
             {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %} 
-            {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','usable_capacity ') | float(0) %} 
-            {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_2_1b','weather_buffer ') | float(0) %} 
+            {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','usable_capacity') | float(0) %} 
+            {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_2_1b','weather_buffer') | float(0) %} 
             {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_sun_interval') | float(0) %} 
             {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_solar_energy') | float(0) %} 
             {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_no_sun_interval') | float(0) %} 
@@ -1151,14 +1318,35 @@ template:
             {% set extra = states('input_number.extra_2') | float(0) %} 
             {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(0) %}
             {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
+            {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_2_1b','solar_surplus') | float(0) %}
+            
+            {# --- BERÄKNING BÖRJAR --- #}
+            {# --- Solel som går till batteriet efter husets behov --- #}
+            {% set solar_after_house = max(0, (estimated_solar_energy * adjustment_factor_solar_energy) - estimated_energy_sun_interval) %}
 
-            {% set solar_diff = [estimated_energy_sun_interval - (estimated_solar_energy * adjustment_factor_solar_energy) , 0] | max %}
-            {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - battery_capacity %}
-            {% set total_energy_need = [raw_total, 0] | max %}
+            {# --- Energibehov fram till nästa laddningsfönster (lookahead) --- #}
+            {% set energy_needed_until_next_window = estimated_energy_no_sun_interval + estimated_energy_sun_interval - solar_surplus %}
+
+            {# --- Batteriets deficit justerat med lookahead --- #}
+            {% if battery_capacity >= energy_needed_until_next_window %}
+                {% set net_charge_needed = 0 %}
+            {% else %}
+                {% set battery_deficit = max(0, battery_max - battery_capacity) %}
+                {% set net_charge_needed = max(0, battery_deficit - solar_after_house) %}
+            {% endif %}
+
+            {# --- Total laddning under fönstret inklusive extra och superbillig el --- #}
+            {% set total_energy_need = net_charge_needed + supercheap_charge + extra %}
+            {{ [total_energy_need, battery_max] | min }}
 
 
-            {{ (total_energy_need + supercheap_charge + extra, battery_max) | min  }}
-#            {{ (total_energy_need + supercheap_charge + extra) | round(2) }}
+
+#            {% set solar_diff = [estimated_energy_sun_interval - (estimated_solar_energy * adjustment_factor_solar_energy) , 0] | max %}
+#            {% set raw_total = (estimated_energy_no_sun_interval + solar_diff + weather_buffer) - (battery_capacity + solar_surplus) %}
+#            {% set total_energy_need = [raw_total, 0] | max %}
+
+
+#            {{ (total_energy_need + supercheap_charge + extra, battery_max) | min  }}
         attributes:
             search_interval: >
                   {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_2') %}
@@ -1441,6 +1629,11 @@ template:
                                 {% endif %}
                   {% endif %}
                   {{ solar_kwh | round(2) }}
+            solar_surplus: >
+                  {% set solar_production = state_attr('sensor.sem_battery_charge_energy_2_1b', 'estimated_solar_energy') | float(0) %}
+                  {% set house_demand = state_attr('sensor.sem_battery_charge_energy_2_1b', 'estimated_energy_sun_interval') | float(0) %}
+                  {% set solar_surplus_for_battery = [solar_production - house_demand, 0] | max %}
+                  {{ solar_surplus_for_battery | round(2) }}
             adjustment_factor_solar_energy: >
                   {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly', 'forecast') %}
                   {% set interval_str = state_attr('sensor.sem_battery_charge_energy_2_1b','sun_interval') %}
@@ -1683,20 +1876,39 @@ template:
 
                 {% endif %}
               {% endif %}
+            battery_charge_profit: >
+              {% set profit = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
+              {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
 
+              {{ profit >= profit_threshold }}
 
             should_charge: >
+              {% set override = states('input_select.sem_battery_charge_override_2_1b') %}
+
+              {% set energy_needed = states('sensor.sem_battery_charge_energy_2_1b') | float(0) %}
+
               {% set profit = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
               {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
 
               {% set avg_price = state_attr('sensor.sem_battery_charge_energy_2_1b', 'avg_window') | float(999) %}
               {% set supercheap = states('input_number.sem_price_limit_supercheap') | float(0.20) %}
 
-              {{ profit >= profit_threshold or avg_price <= supercheap }}
+              {% if override == 'Ladda' %}
+                true
 
-#              {% set diff = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
-#              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
-#              {{ diff >= threshold }}
+              {% elif override == 'Ladda ej' %}
+                false
+
+              {% elif energy_needed <= 0 %}
+                false
+
+              {% else %}
+                {{ profit >= profit_threshold or avg_price <= supercheap }}
+
+              {% endif %}
+
+
+
 
 
 ######################### TRIGGERS ########################################### 
