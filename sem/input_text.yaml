@@ -65,3 +65,8 @@ input_text:
 
   sem_epost: 
     name: E-post
+
+  car_battery_sensor:
+    name: Batterisensor elbil
+
+  
