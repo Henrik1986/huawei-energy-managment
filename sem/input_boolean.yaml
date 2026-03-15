@@ -80,3 +80,6 @@ input_boolean:
 
   sem_submit_user_info: 
     name: "Send"
+  
+  sem_ev_integrated: 
+    name: EV integrated
