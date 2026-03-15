@@ -1,0 +1,26 @@
+input_select:
+  sem_ev_battery_strategy:
+    name: Laddningsstrategi för elbil och batteri
+    options:
+      - Ladda elbil först
+      - Ladda elbil till en viss procent
+      - Dela effekt
+
+  sem_battery_charge_override_1a_2:
+    name: Battery charge override 
+    options:
+      - Auto
+      - Ladda
+      - Ladda ej 
+    initial: Auto
+
+  sem_battery_charge_override_2_1b:
+    name: Battery charge override 
+    options:
+      - Auto
+      - Ladda
+      - Ladda ej 
+    initial: Auto
+      
+
+    
