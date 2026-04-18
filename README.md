@@ -26,8 +26,8 @@ Installationen är uppdelad för att passa olika system. Klicka på länken som 
 > [!NOTE]
 > För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. Därefter kostar en användarkod 399 kr/år. Ansök om en demokod under "mitt system". Efter dina 30 dagar kommer jag att kontakta dig för att erbjuda en årskod. 
 
-> [!NOTE]
-> Om något kort i hemvyn inte fungerar som det ska beror det troligtvis på att fel enhet är inställd. 
+## Saknar du stöd för ditt system? 💬
+Vill du göra din anläggning kompatibel är du välkommen att öppna en diskussion på GitHub eller kontakta mig, så tittar vi på möjligheterna att lägga till stöd.
 
 ## Uppdateringar :loudspeaker:
 Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje realese. Där kommer det framgå om du behöver tänka på något innan du uppdaterar paketet. 
@@ -35,8 +35,7 @@ Via denna sida kommer du kunna läsa om nya funktioner som lagt till vid varje r
 > [!NOTE]
 > För att nya funktioner ska bli tillgängliga hos dig krävs en omstart av Home Assistant.
 
-## Saknar du stöd för ditt system? 💬
-Vill du göra din anläggning kompatibel är du välkommen att öppna en diskussion på GitHub eller kontakta mig, så tittar vi på möjligheterna att lägga till stöd.
+
 
 ## Framtida funktioner :raising_hand:
 Har du idéer på nya funktioner? Lämna gärna dina förslag på GitHub under ”Discussions”.
