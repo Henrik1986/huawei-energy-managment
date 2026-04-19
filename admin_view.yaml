@@ -44,7 +44,7 @@ sections:
           rows: auto
         column_span: 2
       - type: heading
-        heading: Systemets driftplan
+        heading: Så arbetar ditt system
         heading_style: subtitle
         icon: mdi:calendar-clock
         badges:
@@ -96,9 +96,10 @@ sections:
               - id: charge/expensive
                 opposite: true
                 show: false
+                max: 1
             apex_config:
               chart:
-                height: 320
+                height: 305
                 animations:
                   enabled: true
                   easing: easeinout
@@ -251,9 +252,9 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 1]);
-                  data.push([startTime, 1]);
-                  data.push([endTime, 1]);
+                  data.push([startTime, 0.2]);
+                  data.push([startTime, 0.2]);
+                  data.push([endTime, 0.2]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -278,9 +279,9 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 1]);
-                  data.push([startTime, 1]);
-                  data.push([endTime, 1]);
+                  data.push([startTime, 0.2]);
+                  data.push([startTime, 0.2]);
+                  data.push([endTime, 0.2]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -305,9 +306,9 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.75]);
-                  data.push([startTime, 0.75]);
-                  data.push([endTime, 0.75]);
+                  data.push([startTime, 0.14]);
+                  data.push([startTime, 0.14]);
+                  data.push([endTime, 0.14]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -332,9 +333,9 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.75]);
-                  data.push([startTime, 0.75]);
-                  data.push([endTime, 0.75]);
+                  data.push([startTime, 0.14]);
+                  data.push([startTime, 0.14]);
+                  data.push([endTime, 0.14]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -359,9 +360,9 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.5]);
-                  data.push([startTime, 0.5]);
-                  data.push([endTime, 0.5]);
+                  data.push([startTime, 0.12]);
+                  data.push([startTime, 0.12]);
+                  data.push([endTime, 0.12]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -386,9 +387,9 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.7]);
-                  data.push([startTime, 0.7]);
-                  data.push([endTime, 0.7]);
+                  data.push([startTime, 0.1]);
+                  data.push([startTime, 0.1]);
+                  data.push([endTime, 0.1]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -413,9 +414,9 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.7]);
-                  data.push([startTime, 0.7]);
-                  data.push([endTime, 0.7]);
+                  data.push([startTime, 0.1]);
+                  data.push([startTime, 0.1]);
+                  data.push([endTime, 0.1]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -427,7 +428,8 @@ sections:
           - type: custom:vertical-stack-in-card
             cards: []
         grid_options:
-          columns: full
+          columns: 24
+          rows: auto
     column_span: 2
   - type: grid
     cards:
@@ -549,7 +551,7 @@ sections:
               navigation_path: "#battery"
             features:
               - type: trend-graph
-            features_position: inline
+            features_position: bottom
           - square: false
             type: grid
             cards:
@@ -587,60 +589,48 @@ sections:
           position: sidebar
       - type: heading
         heading_style: subtitle
-        heading: Kontrollpanel
-        icon: mdi:cog
-      - square: false
-        type: grid
-        cards:
-          - type: tile
-            grid_options:
-              columns: 12
-              rows: 1
-            entity: input_button.sem_settings_fast
-            name: Snabbval
-            icon: mdi:order-bool-descending
-            color: primary
-            show_entity_picture: false
-            hide_state: true
-            vertical: true
-            tap_action:
-              action: navigate
-              navigation_path: "#settings_fast"
-            hold_action:
-              action: navigate
-              navigation_path: "#settings_fast"
-            icon_tap_action:
-              action: navigate
-              navigation_path: "#settings_fast"
-            features_position: bottom
-          - type: tile
-            grid_options:
-              columns: 12
-              rows: 1
-            entity: input_button.sem_settings
-            name: Mitt system
-            icon: mdi:account
-            color: primary
-            hide_state: true
-            vertical: true
-            tap_action:
-              action: navigate
-              navigation_path: "#settings"
-            hold_action:
-              action: navigate
-              navigation_path: "#settings"
-            icon_tap_action:
-              action: navigate
-              navigation_path: "#settings"
-            features_position: bottom
-        columns: 2
-      - type: heading
-        heading_style: subtitle
-        heading: Planerad laddning
-        icon: mdi:battery-clock
+        heading: AI Analys
+        icon: mdi:creation
         tap_action:
           action: navigate
           navigation_path: "#charge_information"
+        badges:
+          - type: entity
+            show_state: true
+            show_icon: true
+            entity: input_button.sem_settings_fast
+            name: Snabbval
+            icon: mdi:order-bool-descending
+            tap_action:
+              action: navigate
+              navigation_path: "#settings_fast"
+            state_content: name
+        visibility:
+          - condition: state
+            entity: input_boolean.sem_activate_ai
+            state: "on"
+      - type: heading
+        heading_style: subtitle
+        heading: Nästa laddning
+        icon: mdi:creation
+        tap_action:
+          action: navigate
+          navigation_path: "#charge_information"
+        badges:
+          - type: entity
+            show_state: true
+            show_icon: true
+            entity: input_button.sem_settings_fast
+            name: Snabbval
+            icon: mdi:order-bool-descending
+            tap_action:
+              action: navigate
+              navigation_path: "#settings_fast"
+            state_content: name
+        visibility:
+          - condition: state
+            entity: input_boolean.sem_activate_ai
+            state: "off"
       - type: custom:vertical-stack-in-card
         cards:
           - type: conditional
@@ -654,35 +644,62 @@ sections:
               card:
                 type: custom:vertical-stack-in-card
                 cards:
-                  - type: markdown
-                    content: |2
-                        {% set interval = states('sensor.sem_battery_charge_window_cheapest_2') %}
-                        {% set energy = states('sensor.sem_battery_charge_energy_2_1b') %}
-                        {% set sc = state_attr('sensor.sem_battery_charge_energy_2_1b','should_charge') | bool %}
-                        {% set supercheap = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') %}
-                        
-                        {% if ' - ' in interval %}
-                          {% set start_str, end_str = interval.split(' - ') %}
-                          {% set start_time = start_str | as_datetime %}
-                          {% set end_time = end_str | as_datetime %}
+                  - type: conditional
+                    conditions:
+                      - condition: state
+                        entity: input_boolean.sem_activate_ai
+                        state: "off"
+                    card:
+                      type: markdown
+                      content: |2
+                          {% set interval = states('sensor.sem_battery_charge_window_cheapest_2') %}
+                          {% set energy = states('sensor.sem_battery_charge_energy_2_1b') %}
+                          {% set sc = state_attr('sensor.sem_battery_charge_energy_2_1b','should_charge') | bool %}
+                          {% set supercheap = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') %}
                           
-                        🕛Klockan: {{ start_time.strftime('%H:%M') }} - {{ end_time.strftime('%H:%M') }}{% if sc %}
-                        ⚡Laddningsbeslut: Ladda
-                        {% else %}
-                        ❌ Laddningsbeslut: Ladda ej
-                        {% endif %}🔋Beräknad laddning: {{ energy }} kWh
-                        💰Extra superbillig laddning: {{ supercheap }} kWh{% if is_state('input_boolean.sem_interval_2', 'on') %}
-                        ✅Status: Laddar
-                        {% else %}
-                        💤Status: Inaktiv
-                        {% endif %}
+                          {% if ' - ' in interval %}
+                            {% set start_str, end_str = interval.split(' - ') %}
+                            {% set start_time = start_str | as_datetime %}
+                            {% set end_time = end_str | as_datetime %}
+                            
+                          🕛Klockan: {{ start_time.strftime('%H:%M') }} - {{ end_time.strftime('%H:%M') }}{% if sc %}
+                          ⚡Laddningsbeslut: Ladda
+                          {% else %}
+                          ❌ Laddningsbeslut: Ladda ej
+                          {% endif %}🔋Beräknad laddning: {{ energy }} kWh
+                          💰Extra superbillig laddning: {{ supercheap }} kWh{% if is_state('input_boolean.sem_interval_2', 'on') %}
+                          ✅Status: Laddar
+                          {% else %}
+                          💤Status: Inaktiv
+                          {% endif %}
 
+                          {% else %}
+                            Ingen tid tillgänglig  
+                          {% endif %}
+                      tap_action:
+                        action: navigate
+                        navigation_path: "#settings"
+                  - type: conditional
+                    conditions:
+                      - condition: state
+                        entity: input_boolean.sem_activate_ai
+                        state: "on"
+                    card:
+                      type: markdown
+                      content: >
+                        {{ states('sensor.sem_ai_analys_system') }} {{
+                        states('sensor.sem_ai_analys_2') }}
+
+
+                        {% set ts =
+                        state_attr('sensor.sem_ai_analys_2','last_success') %}
+
+                        {% if ts %}
+                          <I>{{ as_datetime(ts).strftime('%Y-%m-%d kl %H:%M') }}</I>
                         {% else %}
-                          Ingen tid tillgänglig  
+                          <I>Analyserar</I>
                         {% endif %}
-                    tap_action:
-                      action: navigate
-                      navigation_path: "#settings"
+                      card_size: 5
           - type: conditional
             conditions: []
             card:
@@ -694,40 +711,70 @@ sections:
               card:
                 type: custom:vertical-stack-in-card
                 cards:
-                  - type: markdown
-                    content: >-
-                      {% set interval =
-                      states('sensor.sem_battery_charge_window_cheapest_1a') %}
-                      {% set energy =
-                      states('sensor.sem_battery_charge_energy_1a_2') %} {% set
-                      sc =
-                      state_attr('sensor.sem_battery_charge_energy_1a_2','should_charge')
-                      | bool %} {% set supercheap =
-                      state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge')
-                      %}
+                  - type: conditional
+                    conditions:
+                      - condition: state
+                        entity: input_boolean.sem_activate_ai
+                        state: "on"
+                    card:
+                      type: markdown
+                      content: >-
+                        {{ states('sensor.sem_ai_analys_system') }} {{
+                        states('sensor.sem_ai_analys_1') }}
 
-                      {% if ' - ' in interval %}
-                        {% set start_str, end_str = interval.split(' - ') %}
-                        {% set start_time = start_str | as_datetime %}
-                        {% set end_time = end_str | as_datetime %}
 
-                      🕐Klockan: {{ start_time.strftime('%H:%M') }} - {{
-                      end_time.strftime('%H:%M') }}
 
-                      {% if sc %} ⚡Laddningsbeslut: Ladda {% else %} ❌
-                      Laddningsbeslut: Ladda ej {% endif %}
 
-                      🔋Beräknad laddning: {{ energy }} kWh  
 
-                      💰Extra superbillig laddning: {{ supercheap }} kWh  
+                        {% set ts =
+                        state_attr('sensor.sem_ai_analys_1','last_success') %}
 
-                      {% if is_state('input_boolean.sem_interval_1a', 'on') %}
-                      ✅Status: Laddar {% else %} 💤Status: Inaktiv {% endif %}
+                        {% if ts %}
+                          <I>{{ as_datetime(ts).strftime('%Y-%m-%d kl %H:%M') }} </I>
+                        {% else %}
+                          <I>Ingen analys tillgänglig</I>
+                        {% endif %}
+                      card_size: 5
+                  - type: conditional
+                    conditions:
+                      - condition: state
+                        entity: input_boolean.sem_activate_ai
+                        state: "off"
+                    card:
+                      type: markdown
+                      content: >-
+                        {% set interval =
+                        states('sensor.sem_battery_charge_window_cheapest_1a')
+                        %} {% set energy =
+                        states('sensor.sem_battery_charge_energy_1a_2') %} {%
+                        set sc =
+                        state_attr('sensor.sem_battery_charge_energy_1a_2','should_charge')
+                        | bool %} {% set supercheap =
+                        state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge')
+                        %}
 
-                      {% else %} Ingen tid tillgänglig {% endif %}
-                    tap_action:
-                      action: navigate
-                      navigation_path: "#settings"
+                        {% if ' - ' in interval %}
+                          {% set start_str, end_str = interval.split(' - ') %}
+                          {% set start_time = start_str | as_datetime %}
+                          {% set end_time = end_str | as_datetime %}
+
+                        🕐Klockan: {{ start_time.strftime('%H:%M') }} - {{
+                        end_time.strftime('%H:%M') }}
+
+                        {% if sc %} ⚡Laddningsbeslut: Ladda {% else %} ❌
+                        Laddningsbeslut: Ladda ej {% endif %}
+
+                        🔋Beräknad laddning: {{ energy }} kWh  
+
+                        💰Extra superbillig laddning: {{ supercheap }} kWh  
+
+                        {% if is_state('input_boolean.sem_interval_1a', 'on') %}
+                        ✅Status: Laddar {% else %} 💤Status: Inaktiv {% endif %}
+
+                        {% else %} Ingen tid tillgänglig {% endif %}
+                      tap_action:
+                        action: navigate
+                        navigation_path: "#settings"
             grid_options:
               columns: 12
               rows: 1
@@ -1028,9 +1075,9 @@ sections:
 
                         Du hittar config entry så här: 
 
-                        Utvecklarverktyg - Åtgärder - klicka på gå ill UI-läget
-                        - Välj nordpool.get_prices under åtgärd - klicka på gå
-                        till yaml-läge.
+                        Utvecklarverktyg -> Åtgärder -> klicka på gå till
+                        UI-läget -> Välj nordpool.get_prices under åtgärd ->
+                        klicka på gå till yaml-läge.
               - type: conditional
                 conditions:
                   - condition: state
@@ -1062,7 +1109,7 @@ sections:
                 content: >-
                   **ℹ️Information**
 
-                  Ditt Huawei batteri ID: 
+                  Hitta ditt Huawei batteri ID: 
 
                   Utvecklarverktyg -> Åtgärder -> Klicka på åtgärd -> Skriv
                   huawei -> Välj forcible charge -> Klicka på gå till UI-läge ->
@@ -1083,7 +1130,7 @@ sections:
                 content: >-
                   **ℹ️Information**
 
-                  Ditt Huawei inverter ID: 
+                  Hitta ditt Huawei inverter ID: 
 
                   Utvecklarverktyg -> Åtgärder -> Klicka på åtgärd -> Skriv
                   huawei -> Välj limit the power fed to grid -> Klicka på gå
@@ -1268,7 +1315,7 @@ sections:
                         laddningen överskattas sänk värdet
 
 
-                        Rekommenderat startvärde: 0.6
+                        Rekommenderat startvärde dämpingsfaktor: 0.6 
 
                         Läs mer: https://doc.forecast.solar/damping
               - type: conditional
@@ -1367,7 +1414,7 @@ sections:
                         laddningen överskattas sänk värdet
 
 
-                        Rekommenderat startvärde: 0.6
+                        Rekommenderat startvärde dämpingsfaktor: 0.6 
 
                         Läs mer: https://doc.forecast.solar/damping
               - type: markdown
@@ -1455,11 +1502,20 @@ sections:
                 content: >-
                   **ℹ️Information**
 
-                  Ange din totala lagringskapacitet under **total kapacitet**.
-                  Ange den maximala tillåtna **laddningseffekt** vid de olika
-                  laddningstillfällena. **Laddningsvinst** styr gränsvärdet för
-                  att laddningen genomföras. Detta hindrar att batteriet laddas
-                  då elpriset är jämnt. 
+                  **Total kapacitet** anger batteriets totala energimängd (kWh).
+
+
+                  **Laddnings-/urladdningseffekt** anger den maximala effekt som
+                  batteriet får ladda och ladda ur med.
+
+
+                  **Laddningsvinst** anger det minsta prisskillnadskravet för
+                  att laddning ska genomföras. Detta är en avgörande faktor för
+                  systemets lönsamhet. Ett rimligt startvärde är 0,5 SEK/kWh.
+              - type: heading
+                icon: ""
+                heading: Elpriser
+                heading_style: subtitle
               - type: entities
                 entities:
                   - entity: input_number.sem_price_limit_supercheap
@@ -1468,19 +1524,31 @@ sections:
                   - entity: input_number.sem_low_price_threshold
                     name: Lågt elpris
                     icon: mdi:finance
+                  - entity: input_number.sem_grid_fees
+                    name: Påslag el
+                    icon: mdi:transmission-tower-import
               - type: markdown
                 content: >-
                   **ℹ️Information**
 
-                  Ange gränsen för vad som räknas som **superbillig el**. Detta
-                  värde används för att ladda batteriet extra när elpriset är
-                  väldigt lågt. **Lågt elpris** avgör gräsvärdet då batteriet
-                  sätts i viloläge och elen köps från elnätet för att spara på
-                  batteriet. 
+                  **Superbillig el** anger gränsen för när elpriset anses vara
+                  mycket lågt. När detta värde underskrids kan batteriet laddas
+                  extra eftersom det är särskilt lönsamt. Ett rimligt startvärde
+                  är 0,35 SEK/kWh.
+
+
+                  **Lågt elpris** anger nivån där batteriet istället sätts i
+                  viloläge och el köps från nätet för att minska slitage på
+                  batteriet. Ett rimligt startvärde är 0,7 SEK/kWh.
+
+
+                  **Påslag el** är det totala påslaget på din köpta el (t.ex.
+                  skatt, avgifter och elnätskostnader). Värdet används för att
+                  beräkna faktiska kostnader och besparingar.
               - type: heading
                 icon: ""
                 heading_style: subtitle
-                heading: Sälja
+                heading: Sälja överskott
               - features:
                   - type: toggle
                 type: tile
@@ -1521,13 +1589,22 @@ sections:
                       content: >-
                         **ℹ️Information**
 
-                        **Urladdningseffekt** styr vilken effekt batteriet ska
-                        kunna exportera el. **Återställningseffekt** anger
-                        vilken effekt batteriet ska återgå till efter export.
-                        **Säljgräns** anger hur högt elpriset måste vara för att
-                        batteriet ska sälja sitt överskott. **Laddgräns** anger
-                        elprisnivån för nästa laddning. Båda villkoren måste
-                        uppfyllas för att batteriet ska sälja överskott.
+                        **Urladdningseffekt** anger den maximala effekt som
+                        batteriet får använda när det säljer el.
+                        **Återställningseffekt** är den effekt som återställs
+                        efter att exportfönstret har avslutats.
+
+
+                        **Säljgräns** är det elpris som minst måste uppnås för
+                        att batteriet ska sälja överskott. Ett rimligt
+                        startvärde är 3,5 SEK/kWh. **Laddgräns** anger högsta
+                        elpris för att ladda batteriet efter ett
+                        försäljningsfönster. Ett rimligt startvärde är 0,5
+                        SEK/kWh.
+
+
+                        För att försäljning ska ske måste båda prisvillkoren
+                        vara uppfyllda.
               - type: conditional
                 conditions:
                   - condition: state
@@ -1538,8 +1615,55 @@ sections:
                   content: >-
                     **ℹ️Information**
 
-                    Aktivera **sälj batteriöverskott** om du vill sälja
-                    batteriets överskott. 
+                    Aktivera **sälj batteriöverskott** om du vill tillåta att
+                    systemet säljer överskottet i batteriet för att öka
+                    lönsamheten.
+              - type: tile
+                entity: input_boolean.sem_activate_ai
+                name: AI
+                icon: mdi:creation
+                color: green
+                hide_state: true
+                vertical: false
+                tap_action:
+                  action: toggle
+                icon_tap_action:
+                  action: toggle
+                features:
+                  - type: toggle
+                features_position: inline
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_activate_ai
+                    state: "off"
+                card:
+                  type: markdown
+                  content: >-
+                    **ℹ️Information**
+
+                    Aktivera reglaget AI för att låta systemet använda AI-analys
+                    för att optimera drift och beslut automatiskt. Systemet
+                    fungerar även utan AI, men med AI-analys kan styrningen bli
+                    mer träffsäker och tydlig. 
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_activate_ai
+                    state: "on"
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: entities
+                      entities:
+                        - entity: input_text.sem_ai_agent
+                    - type: markdown
+                      content: |-
+                        **ℹ️Information**
+                        Ange din AI-agent som ska användas för analysen.
+
+                        Använder du Google anger du: ai_task.google_ai_task
+                        Använder du OpenAI anger du: ai_task.openai_ai_task
               - square: false
                 type: grid
                 cards:
@@ -1613,12 +1737,24 @@ sections:
                 content: >-
                   **ℹ️Information**
 
-                  Aktivera reglaget om du vill att export av solel automatiskt
-                  ska stoppas när elpriset är 0 eller lägre.
+                  Aktivera reglaget för att automatiskt stoppa export av solel
+                  när elpriset är 0 eller lägre.
               - type: heading
                 icon: ""
                 heading_style: subtitle
                 heading: Laddbox och elbil
+              - type: tile
+                entity: input_boolean.sem_ev_wallbox_single
+                name: En laddbox
+                icon: mdi:checkbox-blank
+                color: green
+                hide_state: true
+                vertical: false
+                tap_action:
+                  action: toggle
+                features:
+                  - type: toggle
+                features_position: inline
               - type: tile
                 entity: input_boolean.sem_ev_wallbox_multi
                 name: Två laddboxar
@@ -1633,50 +1769,73 @@ sections:
                 conditions:
                   - condition: state
                     entity: input_boolean.sem_ev_wallbox_multi
+                    state: "off"
+                  - condition: state
+                    entity: input_boolean.sem_ev_wallbox_single
                     state: "on"
                 card:
-                  type: entities
-                  entities:
-                    - entity: input_text.sem_ev_sensor
-                      icon: mdi:ev-plug-type2
-                      name: Laddbox 1
-                    - entity: input_text.sem_ev_sensor_2
-                      icon: mdi:ev-plug-type2
-                      name: Laddbox 2
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: entities
+                      entities:
+                        - entity: input_text.sem_ev_sensor
+                          icon: mdi:ev-plug-type2
+                          name: Laddbox 1
+                    - type: markdown
+                      content: >-
+                        **ℹ️Information**
+
+                        Ange namnet på sensorn som mäter effekten för din
+                        laddbox.
               - type: conditional
                 conditions:
                   - condition: state
                     entity: input_boolean.sem_ev_wallbox_multi
-                    state: "off"
+                    state: "on"
                 card:
-                  type: entities
-                  entities:
-                    - entity: input_text.sem_ev_sensor
-                      icon: mdi:ev-plug-type2
-                      name: Laddbox 1
-              - type: markdown
-                content: >-
-                  **ℹ️Information**
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: entities
+                      entities:
+                        - entity: input_text.sem_ev_sensor
+                          icon: mdi:ev-plug-type2
+                          name: Laddbox 1
+                        - entity: input_text.sem_ev_sensor_2
+                          icon: mdi:ev-plug-type2
+                          name: Laddbox 2
+                    - type: markdown
+                      content: >-
+                        **ℹ️Information**
 
-                  Ange namnet på sensorn som mäter effekten på din laddbox. Fyll
-                  i första fältet om du har två laddboxar. Har du två laddboxar
-                  fyller du även i andra fältet. Lämna båda fälten tomma om du
-                  inte har någon laddbox. Har du två laddboxar aktiverar du
-                  reglaget **två laddboxar**
-              - features:
-                  - type: toggle
-                type: tile
-                entity: input_boolean.sem_ev_charging_protection_enabled
-                features_position: inline
-                vertical: false
-                icon: mdi:ev-plug-type2
-                color: green
-                hide_state: true
-                name: Urladdningskydd
-                tap_action:
-                  action: toggle
-                icon_tap_action:
-                  action: toggle
+                        Ange namnet på sensorerna som mäter effekten för dina
+                        laddboxar. 
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - condition: state
+                        entity: input_boolean.sem_ev_wallbox_single
+                        state: "on"
+                      - condition: state
+                        entity: input_boolean.sem_ev_wallbox_multi
+                        state: "on"
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - features:
+                        - type: toggle
+                      type: tile
+                      entity: input_boolean.sem_ev_charging_protection_enabled
+                      features_position: inline
+                      vertical: false
+                      icon: mdi:ev-plug-type2
+                      color: green
+                      hide_state: true
+                      name: Urladdningskydd
+                      tap_action:
+                        action: toggle
+                      icon_tap_action:
+                        action: toggle
               - type: conditional
                 conditions:
                   - condition: state
@@ -1689,8 +1848,8 @@ sections:
                       content: >-
                         **ℹ️Information**
 
-                        Aktivera **urladdningskydd** om du inte vill att
-                        batteriet ska ladda elbilen.
+                        Aktivera **urladdningskydd** om du vill förhindra att
+                        batteriet används för att ladda elbilen.
               - type: conditional
                 conditions:
                   - condition: state
@@ -1741,93 +1900,117 @@ sections:
                       content: >-
                         **ℹ️Information**
 
-                        I **laddbox** anger du vilken sensor som övervakar
-                        laddboxens aktuella läge (om den laddar eller är låst).
-                        Under **laddningsläge** fyller du i det läge som
-                        motsvarar när laddboxen faktiskt laddar bilen (t.ex
-                        charging). Under **urladdningseffekt** fyller du i den
-                        effekt (kW) som batteriet ska återgå till efter att
-                        elbilen är färdigladdad. Slutlingen anger du den effekt
-                        (kW) som batteriet får ladda med från elnätet. 
-              - type: custom:vertical-stack-in-card
-                cards:
-                  - type: heading
-                    icon: mdi:flash
-                    heading_style: subtitle
-                    heading: Laddningsstrategi för elbil och hembatteri
-                  - type: entities
-                    entities:
-                      - entity: input_select.sem_ev_battery_strategy
-                        secondary_info: none
-                        name: Välj
-                      - entity: input_boolean.sem_ev_integrated
-                        name: Elbil finns i Home Assistant
-                        icon: mdi:car-electric
-                  - type: conditional
-                    conditions:
-                      - condition: state
-                        entity: input_boolean.sem_ev_integrated
-                        state: "on"
-                    card:
-                      type: custom:vertical-stack-in-card
-                      cards:
-                        - type: entities
-                          entities:
-                            - entity: input_text.car_battery_sensor
-                            - entity: input_number.sem_ev_charge_goal
-                              icon: mdi:battery-charging-70
-                            - entity: sensor.car_battery_level
-                              icon: mdi:car-electric
-                              name: Batterinivå Elbil
-                  - type: conditional
-                    conditions:
-                      - condition: state
-                        entity: input_boolean.sem_ev_integrated
-                        state: "off"
-                    card:
-                      type: markdown
-                      content: >
-                        Välj önskad strategi då elbilen och hembatteriet laddas
-                        samtidigt.  
+                        I **laddbox** anger du sensorn som visar laddboxens
+                        aktuella status (t.ex. om den laddar eller är låst).
 
 
-                        **Ladda elbil först**: Prioterar laddning av elbilen.
-                        När elbilen är laddad kommer hembatteriet att laddas. 
+                        Under **laddningsläge** anger du det statusvärde som
+                        motsvarar aktiv laddning av elbilen (t.ex. charging).
 
 
-                        **Dela effekt**: Elbilen och hembatteriet kommer att
-                        dela på tillgänglig effekt. Har du en lastbalanserare
-                        kommer effekten på din laddbox gå ner. Detta kan
-                        resultera i att laddningen pausas vid hög effekt.  
-                  - type: conditional
-                    conditions:
-                      - condition: state
-                        entity: input_boolean.sem_ev_integrated
-                        state: "on"
-                    card:
-                      type: custom:vertical-stack-in-card
-                      cards:
-                        - type: markdown
-                          content: >-
-                            Välj önskad strategi då elbilen och hembatteriet
-                            laddas samtidigt.  
+                        **Urladdningseffekt** anger den effekt (kW) som
+                        batteriet ska återgå till efter att elbilen har laddats
+                        klart.
 
 
-                            **Ladda elbil först**: Prioterar laddning av
-                            elbilen. När elbilen är laddad kommer hembatteriet
-                            att laddas. 
+                        Slutligen anger du **laddningseffekt**, det vill säga
+                        den maximala effekt (kW) som batteriet får ladda med
+                        från elnätet efter att elbilen har laddats klart. 
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_ev_charging_protection_enabled
+                    state: "on"
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: heading
+                      icon: mdi:flash
+                      heading_style: subtitle
+                      heading: Laddningsstrategi för elbil och hembatteri
+                    - type: tile
+                      entity: input_boolean.sem_ev_integrated
+                      name: Elbil i Home Assistant
+                      icon: mdi:home-assistant
+                      color: green
+                      hide_state: true
+                      vertical: false
+                      tap_action:
+                        action: toggle
+                      features:
+                        - type: toggle
+                      features_position: inline
+                    - type: entities
+                      entities:
+                        - entity: input_select.sem_ev_battery_strategy
+                          secondary_info: none
+                          name: Välj
+                    - type: conditional
+                      conditions:
+                        - condition: state
+                          entity: input_boolean.sem_ev_integrated
+                          state: "on"
+                      card:
+                        type: custom:vertical-stack-in-card
+                        cards:
+                          - type: entities
+                            entities:
+                              - entity: input_text.car_battery_sensor
+                              - entity: input_number.sem_ev_charge_goal
+                                icon: mdi:battery-charging-70
+                              - entity: sensor.car_battery_level
+                                icon: mdi:car-electric
+                                name: Batterinivå Elbil
+                    - type: conditional
+                      conditions:
+                        - condition: state
+                          entity: input_boolean.sem_ev_integrated
+                          state: "off"
+                      card:
+                        type: markdown
+                        content: >
+                          Välj önskad strategi då elbilen och hembatteriet
+                          laddas samtidigt.  
 
 
-                            **Dela effekt**: Elbilen och hembatteriet kommer att
-                            dela på tillgänglig effekt. Har du en
-                            lastbalanserare kommer effekten på din laddbox gå
-                            ner. Detta kan resultera i att laddningen pausas vid
-                            hög effekt.  
+                          **Ladda elbil först**: Prioterar laddning av elbilen.
+                          När elbilen är laddad kommer hembatteriet att laddas. 
 
 
-                            **Ladda elbil till en viss procent**: Elbilen laddas
-                            till laddningsnivån du anger. Därefter delar elbilen
-                            och batteriet på tillgänglig effekt. 
+                          **Dela effekt**: Elbilen och hembatteriet kommer att
+                          dela på tillgänglig effekt. Har du en lastbalanserare
+                          kommer effekten på din laddbox gå ner. Detta kan
+                          resultera i att laddningen pausas vid hög effekt.  
+                    - type: conditional
+                      conditions:
+                        - condition: state
+                          entity: input_boolean.sem_ev_integrated
+                          state: "on"
+                      card:
+                        type: custom:vertical-stack-in-card
+                        cards:
+                          - type: markdown
+                            content: >-
+                              Välj önskad strategi då elbilen och hembatteriet
+                              laddas samtidigt.  
+
+
+                              **Ladda elbil först**: Prioterar laddning av
+                              elbilen. När elbilen är laddad kommer hembatteriet
+                              att laddas. 
+
+
+                              **Dela effekt**: Elbilen och hembatteriet kommer
+                              att dela på tillgänglig effekt. Har du en
+                              lastbalanserare kommer effekten på din laddbox gå
+                              ner. Detta kan resultera i att laddningen pausas
+                              vid hög effekt.  
+
+
+                              **Ladda elbil till en viss procent**: Elbilen
+                              laddas till laddningsnivån du anger. Därefter
+                              delar elbilen och batteriet på tillgänglig
+                              effekt. 
               - square: false
                 type: grid
                 cards:
@@ -2241,7 +2424,12 @@ sections:
             vertical: false
             features_position: bottom
           - type: custom:vertical-stack-in-card
-            cards: []
+            cards:
+              - type: entities
+                entities:
+                  - entity: input_number.sem_grid_fees
+                    name: Påslag el
+                    icon: mdi:transmission-tower-import
       - type: vertical-stack
         cards:
           - type: custom:bubble-card
@@ -2280,7 +2468,7 @@ sections:
                       title:
                         text: kWh
                 series:
-                  - entity: sensor.sem_input_power_with_efficiency_loss_kw_tot
+                  - entity: sensor.sem_solar_production
                     type: area
                     yaxis_id: solar
                     name: Producerad solel
@@ -2299,7 +2487,7 @@ sections:
                       duration: 1h
                     show:
                       in_legend: true
-                  - entity: sensor.sem_consumed_solar_energy_today
+                  - entity: sensor.sem_solar_selfused
                     type: area
                     name: Använd solel
                     stroke_width: 1
@@ -2380,18 +2568,24 @@ sections:
                     vertical: false
                     features_position: bottom
                   - type: tile
+                    entity: sensor.sem_solar_forecast_today
+                    name: Prognos
+                    icon: mdi:chart-bar
+                    vertical: false
+                    features_position: bottom
+                  - type: tile
                     entity: sensor.sem_consumed_solar_energy_today
-                    name: Förbrukat
-                    icon: mdi:solar-power-variant
+                    name: Nyttjat
+                    icon: mdi:home-battery
                     vertical: false
                     features_position: bottom
                   - type: tile
                     entity: sensor.sem_export
                     name: Sålt
-                    icon: mdi:solar-power-variant
+                    icon: mdi:transmission-tower-export
                     vertical: false
                     features_position: bottom
-                columns: 3
+                columns: 2
           - type: custom:vertical-stack-in-card
             cards: []
           - type: custom:vertical-stack-in-card
@@ -2551,10 +2745,16 @@ sections:
                         giltig laddningstid</i>{% endif %}</center></b>
 
                         <center>🔋 Batterikapacitet: {{ battery_capacity |
-                        round(2) }} kWh</center>
+                        round(2) }} kWh⁵ (Tot: {{ battery_max | round(2) }}
+                        kWh⁴) </center>
+
+                        <center>☀️ Prognos solel: {{ solar_forecast | round(2)
+                        }} kWh</center>
 
                         <center>⚡ Laddningsbehov: {{ energy | round(2) }}
                         kWh</center>
+
+
 
 
                         {% if ns.should_charge %}
@@ -2564,19 +2764,19 @@ sections:
 
                         <center>
                           Energibehov fram till nästa laddningsfönster:<br>
-                          ({{ estimated_no_sun }} + {{ estimated_sun }} − {{ solar_surplus }}) =
+                          ({{ estimated_no_sun }}² + {{ estimated_sun }}¹ − {{ solar_surplus }}³) =
                           {{ energy_needed_until_next_window | round(2) }}
                           </center>
                           <br>
                           <center>
                           Batteriets underskott justerat för solel:<br>
-                          ({{ battery_max }} − {{ battery_capacity }}) − {{ solar_after_house | round(2) }} =
+                          ({{ battery_max }}⁴ − {{ battery_capacity }}⁵) − {{ solar_after_house | round(2) }}⁶ =
                           {{ net_charge_needed | round(2) }}
                           </center>
                           <br>
                           <center>
                           Total laddning:<br>
-                          {{ net_charge_needed | round(2) }} + {{ supercheap }} + {{ extra }} =
+                          {{ net_charge_needed | round(2) }} + {{ supercheap }}⁷ + {{ extra }} =
                           {{ total_energy | round(2) }}
                           </center>
 
@@ -2584,12 +2784,12 @@ sections:
                         laddningsfönster</center></b>
 
                         <center>☀️ Energibehov under soltimmar: {{ estimated_sun
-                        }} kWh</center>
-                          <center>🌙 Energibehov under solfria timmar: {{ estimated_no_sun }} kWh</center>
+                        }} kWh¹</center>
+                          <center>🌙 Energibehov under solfria timmar: {{ estimated_no_sun }} kWh²</center>
                           <center>🔆 Solelsprognos: {{ solar_forecast | round(2) }} kWh</center>
-                          <center>🔆 Solel tillgänglig för batteriet: {{ solar_after_house | round(2) }} kWh</center>
-                          <center>🔆 Överskott av solel: {{ solar_surplus | round(2) }} kWh</center>
-                          <center>💰 Extra laddning vid superbillig el: {{ supercheap }} kWh</center>
+                          <center>🔆 Solel tillgänglig för batteriet: {{ solar_after_house | round(2) }} kWh⁶</center>
+                          <center>🔆 Överskott av solel: {{ solar_surplus | round(2) }} kWh³</center>
+                          <center>💰 Extra laddning vid superbillig el: {{ supercheap }} kWh⁷</center>
 
                         {% else %}
 
@@ -2749,7 +2949,11 @@ sections:
                         tillgänglig{% endif %}</center></b>
 
                         <center>🔋 Batterikapacitet: {{ battery_capacity |
-                        round(2) }} kWh</center>
+                        round(2) }} kWh (Tot: {{ battery_max | round(2) }} kWh)
+                        </center>
+
+                        <center>☀️ Prognos solel: {{ solar_forecast | round(2)
+                        }} kWh</center>
 
                         <center>⚡ Laddningsbehov: {{ energy | round(2) }}
                         kWh</center>
@@ -3037,8 +3241,19 @@ sections:
                   icon_tap_action:
                     action: none
                   features_position: bottom
+                - type: tile
+                  entity: input_button.sem_restart_ha
+                  name: Klicka här för att starta om Home Assistant
+                  icon: mdi:restart
+                  hide_state: true
+                  vertical: true
+                  tap_action:
+                    action: toggle
+                  icon_tap_action:
+                    action: toggle
+                  features_position: bottom
                 - type: markdown
-                  content: >-
+                  content: >
                     **ℹ️Information**
 
                     Uppdateringen färdig ✅ 
@@ -3048,7 +3263,8 @@ sections:
 
 
                     💻 Uppdatera även hemvyn genom att klistra in koden från
-                    filen admin_view via github. 
+                    filen
+                    [admin_view](https://github.com/Henrik1986/huawei-energy-managment/blob/main/admin_view.yaml)
                   text_only: true
           - type: custom:vertical-stack-in-card
             cards:
@@ -3308,9 +3524,9 @@ sections:
             show_header: false
             width_desktop: 540px
           - type: heading
-            icon: mdi:calendar-clock
+            icon: mdi:auto-mode
             heading_style: title
-            heading: Systemets driftplan
+            heading: Så arbetar ditt energisystem
           - type: custom:vertical-stack-in-card
             cards:
               - type: custom:apexcharts-card
@@ -3349,7 +3565,7 @@ sections:
                     show: false
                 apex_config:
                   chart:
-                    height: 320
+                    height: 200
                     animations:
                       enabled: true
                       easing: easeinout
@@ -3635,412 +3851,717 @@ sections:
                       in_legend: false
               - type: custom:vertical-stack-in-card
                 cards: []
+          - type: vertical-stack
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_more_info_system
+                    state: "off"
+                card:
+                  type: markdown
+                  content: >-
+                    Systemet optimerar automatiskt hur ditt batteri och din
+                    solel används för att minska kostnader och maximera nyttan
+                    av din egenproducerade energi.
+
+
+                    ⚡ **Laddningsfönster**
+
+
+                    Systemet analyserar elpriset och identifierar de billigaste
+                    timmarna för att ladda batteriet. Hur länge batteriet laddas
+                    beror på batteriets storlek och vilken laddeffekt som är
+                    inställd.
+
+
+                    ☀️ **Solelsprognos**
+
+
+                    En prognos beräknar hur mycket solel din anläggning
+                    förväntas producera. Den baseras på din geografiska
+                    position, anläggningens storlek och väderstreck, och hämtas
+                    från tjänsten forecast.solar.
+
+                    Om ingen prognos visas kan det bero på tillfälliga
+                    driftstörningar i tjänsten.
+
+
+                    💤 **Viloläge vid lågt elpris**
+
+
+                    När elpriset är lågt går systemet in i viloläge. Det innebär
+                    att batteriet inte laddas ur, men fortfarande kan laddas.
+
+                    Syftet är att minska slitage på batteriet – det är då mer
+                    ekonomiskt att använda el från nätet än att använda lagrad
+                    energi.
+
+
+                    📉 **Viloläge inför pristopp**
+
+
+                    Inför perioder med höga elpriser kan systemet spara energi i
+                    batteriet. Detta görs för att kunna använda batteriet när
+                    elen är som dyrast och därmed maximera besparingen.
+
+                    Styrningen anpassas efter hushållets energianvändning.
+
+
+                    🚫 **Begränsning av solelexport**
+
+
+                    Om elpriset är 0 kr eller lägre är det inte lönsamt att
+                    sälja solel. Då begränsar systemet exporten och använder
+                    istället energin inom hushållet.
+
+
+                    📊 **Prioriterad batteridrift**
+
+
+                    Systemet identifierar de timmar då elpriset är som högst och
+                    prioriterar att använda batteriet då.
+
+                    Hur länge batteriet används anpassas efter:
+
+
+                    hur mycket energi som finns lagrad
+
+                    hur mycket energi hushållet förväntas använda
+
+
+                    Det innebär att systemet automatiskt justerar sig för att
+                    utnyttja batteriet så effektivt som möjligt.
+
+
+                    🚗**Skydd vid elbilsladdning**
+
+
+                    När elbilen laddas pausas urladdningen från batteriet.
+
+                    Detta görs både för att minska slitage och eftersom det inte
+                    är ekonomiskt att flytta energi från ett batteri till ett
+                    annat.
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_more_info_system
+                    state: "on"
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: custom:vertical-stack-in-card
+                      cards:
+                        - type: conditional
+                          conditions:
+                            - condition: state
+                              entity: sensor.sem_system_plan
+                              state: "2"
+                          card:
+                            type: markdown
+                            content: >+
+                              📊 **Aktuella beslut av systemet** 
+
+                              *Systemet tar nya beslut klockan 04:00*
+
+
+                              🔋 **Laddning:{% set raw =
+                              states('sensor.sem_battery_charge_window_cheapest_2')
+                              %} {% if ' - ' in raw %} {% set start =
+                              as_datetime(raw.split(' - ')[0]) %} {% set end =
+                              as_datetime(raw.split(' - ')[1]) %} {{
+                              start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }}{% else %} Ej
+                              tillgänglig{% endif %}**   
+
+
+                              {% set profit =
+                              state_attr('sensor.sem_battery_charge_energy_2_1b',
+                              'profit') | float(-1) %}
+
+                              {% set profit_threshold =
+                              states('input_number.sem_charge_profit_threshold')
+                              | float(0.20) %}
+
+                              {% set avg_price =
+                              state_attr('sensor.sem_battery_charge_energy_2_1b',
+                              'avg_window') | float(999) %}
+
+                              {% set supercheap =
+                              states('input_number.sem_price_limit_supercheap')
+                              | float(0.20) %}
+
+
+                              {% set should_charge = (profit >=
+                              profit_threshold) or (avg_price <= supercheap) %}
+                              - **Laddningspris:** ~{{ avg_price | round(2) }}
+                              kr/kWh  
+
+                              - **Ditt vinstkrav:** >{{ profit_threshold |
+                              round(2) }} kr/kWh  
+
+                              - **Beräknad vinst:** {{ profit | round(2) }}
+                              kr/kWh
+
+                              - **Beslut:** {% if should_charge %}Ladda{% else
+                              %}Ladda ej{% endif %} 
+
+                               
+                              {% set raw =
+                              states('sensor.sem_relative_expensive_price_1') %}
+                              {% if ' - ' in raw %}
+                                {% set start = as_datetime(raw.split(' - ')[0]) %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{% set hours = (end - start).total_seconds() / 3600 %} {% set need   = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %} {% set batt   = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %} {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %} {% set per_h = hours > 0 and need / hours or 0 %} {% set usable = batt - buffer %} {% if usable > 0 and hours > 0 %} {% set max_hours = usable / per_h %} {% set delta = max_hours - hours %} {% set shift = delta / 2 %} {% set new_start = start - timedelta(hours=shift) %} {% set new_end   = end + timedelta(hours=shift) %} {% else %} {% set new_start = start %} {% set new_end   = end %} {% endif %}
+
+                              🔋 **Prioriterad batteridrift:
+                              {{new_start.strftime('%H:%M') }}–{{
+                              new_end.strftime('%H:%M') }}** 
+
+                              - **Energibehov:** {{ need | round(2) }} kWh
+
+                              - **Batterikapacitet:** {{ batt | round(2) }} kWh
+
+                              - **Energi per timme:** ~{{ per_h | round(2) }}
+                              kWh/h{% else %}Ej tillgänglig{% endif %}
+
+                              - **Dyrt prisintervall:** {% set raw =
+                              states('sensor.sem_relative_expensive_price_1') %}
+                              {% if ' - ' in raw %} {% set start =
+                              as_datetime(raw.split(' - ')[0]) %} {% set end   =
+                              as_datetime(raw.split(' - ')[1]) %}{{
+                              start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }}
+
+                              {% else %}
+
+                              Ej tillgänglig
+
+                              {% endif %}
+
+
+                              🌞 **Begränsa solexport: {% set raw =
+                              states('sensor.sem_export_limit') %} {% if raw not
+                              in ['', 'unknown', 'unavailable'] and ' - ' in raw
+                              %} {% set start = as_datetime(raw.split(' - ')[0])
+                              %} {% set end = as_datetime(raw.split(' - ')[1])
+                              %} {{ start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }}** {% else %} **Ingen
+                              planerat** {% endif %}
+
+                              {% set price_threshold = 0 %}
+
+                              {% set all_prices =
+                              (state_attr('sensor.sem_nordpool_active',
+                              'raw_today') or []) +
+                                                  (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                              {% set start = namespace(value=None) %}
+
+                              {% set end = namespace(value=None) %}
+
+                              {% set hours = namespace(count=0) %}
+
+                              {% set lowest = namespace(value=999) %}
+
+
+                              {% for entry in all_prices %}
+                                {% set price = entry['value'] | float %}
+                                {% set time_start = entry['start'] %}
+                                {% set time_end = entry['end'] %}
+
+                                {% if price < lowest.value %}
+                                  {% set lowest.value = price %}
+                                {% endif %}
+
+                                {% if price <= price_threshold %}
+                                  {% if start.value is none %}
+                                    {% set start.value = time_start %}
+                                  {% endif %}
+                                  {% set end.value = time_end %}
+                                  {% set hours.count = hours.count + 1 %}
+                                {% endif %}
+                              {% endfor %}
+
+
+                              {% if start.value is not none and end.value is not
+                              none %}
+
+
+                              - **Prisgräns:** ≤ {{ price_threshold }} kr/kWh
+
+                              - **Lägsta pris:** {{ lowest.value | round(2) }}
+                              kr/kWh
+
+                              {% else %}
+
+                              - **Period under ≤ {{ price_threshold }} kr/kWh:**
+                              Ingen
+
+                              - **Lägsta pris idag/imorgon:** {{ lowest.value |
+                              round(2) }} kr/kWh
+
+                              {% endif %}
+
+
+
+
+
+                              💤 **Viloläge (lågt elpris):** {% set raw =
+                              states('sensor.sem_battery_cheap_interval_2_1a')
+                              %} {% if ' - ' in raw %} {% set start =
+                              as_datetime(raw.split(' - ')[0]) %} {% set end =
+                              as_datetime(raw.split(' - ')[1]) %} {% if
+                              start.year == 1970 %} **Inget planerat** {% else
+                              %} {{ start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }} {% endif %} {% else
+                              %}**Inget planerat**{% endif %} 
+
+
+                              {% set threshold =
+                              states('input_number.sem_low_price_threshold') |
+                              float(0) %}
+
+
+                              {# --- Hämta alla priser --- #}
+
+                              {% set all_prices =
+                              (state_attr('sensor.sem_nordpool_active',
+                              'raw_today') or []) +
+                                                  (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                              {% set ns = namespace(lowest=999) %}
+
+
+                              {% for entry in all_prices %}
+                                {% if entry.value is defined %}
+                                  {% set price = entry.value | float %}
+                                  {% if price < ns.lowest %}
+                                    {% set ns.lowest = price %}
+                                  {% endif %}
+                                {% endif %}
+                              {% endfor %}
+
+
+                              - **Lägsta pris:** {{ ns.lowest | round(3) }}
+                              kr/kWh  
+
+                              - **Din prisgräns:** ≤ {{ threshold }} kr/kWh
+
+
+                            text_only: true
+                        - type: conditional
+                          conditions:
+                            - condition: state
+                              entity: sensor.sem_system_plan
+                              state: "1"
+                          card:
+                            type: markdown
+                            content: >+
+                              📊 **Aktuella beslut av systemet**
+
+                              *Systemet tar nya beslut klockan 16:00*
+
+
+                              🔋 **Laddning:{% set raw =
+                              states('sensor.sem_battery_charge_window_cheapest_1a')
+                              %} {% if ' - ' in raw %} {% set start =
+                              as_datetime(raw.split(' - ')[0]) %} {% set end =
+                              as_datetime(raw.split(' - ')[1]) %} {{
+                              start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }}{% else %} Ej
+                              tillgänglig{% endif %}**   
+
+
+                              {% set override =
+                              states('input_select.sem_battery_charge_override_1a_2')
+                              %}
+
+                              {% set energy_needed =
+                              states('sensor.sem_battery_charge_energy_1a_2') |
+                              float(0) %}
+
+                              {% set profit =
+                              state_attr('sensor.sem_battery_charge_energy_1a_2',
+                              'profit') | float(-1) %}
+
+                              {% set profit_threshold =
+                              states('input_number.sem_charge_profit_threshold')
+                              | float(0.20) %}
+
+                              {% set avg_price =
+                              state_attr('sensor.sem_battery_charge_energy_1a_2',
+                              'avg_window') | float(999) %}
+
+                              {% set supercheap =
+                              states('input_number.sem_price_limit_supercheap')
+                              | float(0.20) %}
+
+                              {% set solar_enough =
+                              state_attr('sensor.sem_battery_charge_energy_1a_2','battery_solar_enough_today')
+                              %}
+
+
+                              {% set ns = namespace(decision='Ladda',
+                              reasons=[]) %}
+
+
+                              {# Manuell override #}
+
+                              {% if override == 'Ladda' %}
+                                {% set ns.decision = 'Ladda' %}
+                                {% set ns.reasons = ns.reasons + ['Beslut av användaren'] %}
+                              {% elif override == 'Ladda ej' %}
+                                {% set ns.decision = 'Ladda ej' %}
+                                {% set ns.reasons = ns.reasons + ['Beslut av användaren'] %}
+                              {% else %}
+                                {# Solel räcker #}
+                                {% if solar_enough == true %}
+                                  {% set ns.decision = 'Ladda ej' %}
+                                  {% set ns.reasons = ns.reasons + ['Solelen beräknas fylla batteriet'] %}
+                                {% endif %}
+
+                                {# Inget laddningsbehov #}
+                                {% if energy_needed <= 0 %}
+                                  {% set ns.decision = 'Ladda ej' %}
+                                  {% set ns.reasons = ns.reasons + ['Inget laddningsbehov'] %}
+                                {% endif %}
+
+                                {# Vinstbaserat beslut körs endast om batteriet inte fylls av solel och energin > 0 #}
+                                {% if not (solar_enough == true or energy_needed <= 0) %}
+                                  {% if profit >= profit_threshold or avg_price <= supercheap %}
+                                    {% set ns.decision = 'Ladda' %}
+                                    {% set ns.reasons = ns.reasons + ['Elpriset eller arbitrage uppfyller ditt vinstkrav'] %}
+                                  {% else %}
+                                    {% set ns.decision = 'Ladda ej' %}
+                                    {% set ns.reasons = ns.reasons + ['Vinstkravet uppfylls inte'] %}
+                                  {% endif %}
+                                {% endif %}
+                              {% endif %}
+
+
+                              - **Laddningspris:** ~{{ avg_price | round(2) }}
+                              kr/kWh  
+
+                              - **Ditt vinstkrav:** >{{ profit_threshold |
+                              round(2) }} kr/kWh  
+
+                              - **Beräknad vinst:** {{ profit | round(2) }}
+                              kr/kWh  
+
+                              - **Energibehov:** {{ energy_needed | round(2) }}
+                              kWh  
+
+                              - **Beslut:** {{ ns.decision }}
+
+                              - **Orsaker:** {{ ns.reasons | join(', ') }}
+
+                               
+                              {% set raw =
+                              states('sensor.sem_relative_expensive_price_1') %}
+                              {% if ' - ' in raw %}
+                                {% set start = as_datetime(raw.split(' - ')[0]) %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{% set hours = (end - start).total_seconds() / 3600 %} {% set need   = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %} {% set batt   = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %} {% set per_h = hours > 0 and need / hours or 0 %} {% set usable = batt - buffer %} {% if usable > 0 and hours > 0 %} {% set max_hours = usable / per_h %} {% set delta = max_hours - hours %} {% set shift = delta / 2 %} {% set new_start = start - timedelta(hours=shift) %} {% set new_end   = end + timedelta(hours=shift) %} {% else %} {% set new_start = start %} {% set new_end   = end %} {% endif %}
+
+                              🔋 **Prioriterad batteridrift:
+                              {{new_start.strftime('%H:%M') }}–{{
+                              new_end.strftime('%H:%M') }}** 
+
+                              - **Energibehov:** {{ need | round(2) }} kWh
+
+                              - **Batterikapacitet:** {{ batt | round(2) }} kWh
+
+                              - **Energi per timme:** ~{{ per_h | round(2) }}
+                              kWh/h{% else %}Ej tillgänglig{% endif %}
+
+                              - **Dyrt prisintervall:** {% set raw =
+                              states('sensor.sem_relative_expensive_price_1') %}
+                              {% if ' - ' in raw %} {% set start =
+                              as_datetime(raw.split(' - ')[0]) %} {% set end   =
+                              as_datetime(raw.split(' - ')[1]) %}{{
+                              start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }}
+
+                              {% else %}
+
+                              Ej tillgänglig
+
+                              {% endif %}
+
+
+                              🌞 **Begränsa solexport:** {% set raw =
+                              states('sensor.sem_export_limit') %} {% if raw not
+                              in ['', 'unknown', 'unavailable'] and ' - ' in raw
+                              %} {% set start = as_datetime(raw.split(' - ')[0])
+                              %} {% set end = as_datetime(raw.split(' - ')[1])
+                              %} {{ start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }}** {% else %} **Ingen
+                              planerat** {% endif %}
+
+                              {% set price_threshold = 0 %}
+
+                              {% set all_prices =
+                              (state_attr('sensor.sem_nordpool_active',
+                              'raw_today') or []) +
+                                                  (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                              {% set start = namespace(value=None) %}
+
+                              {% set end = namespace(value=None) %}
+
+                              {% set hours = namespace(count=0) %}
+
+                              {% set lowest = namespace(value=999) %}
+
+
+                              {% for entry in all_prices %}
+                                {% set price = entry['value'] | float %}
+                                {% set time_start = entry['start'] %}
+                                {% set time_end = entry['end'] %}
+
+                                {% if price < lowest.value %}
+                                  {% set lowest.value = price %}
+                                {% endif %}
+
+                                {% if price <= price_threshold %}
+                                  {% if start.value is none %}
+                                    {% set start.value = time_start %}
+                                  {% endif %}
+                                  {% set end.value = time_end %}
+                                  {% set hours.count = hours.count + 1 %}
+                                {% endif %}
+                              {% endfor %}
+
+
+                              {% if start.value is not none and end.value is not
+                              none %}
+
+                              - **Prisgräns:** ≤ {{ price_threshold }} kr/kWh
+
+                              - **Lägsta pris:** {{ lowest.value | round(2) }}
+                              kr/kWh
+
+                              {% else %}
+
+                              - **Period under ≤ {{ price_threshold }} kr/kWh:**
+                              Ingen
+
+                              - **Lägsta pris idag/imorgon:** {{ lowest.value |
+                              round(2) }} kr/kWh
+
+                              {% endif %}
+
+
+
+                              💤 **Viloläge (lågt elpris):** {% set raw =
+                              states('sensor.sem_battery_cheap_interval_2_1a')
+                              %} {% if ' - ' in raw %} {% set start =
+                              as_datetime(raw.split(' - ')[0]) %} {% set end =
+                              as_datetime(raw.split(' - ')[1]) %} {% if
+                              start.year == 1970 %} **Inget planerat** {% else
+                              %} **{{ start.strftime('%H:%M') }}–{{
+                              end.strftime('%H:%M') }}** {% endif %} {% else
+                              %}**Inget planerat**{% endif %} 
+
+
+                              {% set threshold =
+                              states('input_number.sem_low_price_threshold') |
+                              float(0) %}
+
+
+                              {# --- Hämta alla priser --- #}
+
+                              {% set all_prices =
+                              (state_attr('sensor.sem_nordpool_active',
+                              'raw_today') or []) +
+                                                  (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+                              {% set ns = namespace(lowest=999) %}
+
+
+                              {% for entry in all_prices %}
+                                {% if entry.value is defined %}
+                                  {% set price = entry.value | float %}
+                                  {% if price < ns.lowest %}
+                                    {% set ns.lowest = price %}
+                                  {% endif %}
+                                {% endif %}
+                              {% endfor %}
+
+
+                              - **Lägsta pris:** {{ ns.lowest | round(3) }}
+                              kr/kWh  
+
+                              - **Din prisgräns:** ≤ {{ threshold }} kr/kWh
+
+          - type: entities
+            entities:
+              - entity: input_boolean.sem_more_info_system
+                name: Mer information
+                icon: mdi:information
+      - type: vertical-stack
+        cards:
+          - type: custom:bubble-card
+            card_type: pop-up
+            hash: "#savings"
+            show_header: false
+            width_desktop: 540px
+            button_type: name
+            sub_button:
+              main: []
+              bottom: []
+          - type: heading
+            icon: mdi:finance
+            heading_style: title
+            heading: Besparingar
+          - type: markdown
+            content: >-
+              Nedan visas de besparingar du har gjort med hjälp av solenergi,
+              samt när du har använt ditt batteri. Solelen har täckt husets
+              energibehov, vilket har minskat behovet av att köpa el från nätet.
+              Dessutom har systemet laddat batteriet med billig el för att täcka
+              dyra pristoppar, vilket ökar både sparandet och effektiviteten.
+          - type: heading
+            icon: mdi:apps
+            heading: Översikt
+            heading_style: subtitle
+          - type: entities
+            entities:
+              - entity: sensor.sem_savings_daily
+                name: Idag
+                icon: mdi:calendar-today
+              - entity: sensor.sem_savings_weekly
+                name: Vecka
+                icon: mdi:calendar-week
+              - entity: sensor.sem_savings_monthly
+                name: Månad
+                icon: mdi:calendar-month
+              - entity: sensor.sem_savings_yearly
+                name: År
+                icon: mdi:calendar-multiple
+              - entity: sensor.sem_savings_total
+                name: Totalt
+                icon: mdi:all-inclusive
           - type: custom:vertical-stack-in-card
             cards:
               - type: conditional
                 conditions:
                   - condition: state
-                    entity: sensor.sem_system_plan
-                    state: "2"
+                    entity: input_select.sem_savings
+                    state: Idag
                 card:
-                  type: markdown
-                  content: >+
-                    📊 **Aktuella beslut av systemet** 
-
-                    *Systemet tar nya beslut klockan 04:00*
-
-
-                    🔋 **Laddning:{% set raw =
-                    states('sensor.sem_battery_charge_window_cheapest_2') %} {%
-                    if ' - ' in raw %} {% set start = as_datetime(raw.split(' -
-                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
-                    {{ start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}{%
-                    else %} Ej tillgänglig{% endif %}**   
-
-
-                    {% set profit =
-                    state_attr('sensor.sem_battery_charge_energy_2_1b',
-                    'profit') | float(-1) %}
-
-                    {% set profit_threshold =
-                    states('input_number.sem_charge_profit_threshold') |
-                    float(0.20) %}
-
-                    {% set avg_price =
-                    state_attr('sensor.sem_battery_charge_energy_2_1b',
-                    'avg_window') | float(999) %}
-
-                    {% set supercheap =
-                    states('input_number.sem_price_limit_supercheap') |
-                    float(0.20) %}
-
-
-                    {% set should_charge = (profit >= profit_threshold) or
-                    (avg_price <= supercheap) %} - **Laddningspris:** ~{{
-                    avg_price | round(2) }} kr/kWh  
-
-                    - **Ditt vinstkrav:** >{{ profit_threshold | round(2) }}
-                    kr/kWh  
-
-                    - **Beräknad vinst:** {{ profit | round(2) }} kr/kWh
-
-                    - **Beslut:** {% if should_charge %}Ladda{% else %}Ladda
-                    ej{% endif %} 
-
-                     
-                    {% set raw = states('sensor.sem_relative_expensive_price_1')
-                    %} {% if ' - ' in raw %}
-                      {% set start = as_datetime(raw.split(' - ')[0]) %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{% set hours = (end - start).total_seconds() / 3600 %} {% set need   = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %} {% set batt   = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %} {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %} {% set per_h = hours > 0 and need / hours or 0 %} {% set usable = batt - buffer %} {% if usable > 0 and hours > 0 %} {% set max_hours = usable / per_h %} {% set delta = max_hours - hours %} {% set shift = delta / 2 %} {% set new_start = start - timedelta(hours=shift) %} {% set new_end   = end + timedelta(hours=shift) %} {% else %} {% set new_start = start %} {% set new_end   = end %} {% endif %}
-
-                    🔋 **Prioriterad batteridrift: {{new_start.strftime('%H:%M')
-                    }}–{{ new_end.strftime('%H:%M') }}** 
-
-                    - **Energibehov:** {{ need | round(2) }} kWh
-
-                    - **Batterikapacitet:** {{ batt | round(2) }} kWh
-
-                    - **Energi per timme:** ~{{ per_h | round(2) }} kWh/h{% else
-                    %}Ej tillgänglig{% endif %}
-
-                    - **Dyrt prisintervall:** {% set raw =
-                    states('sensor.sem_relative_expensive_price_1') %} {% if ' -
-                    ' in raw %} {% set start = as_datetime(raw.split(' - ')[0])
-                    %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{{
-                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}
-
-                    {% else %}
-
-                    Ej tillgänglig
-
-                    {% endif %}
-
-
-                    🌞 **Begränsa solexport: {% set raw =
-                    states('sensor.sem_export_limit') %} {% if raw not in ['',
-                    'unknown', 'unavailable'] and ' - ' in raw %} {% set start =
-                    as_datetime(raw.split(' - ')[0]) %} {% set end =
-                    as_datetime(raw.split(' - ')[1]) %} {{
-                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}** {%
-                    else %} **Ingen planerat** {% endif %}
-
-                    {% set price_threshold = 0 %}
-
-                    {% set all_prices =
-                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
-                    []) +
-                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
-
-                    {% set start = namespace(value=None) %}
-
-                    {% set end = namespace(value=None) %}
-
-                    {% set hours = namespace(count=0) %}
-
-                    {% set lowest = namespace(value=999) %}
-
-
-                    {% for entry in all_prices %}
-                      {% set price = entry['value'] | float %}
-                      {% set time_start = entry['start'] %}
-                      {% set time_end = entry['end'] %}
-
-                      {% if price < lowest.value %}
-                        {% set lowest.value = price %}
-                      {% endif %}
-
-                      {% if price <= price_threshold %}
-                        {% if start.value is none %}
-                          {% set start.value = time_start %}
-                        {% endif %}
-                        {% set end.value = time_end %}
-                        {% set hours.count = hours.count + 1 %}
-                      {% endif %}
-                    {% endfor %}
-
-
-                    {% if start.value is not none and end.value is not none %}
-
-
-                    - **Prisgräns:** ≤ {{ price_threshold }} kr/kWh
-
-                    - **Lägsta pris:** {{ lowest.value | round(2) }} kr/kWh
-
-                    {% else %}
-
-                    - **Period under ≤ {{ price_threshold }} kr/kWh:** Ingen
-
-                    - **Lägsta pris idag/imorgon:** {{ lowest.value | round(2)
-                    }} kr/kWh
-
-                    {% endif %}
-
-
-
-
-
-                    💤 **Viloläge (lågt elpris):** {% set raw =
-                    states('sensor.sem_battery_cheap_interval_2_1a') %} {% if '
-                    - ' in raw %} {% set start = as_datetime(raw.split(' -
-                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
-                    {% if start.year == 1970 %} **Inget planerat** {% else %} {{
-                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }} {%
-                    endif %} {% else %}**Inget planerat**{% endif %} 
-
-
-                    {% set threshold =
-                    states('input_number.sem_low_price_threshold') | float(0) %}
-
-
-                    {# --- Hämta alla priser --- #}
-
-                    {% set all_prices =
-                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
-                    []) +
-                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
-
-                    {% set ns = namespace(lowest=999) %}
-
-
-                    {% for entry in all_prices %}
-                      {% if entry.value is defined %}
-                        {% set price = entry.value | float %}
-                        {% if price < ns.lowest %}
-                          {% set ns.lowest = price %}
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-
-
-                    - **Lägsta pris:** {{ ns.lowest | round(3) }} kr/kWh  
-
-                    - **Din prisgräns:** ≤ {{ threshold }} kr/kWh
-
-
-                  text_only: true
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-today
+                      heading: Idag
+                      heading_style: subtitle
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing idag
+                      graph_span: 24h
+                      span:
+                        start: day
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_savings_daily
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1h
+                            func: diff
               - type: conditional
                 conditions:
                   - condition: state
-                    entity: sensor.sem_system_plan
-                    state: "1"
+                    entity: input_select.sem_savings
+                    state: Vecka
                 card:
-                  type: markdown
-                  content: >+
-                    📊 **Aktuella beslut av systemet**
-
-                    *Systemet tar nya beslut klockan 16:00*
-
-
-                    🔋 **Laddning:{% set raw =
-                    states('sensor.sem_battery_charge_window_cheapest_1a') %} {%
-                    if ' - ' in raw %} {% set start = as_datetime(raw.split(' -
-                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
-                    {{ start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}{%
-                    else %} Ej tillgänglig{% endif %}**   
-
-
-                    {% set override =
-                    states('input_select.sem_battery_charge_override_1a_2') %}
-
-                    {% set energy_needed =
-                    states('sensor.sem_battery_charge_energy_1a_2') | float(0)
-                    %}
-
-                    {% set profit =
-                    state_attr('sensor.sem_battery_charge_energy_1a_2',
-                    'profit') | float(-1) %}
-
-                    {% set profit_threshold =
-                    states('input_number.sem_charge_profit_threshold') |
-                    float(0.20) %}
-
-                    {% set avg_price =
-                    state_attr('sensor.sem_battery_charge_energy_1a_2',
-                    'avg_window') | float(999) %}
-
-                    {% set supercheap =
-                    states('input_number.sem_price_limit_supercheap') |
-                    float(0.20) %}
-
-                    {% set solar_enough =
-                    state_attr('sensor.sem_battery_charge_energy_1a_2','battery_solar_enough_today')
-                    %}
-
-
-                    {% set ns = namespace(decision='Ladda', reasons=[]) %}
-
-
-                    {# Manuell override #}
-
-                    {% if override == 'Ladda' %}
-                      {% set ns.decision = 'Ladda' %}
-                      {% set ns.reasons = ns.reasons + ['Beslut av användaren'] %}
-                    {% elif override == 'Ladda ej' %}
-                      {% set ns.decision = 'Ladda ej' %}
-                      {% set ns.reasons = ns.reasons + ['Beslut av användaren'] %}
-                    {% else %}
-                      {# Solel räcker #}
-                      {% if solar_enough == true %}
-                        {% set ns.decision = 'Ladda ej' %}
-                        {% set ns.reasons = ns.reasons + ['Solelen beräknas fylla batteriet'] %}
-                      {% endif %}
-
-                      {# Inget laddningsbehov #}
-                      {% if energy_needed <= 0 %}
-                        {% set ns.decision = 'Ladda ej' %}
-                        {% set ns.reasons = ns.reasons + ['Inget laddningsbehov'] %}
-                      {% endif %}
-
-                      {# Vinstbaserat beslut körs endast om batteriet inte fylls av solel och energin > 0 #}
-                      {% if not (solar_enough == true or energy_needed <= 0) %}
-                        {% if profit >= profit_threshold or avg_price <= supercheap %}
-                          {% set ns.decision = 'Ladda' %}
-                          {% set ns.reasons = ns.reasons + ['Elpriset eller arbitrage uppfyller ditt vinstkrav'] %}
-                        {% else %}
-                          {% set ns.decision = 'Ladda ej' %}
-                          {% set ns.reasons = ns.reasons + ['Vinstkravet uppfylls inte'] %}
-                        {% endif %}
-                      {% endif %}
-                    {% endif %}
-
-
-                    - **Laddningspris:** ~{{ avg_price | round(2) }} kr/kWh  
-
-                    - **Ditt vinstkrav:** >{{ profit_threshold | round(2) }}
-                    kr/kWh  
-
-                    - **Beräknad vinst:** {{ profit | round(2) }} kr/kWh  
-
-                    - **Energibehov:** {{ energy_needed | round(2) }} kWh  
-
-                    - **Beslut:** {{ ns.decision }}
-
-                    - **Orsaker:** {{ ns.reasons | join(', ') }}
-
-                     
-                    {% set raw = states('sensor.sem_relative_expensive_price_1')
-                    %} {% if ' - ' in raw %}
-                      {% set start = as_datetime(raw.split(' - ')[0]) %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{% set hours = (end - start).total_seconds() / 3600 %} {% set need   = state_attr('sensor.sem_relative_expensive_price_1','kwh_required') | float(0) %} {% set batt   = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} {% set buffer = states('input_number.sem_battery_total_capacity_kwh') | float(0) * 0.10 %} {% set per_h = hours > 0 and need / hours or 0 %} {% set usable = batt - buffer %} {% if usable > 0 and hours > 0 %} {% set max_hours = usable / per_h %} {% set delta = max_hours - hours %} {% set shift = delta / 2 %} {% set new_start = start - timedelta(hours=shift) %} {% set new_end   = end + timedelta(hours=shift) %} {% else %} {% set new_start = start %} {% set new_end   = end %} {% endif %}
-
-                    🔋 **Prioriterad batteridrift: {{new_start.strftime('%H:%M')
-                    }}–{{ new_end.strftime('%H:%M') }}** 
-
-                    - **Energibehov:** {{ need | round(2) }} kWh
-
-                    - **Batterikapacitet:** {{ batt | round(2) }} kWh
-
-                    - **Energi per timme:** ~{{ per_h | round(2) }} kWh/h{% else
-                    %}Ej tillgänglig{% endif %}
-
-                    - **Dyrt prisintervall:** {% set raw =
-                    states('sensor.sem_relative_expensive_price_1') %} {% if ' -
-                    ' in raw %} {% set start = as_datetime(raw.split(' - ')[0])
-                    %} {% set end   = as_datetime(raw.split(' - ')[1]) %}{{
-                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}
-
-                    {% else %}
-
-                    Ej tillgänglig
-
-                    {% endif %}
-
-
-                    🌞 **Begränsa solexport:** {% set raw =
-                    states('sensor.sem_export_limit') %} {% if raw not in ['',
-                    'unknown', 'unavailable'] and ' - ' in raw %} {% set start =
-                    as_datetime(raw.split(' - ')[0]) %} {% set end =
-                    as_datetime(raw.split(' - ')[1]) %} {{
-                    start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}** {%
-                    else %} **Ingen planerat** {% endif %}
-
-                    {% set price_threshold = 0 %}
-
-                    {% set all_prices =
-                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
-                    []) +
-                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
-
-                    {% set start = namespace(value=None) %}
-
-                    {% set end = namespace(value=None) %}
-
-                    {% set hours = namespace(count=0) %}
-
-                    {% set lowest = namespace(value=999) %}
-
-
-                    {% for entry in all_prices %}
-                      {% set price = entry['value'] | float %}
-                      {% set time_start = entry['start'] %}
-                      {% set time_end = entry['end'] %}
-
-                      {% if price < lowest.value %}
-                        {% set lowest.value = price %}
-                      {% endif %}
-
-                      {% if price <= price_threshold %}
-                        {% if start.value is none %}
-                          {% set start.value = time_start %}
-                        {% endif %}
-                        {% set end.value = time_end %}
-                        {% set hours.count = hours.count + 1 %}
-                      {% endif %}
-                    {% endfor %}
-
-
-                    {% if start.value is not none and end.value is not none %}
-
-                    - **Prisgräns:** ≤ {{ price_threshold }} kr/kWh
-
-                    - **Lägsta pris:** {{ lowest.value | round(2) }} kr/kWh
-
-                    {% else %}
-
-                    - **Period under ≤ {{ price_threshold }} kr/kWh:** Ingen
-
-                    - **Lägsta pris idag/imorgon:** {{ lowest.value | round(2)
-                    }} kr/kWh
-
-                    {% endif %}
-
-
-
-                    💤 **Viloläge (lågt elpris):** {% set raw =
-                    states('sensor.sem_battery_cheap_interval_2_1a') %} {% if '
-                    - ' in raw %} {% set start = as_datetime(raw.split(' -
-                    ')[0]) %} {% set end = as_datetime(raw.split(' - ')[1]) %}
-                    {% if start.year == 1970 %} **Inget planerat** {% else %}
-                    **{{ start.strftime('%H:%M') }}–{{ end.strftime('%H:%M')
-                    }}** {% endif %} {% else %}**Inget planerat**{% endif %} 
-
-
-                    {% set threshold =
-                    states('input_number.sem_low_price_threshold') | float(0) %}
-
-
-                    {# --- Hämta alla priser --- #}
-
-                    {% set all_prices =
-                    (state_attr('sensor.sem_nordpool_active', 'raw_today') or
-                    []) +
-                                        (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
-
-                    {% set ns = namespace(lowest=999) %}
-
-
-                    {% for entry in all_prices %}
-                      {% if entry.value is defined %}
-                        {% set price = entry.value | float %}
-                        {% if price < ns.lowest %}
-                          {% set ns.lowest = price %}
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-
-
-                    - **Lägsta pris:** {{ ns.lowest | round(3) }} kr/kWh  
-
-                    - **Din prisgräns:** ≤ {{ threshold }} kr/kWh
-
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-week
+                      heading: Vecka
+                      heading_style: subtitle
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing vecka
+                      graph_span: 7d
+                      span:
+                        start: isoWeek
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                          padding:
+                            left: 40
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                            maxWidth: 40
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_savings_monthly
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1d
+                            func: diff
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_select.sem_savings
+                    state: Månad
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-week
+                      heading: Månad
+                      heading_style: subtitle
+                    - type: markdown
+                      content: Under utveckling
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_select.sem_savings
+                    state: År
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-week
+                      heading: År
+                      heading_style: subtitle
+                    - type: markdown
+                      content: Under utveckling
+          - type: entities
+            entities:
+              - entity: input_select.sem_savings
+                name: Välj graf
 badges:
   - type: entity
     show_name: true
@@ -4132,6 +4653,17 @@ badges:
   - type: entity
     show_name: true
     show_state: true
+    show_icon: true
+    entity: sensor.sem_savings_daily
+    icon: mdi:finance
+    color: green
+    name: Besparing (Idag)
+    tap_action:
+      action: navigate
+      navigation_path: "#savings"
+  - type: entity
+    show_name: true
+    show_state: true
     show_icon: false
     entity: sensor.sem_update_status
     icon: mdi:database
@@ -4139,3 +4671,4 @@ badges:
       action: navigate
       navigation_path: "#settings"
     name: Mitt system
+cards: []
