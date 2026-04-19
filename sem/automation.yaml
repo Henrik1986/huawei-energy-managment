@@ -1500,7 +1500,6 @@ automation:
     triggers:
       - trigger: state
         entity_id: input_button.sem_restart_ha
-        to: 'pressed'
     actions:
       - action: homeassistant.restart
 
