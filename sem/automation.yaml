@@ -1125,10 +1125,7 @@ automation:
           - conditions:
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
-                state: "off"
-#              - condition: state
-#                entity_id: input_boolean.sem_battery_save
-#                state: "off"     
+                state: "off" 
               - condition: template
                 value_template: >
                   {% set now_local = now() | as_local %}
@@ -1174,15 +1171,15 @@ automation:
 
 
           #################################################################
-          # 2. NORMALPRIS → ÅTERSTÄLL URLADDNINGSEFFEKTER OCH ELBILEN LADDAR INTE
+          # 2A. NORMALPRIS → ÅTERSTÄLL URLADDNINGSEFFEKTER, ELBILEN LADDAR INTE OCH INTE SPAR INNAN PRISTOPP
           #################################################################
           - conditions:
               - condition: state
                 entity_id: input_boolean.sem_battery_cheap_mode
                 state: "on"
-#              - condition: state
-#                entity_id: input_boolean.sem_battery_save
-#                state: "off"
+              - condition: state
+                entity_id: input_boolean.sem_battery_save
+                state: "off"
               - condition: state
                 entity_id: input_boolean.sem_ev_charging_protection_status
                 state: "off"
@@ -1232,6 +1229,57 @@ automation:
                 target:
                   entity_id: input_boolean.sem_battery_cheap_mode
 
+          #################################################################
+          # 2B. NORMALPRIS MEN BATTERISPAR INNAN PRISTOPP AKTIV → SLÄCK ENDAST CHEAP MODE
+          #################################################################
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.sem_battery_cheap_mode
+                state: "on"
+
+              - condition: state
+                entity_id: input_boolean.sem_battery_save
+                state: "on"
+
+              - condition: template
+                value_template: >
+                  {% set now_local = now() | as_local %}
+
+                  {# Interval 1 #}
+                  {% set i1 = states('sensor.sem_battery_cheap_interval_2_1a') %}
+                  {% set r1 = false %}
+                  {% if i1 not in ['', 'unknown', 'unavailable'] %}
+                    {% set p = i1.split(' - ') %}
+                    {% set s = p[0] | trim | as_datetime | as_local %}
+                    {% set e = p[1] | trim | as_datetime | as_local %}
+                    {% if s <= e %} 
+                      {% set r1 = s <= now_local <= e %}
+                    {% else %}
+                      {% set r1 = now_local >= s or now_local <= e %}
+                    {% endif %}
+                  {% endif %}
+
+                  {# Interval 2 #}
+                  {% set i2 = states('sensor.sem_battery_cheap_interval_1a_2') %}
+                  {% set r2 = false %}
+                  {% if i2 not in ['', 'unknown', 'unavailable'] %}
+                    {% set p = i2.split(' - ') %}
+                    {% set s = p[0] | trim | as_datetime | as_local %}
+                    {% set e = p[1] | trim | as_datetime | as_local %}
+                    {% if s <= e %} 
+                      {% set r2 = s <= now_local <= e %}
+                    {% else %}
+                      {% set r2 = now_local >= s or now_local <= e %}
+                    {% endif %}
+                  {% endif %}
+
+                  {{ not (r1 or r2) }}
+
+            sequence:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.sem_battery_cheap_mode
+
 ################################################################################
   - alias: "SEM - Battery use between 12-00"
     triggers:
@@ -1254,6 +1302,9 @@ automation:
       - condition: time
         after: "12:00:00"
         before: "23:59:59"
+      - condition: state
+        entity_id: input_boolean.sem_battery_cheap_mode
+        state: "off"     
     action:
       - choose:
           # PRE-INTERVAL: CONTROL DISCHARGE BATTERY BEFORE BATTERY INTERVAL
@@ -1334,6 +1385,9 @@ automation:
       - condition: time
         after: "00:00:00"
         before: "12:00:00"
+      - condition: state
+        entity_id: input_boolean.sem_battery_cheap_mode
+        state: "off"      
     action:
       - choose:
           # PRE-INTERVAL: CONTROL DISCHARGE BATTERY BEFORE BATTERY INTERVAL
@@ -1440,6 +1494,103 @@ automation:
             - input_boolean.sem_setting_view
             - input_boolean.sem_fast_choice
 
+################################################################################
+  - alias: SEM - Restart Home Assistant via Button
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_button.sem_restart_ha
+        to: 'pressed'
+    actions:
+      - action: homeassistant.restart
+
+################################################################################
+  - alias: SEM - Update battery mix every 15 min
+    mode: single
+    triggers:
+      - trigger: time_pattern
+        minutes: "/14"
+        seconds: "0"
+    actions:
+      # --- SOLAR ---
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_solar_kwh
+        data:
+          value: >-
+            {% set total_capacity = states('input_number.sem_battery_total_capacity_kwh') | float(14) %}
+            {{ [(states('input_number.sem_battery_solar_kwh') | float + states('sensor.sem_battery_solar_delta') | float), total_capacity - (states('input_number.sem_battery_grid_kwh') | float)] | min | round(2) }}
+      # --- GRID ---
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_grid_kwh
+        data:
+          value: >-
+            {% set total_capacity = states('input_number.sem_battery_total_capacity_kwh') | float(14) %}
+            {{ [(states('input_number.sem_battery_grid_kwh') | float + states('sensor.sem_battery_grid_delta') | float), total_capacity - (states('input_number.sem_battery_solar_kwh') | float)] | min | round(2) }}
+################################################################################
+  - alias: SEM - Store start values window 1a
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.sem_interval_1a
+        to: "on"
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_price_window_1
+        data:
+          value: "{{ state_attr('sensor.sem_battery_charge_energy_1a_2', 'avg_window') | float(0) }}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.grid_charge_start_1a
+        data:
+          value: "{{ states('sensor.sem_battery_charge_from_grid_energy') | float(0) }}"
+
+  - alias: SEM - Store end values window 1a
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.sem_interval_1a
+        to: "off"
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.grid_charge_stop_1a
+        data:
+          value: "{{ states('sensor.sem_battery_charge_from_grid_energy') | float(0) }}"
+
+################################################################################
+  - alias: SEM - Store start values window 2
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.sem_interval_2
+        to: "on"
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_price_window_2
+        data:
+          value: "{{ state_attr('sensor.sem_battery_charge_energy_2_1b', 'avg_window') | float(0) }}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.grid_charge_start_2
+        data:
+          value: "{{ states('sensor.sem_battery_charge_from_grid_energy') | float(0) }}"
+
+  - alias: SEM - Store end values window 2
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.sem_interval_2
+        to: "off"
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.grid_charge_stop_2
+        data:
+          value: "{{ states('sensor.sem_battery_charge_from_grid_energy') | float(0) }}"
 ################################################################################
   - alias: Update packages from GitHub
     triggers:
