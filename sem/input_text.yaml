@@ -68,5 +68,6 @@ input_text:
 
   car_battery_sensor:
     name: Batterisensor elbil
-
   
+  sem_ai_agent: 
+    name: AI Agent
