@@ -419,7 +419,9 @@ template:
       - name: "sem_savings_power_battery"
         unit_of_measurement: "SEK/h"
         state: >
-          {% set battery = states('sensor.batteries_charge_discharge_power') | float(0) %}
+          {% set raw = states('sensor.batteries_charge_discharge_power') | float(0) %}
+          {% set unit = state_attr('sensor.batteries_charge_discharge_power', 'unit_of_measurement') | default('W') %}
+          {% set battery = raw / 1000 if unit == 'W' else raw %}
 
           {% set spot = states('sensor.sem_nordpool_active') | float(0) %}
           {% set fees = states('input_number.sem_grid_fees') | float(0) %}
@@ -453,13 +455,26 @@ template:
       - name: "sem_savings_power_solar"
         unit_of_measurement: "SEK/h"
         state: >
-          {% set house = states('sensor.sem_house_power_ev') | float(0) %}
-          {% set solar = states('sensor.sem_input_power_with_efficiency_loss_kw') | float(0) %}
-          {% set battery = states('sensor.batteries_charge_discharge_power') | float(0) %}
+          {% set raw_house = states('sensor.sem_house_power_ev') | float(0) %}
+          {% set house_unit = state_attr('sensor.sem_house_power_ev', 'unit_of_measurement') | default('kW') %}
+          {% set house = raw_house / 1000 if house_unit == 'W' else raw_house %}
+
+          {# SOLAR #}
+          {% set raw_solar = states('sensor.sem_input_power_with_efficiency_loss_kw') | float(0) %}
+          {% set solar_unit = state_attr('sensor.sem_input_power_with_efficiency_loss_kw', 'unit_of_measurement') | default('kW') %}
+          {% set solar = raw_solar / 1000 if solar_unit == 'W' else raw_solar %}
+
+          {# BATTERY #}
+          {% set raw_battery = states('sensor.batteries_charge_discharge_power') | float(0) %}
+          {% set battery_unit = state_attr('sensor.batteries_charge_discharge_power', 'unit_of_measurement') | default('W') %}
+          {% set battery = raw_battery / 1000 if battery_unit == 'W' else raw_battery %}
+
+          {# PRISER #}
           {% set spot_price = states('sensor.sem_nordpool_active') | float(0) %}
           {% set fees = states('input_number.sem_grid_fees') | float(0) %}
           {% set price = spot_price + fees %}
 
+          {# LOGIK #}
           {% set battery_charge = battery if battery > 0 else 0 %}
           {% set solar_available = solar - battery_charge %}
           {% set solar_to_house = [house, solar_available] | min if solar_available > 0 else 0 %}
