@@ -17,3 +17,10 @@ input_button:
   sem_config_2:
     name: "Step Two Config"
   
+  sem_restart_ha:
+    name: Restart Home Assistant
+    
+  sem_test: 
+    name: TEST
+
+    
