@@ -1,9 +1,10 @@
 template:
   - sensor:
       # CHECK IF THE SYSTEM IS UP TO DATE
+      # CHECK IF THE SYSTEM IS UP TO DATE
       - name: "sem_update_status"
         state: >
-          {% set local = states('sensor.sem_version') %}
+          {% set local = states('sensor.sem_version') | replace('v.', '') | replace('v', '') %}
           {% set remote = states('sensor.sem_github_latest_release') %}
 
           {% if local in ['unknown','unavailable'] or remote in ['unknown','unavailable'] %}
