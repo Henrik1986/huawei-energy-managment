@@ -5,8 +5,6 @@ sensor:
     source: sensor.sem_house_power
     round: 2
     method: left
-#    unit_prefix: k
-#    unit_time: h  
 
   # SOLAR KWH
   - platform: integration
@@ -14,18 +12,13 @@ sensor:
     source: sensor.sem_input_power_with_efficiency_loss_kW
     round: 2
     method: trapezoidal
-#    unit_prefix: k
-#    unit_time: h  
-
+  
   # EV KWH
   - platform: integration
     name: "sem_ev_sensor_power_tot"
     source: sensor.sem_ev_sensor_power
     round: 2
     method: left
-#    method: trapezoidal
-#    unit_prefix: k
-#    unit_time: h  
 
   # IMPORT KWH
   - platform: integration
@@ -33,8 +26,6 @@ sensor:
     source: sensor.sem_import_power
     round: 2
     method: left
-#    unit_prefix: k
-#    unit_time: h  
 
   # EXPORT KWH
   - platform: integration
@@ -42,12 +33,59 @@ sensor:
     source: sensor.sem_export_power
     round: 2
     method: left
-#    unit_prefix: k
-#    unit_time: h  
 
-  # LATEST GITHUB RELEASE
+  # BATTERY DISCHARGE KWH
+  - platform: integration
+    source: sensor.sem_battery_discharge_power
+    name: sem_battery_discharge_energy
+    round: 3
+    method: left
+
+  # BATTERY CHARGE KWH
+  - platform: integration
+    source: sensor.sem_battery_charge_power
+    name: sem_battery_charge_energy
+    round: 3
+    method: left
+
+  # BATTERY CHARGE FROM GRID KWH
+  - platform: integration
+    source: sensor.sem_battery_charge_from_grid_power
+    name: sem_battery_charge_from_grid_energy
+    round: 3
+    method: left
+
+  # BATTERY CHARGE FROM SOLAR KWH
+  - platform: integration
+    source: sensor.sem_battery_charge_from_solar_power
+    name: sem_battery_charge_from_solar_energy
+    round: 3
+    method: left
+  
+  # SOLAR ENERGI TO HOUSE KWH
+  - platform: integration
+    source: sensor.sem_solar_to_house_power
+    name: sem_solar_to_house_energy
+    round: 3
+    method: left
+
+  # TOTAL SAVINGS SEK 
+  - platform: integration
+    name: sem_savings_total
+    source: sensor.sem_savings_power_total
+    round: 2
+    method: trapezoidal
+
+#  # LATEST GITHUB RELEASE
+#  - platform: rest
+#    name: "sem_github_latest_release"
+#    resource: https://api.github.com/repos/Henrik1986/huawei-energy-managment/releases/latest
+#    value_template: "{{ value_json.tag_name }}"
+#    scan_interval: 3600
+
+# LATEST GITHUB RELEASE
   - platform: rest
     name: "sem_github_latest_release"
-    resource: https://api.github.com/repos/Henrik1986/huawei-energy-managment/releases/latest
-    value_template: "{{ value_json.tag_name }}"
-    scan_interval: 3600
+    resource: https://raw.githubusercontent.com/Henrik1986/huawei-energy-managment/main/sem/github_version.json
+    value_template: "{{ value_json.version }}"
+    scan_interval: 21600  # var 6:e timme
