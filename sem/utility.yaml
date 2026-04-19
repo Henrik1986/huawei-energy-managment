@@ -1,25 +1,83 @@
 utility_meter:
   
-  # SOLARPRODUCTION KWH DAILY
+# SOLARPRODUCTION KWH DAILY
   sem_solar_production:
     source: sensor.sem_input_power_with_efficiency_loss_kW_tot
     cycle: daily
     unique_id: sem_solar_production
 
-  # EV KWH DAILY
+# SOLAR SELF_USED
+  sem_solar_selfused:
+    source: sensor.sem_consumed_solar_energy_today
+    cycle: daily
+    unique_id: sem_solar_self_used
+
+# EV KWH DAILY
   sem_ev_charge:
     source: sensor.sem_ev_sensor_power_tot
     cycle: daily
     unique_id: sem_ev_charge
 
-  # IMPORT KWH DAILY
+# IMPORT KWH DAILY
   sem_import:
     source: sensor.sem_import_power_tot
     cycle: daily
     unique_id: sem_import
 
-  # EXPORT KWH DAILY
+# EXPORT KWH DAILY
   sem_export:
     source: sensor.sem_export_power_tot
     cycle: daily
     unique_id: sem_export
+
+# TOTAL SAVINGS DAILY
+  sem_savings_daily:
+    source: sensor.sem_savings_total
+    cycle: daily
+    unique_id: sem_savings_daily
+
+# TOTAL SAVINGS WEEKLY
+  sem_savings_weekly:
+    source: sensor.sem_savings_total
+    cycle: weekly
+    unique_id: sem_savings_weekly
+
+# TOTAL SAVINGS MONTHLY
+  sem_savings_monthly:
+    source: sensor.sem_savings_total
+    cycle: monthly
+    unique_id: sem_savings_monthly
+
+# TOTAL SAVINGS YEARLY
+  sem_savings_yearly:
+    source: sensor.sem_savings_total
+    cycle: yearly
+    unique_id: sem_savings_yearly
+
+# BATTERY DISCHARGE KWH
+  sem_battery_discharge_quarter:
+    source: sensor.sem_battery_discharge_energy
+    cycle: quarter-hourly
+    unique_id: sem_battery_discharge_energy
+
+# BATTERY CHARGE FROM GRID KWH
+  sem_battery_charge_grid_quarter:
+    source: sensor.sem_battery_charge_from_grid_energy
+    cycle: quarter-hourly
+    unique_id: sem_battery_charge_from_grid_energy
+
+  # BATTERY CHARGE FROM SOLAR KWH
+  sem_battery_charge_solar_quarter:
+    source: sensor.sem_battery_charge_from_solar_energy
+    cycle: quarter-hourly
+    unique_id: sem_battery_charge_from_solar_energy
+
+  # SOLAR ENERGI TO HOUSE KWH
+  sem_solar_to_house_energy_quarter:
+    source: sensor.sem_solar_to_house_energy
+    cycle: quarter-hourly
+    unique_id: sem_solar_to_house_energy_quarter
+
+
+
+    
