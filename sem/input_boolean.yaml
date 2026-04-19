@@ -9,6 +9,9 @@ input_boolean:
   sem_battery_cheap_mode:
     name: Billigt elpris aktivt
 
+  sem_ev_wallbox_single: 
+    name: "Wallbox Single"
+
   sem_ev_wallbox_multi: 
     name: "Wallbox Multi"
   
@@ -83,3 +86,12 @@ input_boolean:
   
   sem_ev_integrated: 
     name: EV integrated
+
+  sem_more_info_system:
+    name: Mer information om systemetsdriftplan
+  
+  sem_activate_ai: 
+    name: Aktivera AI-analys
+    
+  sem_test: 
+    name: TEST BOOLEAN
