@@ -3105,7 +3105,7 @@ template:
             ====================
             SVAR
             ====================
-            Svara på svenska i max 255 tecken. Skriv exakt 2-3 meningar, kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
+            Svara på svenska med max 250 tecken. Skriv kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
 
             Struktur:
             1. Börja alltid med: "När det gäller laddning av batteriet har jag planerat att ladda ..." eller "har jag inte planerat att ladda..."
@@ -3205,8 +3205,7 @@ template:
             ====================
             SVAR
             ====================
-            Svara på svenska i max 255 tecken. Skriv exakt 2-3 meningar, kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
-
+            Svara på svenska med max 250 tecken. Skriv kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
             Struktur:
             1. Börja alltid med: "När det gäller laddning av batteriet har jag planerat att ladda ..." eller "har jag inte planerat att ladda..."
             2. Ange laddningstid EXAKT i formatet HH:MM-HH:MM. Inga undantag. Ingen text, endast siffror och bindestreck.
@@ -3299,8 +3298,7 @@ template:
             ====================
             SVAR
             ====================
-            Svara på svenska i max 255 tecken. Skriv exakt 2-3 meningar, kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
-
+            Svara på svenska med max 250 tecken. Skriv kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
             Struktur:
             1. Börja alltid med: "Jag har valt att ..."
             2. Beskriv hur systemet planeras att köras baserat på aktiva funktioner
