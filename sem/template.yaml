@@ -1,7 +1,6 @@
 template:
   - sensor:
       # CHECK IF THE SYSTEM IS UP TO DATE
-      # CHECK IF THE SYSTEM IS UP TO DATE
       - name: "sem_update_status"
         state: >
           {% set local = states('sensor.sem_version') | replace('v.', '') | replace('v', '') %}
