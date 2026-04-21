@@ -54,6 +54,11 @@ utility_meter:
     cycle: yearly
     unique_id: sem_savings_yearly
 
+# TOTAL SAVINGS TOTAL
+  sem_savings_tot:
+    source: sensor.sem_savings_total
+    unique_id: sem_savings_tot
+
 # BATTERY DISCHARGE KWH
   sem_battery_discharge_quarter:
     source: sensor.sem_battery_discharge_energy
