@@ -69,9 +69,10 @@ sensor:
     round: 3
     method: left
 
-  # TOTAL SAVINGS SEK 
+  # TOTAL SAVINGS SEK
   - platform: integration
     name: sem_savings_total
+    unique_id: sem_savings_total
     source: sensor.sem_savings_power_total
     round: 2
     method: trapezoidal
