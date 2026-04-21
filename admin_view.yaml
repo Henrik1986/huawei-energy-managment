@@ -3185,6 +3185,9 @@ sections:
                     Uppdatera systemet genom att klicka på uppdatera. Då laddas
                     och installeras den senste versionen. **Starta om Home
                     Assistant efter installationen.**
+
+
+                    Tips! Ta en säkerhetskopia innan du uppdaterar.
                   text_only: true
           - type: conditional
             conditions:
