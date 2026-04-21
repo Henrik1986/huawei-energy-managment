@@ -4436,7 +4436,7 @@ sections:
               - entity: sensor.sem_savings_yearly
                 name: År
                 icon: mdi:calendar-multiple
-              - entity: sensor.sem_savings_total
+              - entity: sensor.sem_savings_tot
                 name: Totalt
                 icon: mdi:all-inclusive
           - type: custom:vertical-stack-in-card
