@@ -1614,7 +1614,7 @@ template:
             {# ===== PARSA INTERVALL ===== #}
             {% if ' - ' in raw_start and ' - ' in raw_end %}
             {% set t1 = raw_start.split(' - ')[0] %}
-            {% set t2 = raw_end.split(' - ')[1] %}
+            {% set t2 = raw_end.split(' - ')[0] %}
             {% set start = as_datetime(t1) %}
             {% set end = as_datetime(t2) %}
             {% else %}
