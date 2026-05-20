@@ -1,7 +1,7 @@
 views:
   - type: sections
     max_columns: 3
-    path: smart-energy-system
+    path: smart-energistyrning
     icon: mdi:dots-circle
     sections:
       - type: grid
