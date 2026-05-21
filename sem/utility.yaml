@@ -30,6 +30,7 @@ utility_meter:
     cycle: daily
     unique_id: sem_export
 
+##### SAVINGS #####
 # TOTAL SAVINGS DAILY
   sem_savings_daily:
     source: sensor.sem_savings_total
@@ -59,6 +60,38 @@ utility_meter:
     source: sensor.sem_savings_total
     unique_id: sem_savings_tot
 
+##### EARNINGS #####
+# TOTAL EARNINGS DAILY
+  sem_earnings_daily:
+    source: sensor.sem_solar_export_earnings_total
+    cycle: daily
+    unique_id: sem_earnings_daily
+
+# TOTAL EARNINGS WEEKLY
+  sem_earnings_weekly:
+    source: sensor.sem_solar_export_earnings_total
+    cycle: weekly
+    unique_id: sem_earnings_weekly
+
+# TOTAL EARNINGS MONTHLY
+  sem_earnings_monthly:
+    source: sensor.sem_solar_export_earnings_total
+    cycle: monthly
+    unique_id: sem_earnings_monthly
+
+# TOTAL EARNINGS YEARLY
+  sem_earnings_yearly:
+    source: sensor.sem_solar_export_earnings_total
+    cycle: yearly
+    unique_id: sem_earnings_yearly
+
+# TOTAL EARNINGS TOTAL
+  sem_earnings_tot:
+    source: sensor.sem_solar_export_earnings_total
+    unique_id: sem_earnings_tot
+
+
+##### BATTERY #####
 # BATTERY DISCHARGE KWH
   sem_battery_discharge_quarter:
     source: sensor.sem_battery_discharge_energy
@@ -82,7 +115,3 @@ utility_meter:
     source: sensor.sem_solar_to_house_energy
     cycle: quarter-hourly
     unique_id: sem_solar_to_house_energy_quarter
-
-
-
-    
