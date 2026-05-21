@@ -1,7 +1,7 @@
 sensor:
   # FOR CALCULATION OF CHARGE
   - platform: integration
-    name: "sem_house_power_tot"  
+    name: "sem_house_power_tot"
     source: sensor.sem_house_power
     round: 2
     method: left
@@ -12,7 +12,7 @@ sensor:
     source: sensor.sem_input_power_with_efficiency_loss_kW
     round: 2
     method: trapezoidal
-  
+
   # EV KWH
   - platform: integration
     name: "sem_ev_sensor_power_tot"
@@ -61,7 +61,7 @@ sensor:
     name: sem_battery_charge_from_solar_energy
     round: 3
     method: left
-  
+
   # SOLAR ENERGI TO HOUSE KWH
   - platform: integration
     source: sensor.sem_solar_to_house_power
@@ -77,16 +77,30 @@ sensor:
     round: 2
     method: trapezoidal
 
-#  # LATEST GITHUB RELEASE
-#  - platform: rest
-#    name: "sem_github_latest_release"
-#    resource: https://api.github.com/repos/Henrik1986/huawei-energy-managment/releases/latest
-#    value_template: "{{ value_json.tag_name }}"
-#    scan_interval: 3600
+  # TOTAL EARNINGS SEK
+  - platform: integration
+    name: sem_solar_export_earnings_total
+    unique_id: sem_solar_export_earnings_total
+    source: sensor.sem_solar_export_earnings
+    round: 2
+    method: trapezoidal   
 
-# LATEST GITHUB RELEASE
+  # LATEST GITHUB RELEASE
   - platform: rest
     name: "sem_github_latest_release"
     resource: https://raw.githubusercontent.com/Henrik1986/huawei-energy-managment/main/sem/github_version.json
     value_template: "{{ value_json.version }}"
-    scan_interval: 21600  # var 6:e timme
+    scan_interval: 21600 # var 6:e timme
+
+
+
+        
+
+          
+          
+          
+          
+          
+          
+          
+          
