@@ -22,7 +22,6 @@ input_select:
       - Ladda ej 
     initial: Auto
       
-
   sem_savings: 
     name: Savings graph
     options: 
