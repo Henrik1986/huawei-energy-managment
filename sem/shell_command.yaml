@@ -1,11 +1,30 @@
 shell_command:
   update_packages_from_github: >
     bash -c "
-      cd /config && \
-      mkdir -p /config/packages/sem && \
-      curl -L -o repo.zip https://github.com/Henrik1986/huawei-energy-managment/archive/refs/heads/main.zip && \
-      unzip -o repo.zip -d /config/tmp_repo && \
-      cp -r /config/tmp_repo/huawei-energy-managment-main/sem/* /config/packages/sem && \
-      rm repo.zip && \
-      rm -rf /config/tmp_repo
+      cd /config &&
+
+      echo '--- CLEAN ---' &&
+      rm -rf /config/tmp_sem &&
+      rm -f sem.zip &&
+
+      echo '--- CREATE FOLDERS ---' &&
+      mkdir -p /config/packages/sem &&
+      mkdir -p /config/dashboards &&
+
+      echo '--- DOWNLOAD REPO ---' &&
+      curl -L -o sem.zip https://github.com/Henrik1986/huawei-energy-managment/archive/refs/heads/main.zip &&
+
+      echo '--- UNZIP ---' &&
+      unzip -o sem.zip -d /config/tmp_sem &&
+
+      echo '--- BACKEND COPY ---' &&
+      cp -r /config/tmp_sem/huawei-energy-managment-main/sem/* /config/packages/sem/ &&
+
+      echo '--- FRONTEND COPY ---' &&
+      cp -r /config/tmp_sem/huawei-energy-managment-main/dashboards/* /config/dashboards/ &&
+
+      echo '--- CLEANUP ---' &&
+      rm -rf sem.zip /config/tmp_sem &&
+
+      echo 'INSTALL COMPLETE'
     "
