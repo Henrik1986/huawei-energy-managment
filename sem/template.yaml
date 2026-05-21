@@ -279,7 +279,9 @@ template:
           {% set solar_exported = states('sensor.sem_export') | float(0) %}
           {{ [solar_produced - solar_exported, 0] | max | round(2) }}
 
-      # SAVINGS START #
+########
+#SAVINGS
+########
 
       # CHARGE POWER BATTERY
       - name: "sem_battery_charge_power"
@@ -490,6 +492,29 @@ template:
           {% set solar = states('sensor.sem_savings_power_solar') | float(0) %}
           {% set battery = states('sensor.sem_savings_power_battery') | float(0) %}
           {{ (solar + battery) | round(2) }}
+
+#########
+#EARNINGS
+#########
+
+      - name: "SEM Solar Export Earnings"
+        unique_id: sem_solar_export_earnings
+        unit_of_measurement: "SEK/h"
+        device_class: monetary
+        state_class: measurement
+        state: >
+          {# EXPORT #}
+          {% set raw_export = states('sensor.sem_export_power') | float(0) %}
+          {% set export_unit = state_attr('sensor.sem_export_power', 'unit_of_measurement') | default('kW') %}
+          {% set export = raw_export / 1000 if export_unit == 'W' else raw_export %}
+          {# PRIS #}
+          {% set spot_price = states('sensor.sem_nordpool_active') | float(0) %}
+          {% set addon = states('input_number.sem_export_addon') | float(0) %}
+          {% set sell_price = spot_price + addon %}
+          {# INTÄKT #}
+          {{ (export * sell_price) | round(3) }}
+
+
 
       # HOUSE POWER - NO EV
       - name: "sem_house_power"
@@ -719,37 +744,6 @@ template:
 
       ################################ SMART LOGIC ####################################################
 
-      # SHOWS INTERVAL WHEN SOLAREXPORT SHOULD BE REDUCED
-      - name: "sem_export_limit"
-        unique_id: sem_export_limit
-        state: >
-          {% set limit_active = is_state('input_boolean.sem_export_limit_active', 'on') %}
-          {% if not limit_active %}
-            ""
-          {% else %}
-            {% set price_threshold = 0 %}
-            {% set all_prices = (state_attr('sensor.sem_nordpool_active', 'raw_today') or []) +
-                                (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
-            {% set start = namespace(value=None) %}
-            {% set end = namespace(value=None) %}           
-            {% for entry in all_prices %}
-              {% set price = entry['value'] | float %}
-              {% set time_start = entry['start'] %}
-              {% set time_end = entry['end'] %}
-            
-              {% if price <= price_threshold %}
-                {% if start.value is none %}
-                  {% set start.value = time_start %}
-                {% endif %}
-                {% set end.value = time_end %}
-              {% endif %}
-            {% endfor %}          
-            {% if start.value is not none and end.value is not none %}
-              {{ start.value }} - {{ end.value }}
-            {% else %}
-              ""
-            {% endif %}
-          {% endif %}
 
       # CALCULATES CHARGE TIME FROM MAX kW
       - name: "sem_battery_dynamic_charge_time_window_1"
@@ -814,97 +808,80 @@ template:
             0
           {% endif %}
 
-      #ADJUSTMENT FACTOR FOR ENERGY CALCULATION
-      - name: sem_energy_adjustment_morning
-        state: >
-          {% set d1 = states('sensor.sem_energy_avg_morning_1d') | float(0) %}
-          {% set d7 = states('sensor.sem_energy_avg_morning') | float(0) %}
-          {% if d7 > 0 %}
-            {% set ratio = d1 / d7 %}
-            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
-          {% else %}
-            1
-          {% endif %}
-
-      - name: sem_energy_adjustment_day
-        state: >
-          {% set d1 = states('sensor.sem_energy_avg_day_1d') | float(0) %}
-          {% set d7 = states('sensor.sem_energy_avg_day') | float(0) %}
-          {% if d7 > 0 %}
-            {% set ratio = d1 / d7 %}
-            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
-          {% else %}
-            1
-          {% endif %}
-
-      - name: sem_energy_adjustment_evening
-        state: >
-          {% set d1 = states('sensor.sem_energy_avg_evening_1d') | float(0) %}
-          {% set d7 = states('sensor.sem_energy_avg_evening') | float(0) %}
-          {% if d7 > 0 %}
-            {% set ratio = d1 / d7 %}
-            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
-          {% else %}
-            1
-          {% endif %}
-
-      - name: sem_energy_adjustment_night
-        state: >
-          {% set d1 = states('sensor.sem_energy_avg_night_1d') | float(0) %}
-          {% set d7 = states('sensor.sem_energy_avg_night') | float(0) %}
-          {% if d7 > 0 %}
-            {% set ratio = d1 / d7 %}
-            {{ (1 + (ratio - 1) * 0.3) | round(2) }}
-          {% else %}
-            1
-          {% endif %}
-
-      # CALCULATES ENERGY BETWEEN 1A AND 2
+# CALCULATES ENERGY BETWEEN 1A AND 2
       - name: "sem_battery_charge_energy_1a_2"
         unique_id: sem_battery_charge_energy_1a_2
         unit_of_measurement: "kWh"
         state: >
-          {% set battery_solar_enough = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_solar_enough_today') %}
-          {% if battery_solar_enough %}
-            0
-          {% else %}
+          {% set pre_peak  = state_attr('sensor.sem_battery_charge_energy_1a_2', 'pre_peak') | float(0) %}
+          {% set peak      = state_attr('sensor.sem_battery_charge_energy_1a_2', 'peak') | float(0) %}
+          {% set post_peak = state_attr('sensor.sem_battery_charge_energy_1a_2', 'post_peak') | float(0) %}
 
-            {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} 
-            {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %} 
-            {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_1a_2','weather_buffer') | float(0) %} 
-            {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval') | float(0) %} 
-            {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_solar_energy') | float(0) %} 
-            {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval') | float(0) %} 
-            {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_1a_2','avg_price') | float(0) %} 
-            {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
-            {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') | float(0) %}
-            {% set extra = states('input_number.extra_1') | float(0) %}
-            {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
-            {% set ev_charge_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','ev_charge_factor') | float(0) %}
-            {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_1a_2','solar_surplus') | float(0) %}
-            {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-            
-            {# --- START BERÄKNING --- #}
-            {# --- Solel som går till batteriet efter husets behov --- #}
-            {% set solar_after_house = max(0, (estimated_solar_energy * adjustment_factor_solar_energy) - estimated_energy_sun_interval) %}
+          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2', 'usable_capacity') | float(0) %}
+          {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2', 'battery_capacity') | float(0) %}
 
-            {# --- Energibehov fram till nästa laddningsfönster (lookahead) --- #}
-            {% set energy_needed_until_next_window = estimated_energy_no_sun_interval + estimated_energy_sun_interval - solar_surplus %}
+          {% set pre_ok  = state_attr('sensor.sem_battery_charge_energy_1a_2', 'pre_peak_profit') is true %}
+          {% set peak_ok = state_attr('sensor.sem_battery_charge_energy_1a_2', 'peak_profit') is true %}
+          {% set post_ok = state_attr('sensor.sem_battery_charge_energy_1a_2', 'post_peak_profit') is true %}
 
-            {# --- Batteriets deficit justerat med lookahead --- #}
-            {% if battery_capacity >= energy_needed_until_next_window %}
-                {% set net_charge_needed = 0 %}
-            {% else %}
-                {% set battery_deficit = max(0, battery_max - battery_capacity) %}
-                {% set net_charge_needed = max(0, battery_deficit - solar_after_house) %}
-            {% endif %}
+          {% set total_kwh =
+            (pre_peak  if pre_ok  else 0) +
+            (peak      if peak_ok else 0) +
+            (post_peak if post_ok else 0)
+          %}
 
-            {# --- Total laddning under fönstret inklusive extra och superbillig el --- #}
-            {% set total_energy_need = net_charge_needed + supercheap_charge + extra %}
-            {{ [total_energy_need, battery_max] | min }}
+          {# Begränsa först mot batteriets maxkapacitet #}
+          {% set capped_total = [total_kwh, usable_capacity] | min %}
 
-          {% endif %}
+          {# Dra sedan bort energi som redan finns i batteriet #}
+          {% set charge_needed = capped_total - battery_capacity %}
 
+          {# Tillåt aldrig negativt värde #}
+          {% set charge_needed = [charge_needed, 0] | max %}
+
+          {{ charge_needed | round(2) }}
+##############################
+#          {% set battery_solar_enough = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_solar_enough_today') %}
+#          {% if battery_solar_enough %}
+#            0
+#          {% else %}
+
+#            {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %} 
+#            {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %} 
+#            {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_1a_2','weather_buffer') | float(0) %} 
+#            {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_sun_interval') | float(0) %} 
+#            {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_solar_energy') | float(0) %} 
+#            {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_energy_no_sun_interval') | float(0) %} 
+#            {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_1a_2','avg_price') | float(0) %} 
+#            {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
+#            {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_1a_2','supercheap_charge') | float(0) %}
+#            {% set extra = states('input_number.extra_1') | float(0) %}
+#            {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(0) %}
+#            {% set ev_charge_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','ev_charge_factor') | float(0) %}
+#            {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_1a_2','solar_surplus') | float(0) %}
+#            {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
+#            
+#            {# --- START BERÄKNING --- #}
+#            {# --- Solel som går till batteriet efter husets behov --- #}
+#            {% set solar_after_house = max(0, (estimated_solar_energy * adjustment_factor_solar_energy) - estimated_energy_sun_interval) %}
+
+#            {# --- Energibehov fram till nästa laddningsfönster (lookahead) --- #}
+#            {% set energy_needed_until_next_window = estimated_energy_no_sun_interval + estimated_energy_sun_interval - solar_surplus %}
+
+#            {# --- Batteriets deficit justerat med lookahead --- #}
+#            {% if battery_capacity >= energy_needed_until_next_window %}
+#                {% set net_charge_needed = 0 %}
+#            {% else %}
+#                {% set battery_deficit = max(0, battery_max - battery_capacity) %}
+#                {% set net_charge_needed = max(0, battery_deficit - solar_after_house) %}
+#            {% endif %}
+
+#            {# --- Total laddning under fönstret inklusive extra och superbillig el --- #}
+#            {% set total_energy_need = net_charge_needed + supercheap_charge + extra %}
+#            {{ [total_energy_need, battery_max] | min }}
+
+#          {% endif %}
+###############################
         #          {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
         #          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %}
         #          {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_1a_2','weather_buffer') | float(0) %}
@@ -1283,27 +1260,10 @@ template:
             {% set solar_surplus_for_battery = [solar_production - house_demand, 0] | max %}
             {{ solar_surplus_for_battery | round(2) }}
           battery_solar_enough_today: >
-            {% set remaining_solar = state_attr('sensor.sem_battery_charge_energy_1a_2','estimated_remaining_solar_today') | float(0) %}
-            {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','battery_capacity') | float(0) %}
-            {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-            {% set battery_remaining = battery_max - battery_capacity %}
+            {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_1a_2','solar_surplus') | float(0) %}
+            {% set required_energy = states('sensor.sem_battery_charge_energy_1a_2') | float(0) %}
 
-            {% set forecast = state_attr('sensor.sem_weather_forecasts_hourly','forecast') %}
-
-            {% if forecast %}
-              {% set next6 = forecast[:6] %}
-              {% set clouds = (next6 | map(attribute='cloud_coverage') | sum / (next6 | length)) %}
-            {% else %}
-              {% set clouds = 50 %}
-            {% endif %}
-
-            {% set factor = 1 - (clouds / 200) %}
-            {% set factor = [0.90, factor] | min %}
-            {% set factor = [0.50, factor] | max %}
-
-            {% set solar_safe = remaining_solar * factor %}
-
-            {{ solar_safe >= battery_remaining }}
+            {{ solar_surplus >= required_energy }}
           ev_charge_factor: >
             {% if is_state('input_boolean.sem_ev_charged_today', 'on') %}
               0.5
@@ -1530,11 +1490,631 @@ template:
                 {% endif %}
               {% endif %}
             {% endif %}
-          battery_charge_profit: >
-            {% set profit = state_attr('sensor.sem_battery_charge_energy_1a_2', 'profit') | float(-1) %}
-            {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
+          pre_peak: >
+            {% set peak = states('sensor.sem_relative_expensive_price_1') %}
 
-            {{ profit >= profit_threshold }}
+            {# ===== INPUT =====
+            peak: {{ peak }} #}
+
+            {% if ' - ' not in peak %}
+            {# ❌ fel format #}
+            {% else %}
+
+            {# =========================
+            INTERVALL (PRE-PEAK)
+            ========================= #}
+
+            {% set cheap_2 = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+
+            {% set start_raw = as_datetime(cheap_2.split(' - ')[1]) %}
+            {% set end_raw   = as_datetime(peak.split(' - ')[0]) %}
+
+            {% set start = start_raw %}
+            {% if start.minute > 0 or start.second > 0 %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% else %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) %}
+            {% endif %}
+
+            {% set end = end_raw %}
+            {% if end.minute > 0 or end.second > 0 %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% else %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) %}
+            {% endif %}
+
+            {# ===== INTERVALL (PRE-PEAK) =====
+            raw start: {{ start_raw }}
+            raw end: {{ end_raw }}
+            start: {{ start }}
+            end: {{ end }} #}
+
+            {# =========================
+            ENERGIPROFIL
+            ========================= #}
+
+            {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+            {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+            {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+            {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+            {# =========================
+            SOLDATA
+            ========================= #}
+
+            {% set forecast_raw = state_attr('sensor.sem_solar_forecast','sem') %}
+            {% set forecast = forecast_raw if forecast_raw is mapping else {} %}
+            {% set wp = forecast.get('watt_hours_period', []) %}
+
+            {% set sol_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(1) %}
+
+            {% set sol_map = namespace(data={}) %}
+            {% for e in wp %}
+              {% if e is mapping %}
+                {% set d = e.get('date') %}
+                {% set v = e.get('values') %}
+                {% if d is not none and v is not none %}
+                  {% set dt = as_datetime(d) %}
+                  {% set ts_hour = dt.replace(minute=0, second=0, microsecond=0) %}
+                  {% set kwh = (v | float / 1000) * sol_factor %}
+                  {% set sol_map.data = dict(sol_map.data, **{ts_hour|string: kwh}) %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {# =========================
+            PRE-PEAK BEHOV
+            ========================= #}
+
+            {# ===== TIMMAR (PRE-PEAK) ===== #}
+
+            {% set ns2 = namespace(current=start, total_netto=0) %}
+
+            {% for i in range(0, 48) %}
+              {% if ns2.current >= end %}
+                {% break %}
+              {% endif %}
+
+              {% set h = ns2.current.hour %}
+              {% set ts_key = ns2.current.replace(minute=0, second=0, microsecond=0) | string %}
+
+              {% if 5 <= h < 10 %}
+                {% set need = k_morning %}
+                {% set label = "morgon" %}
+              {% elif 10 <= h < 15 %}
+                {% set need = k_day %}
+                {% set label = "dag" %}
+              {% elif 15 <= h < 21 %}
+                {% set need = k_evening %}
+                {% set label = "kväll" %}
+              {% else %}
+                {% set need = k_night %}
+                {% set label = "natt" %}
+              {% endif %}
+
+              {% set sol = sol_map.data.get(ts_key, 0) %}
+              {% set netto = need - sol %}
+              {% set deficit = [netto, 0] | max %}
+
+              {% set ns2.total_netto = ns2.total_netto + deficit %}
+
+              {# {{ ns2.current }} | {{ label }} | behov: {{ need }} | sol: {{ sol }} | netto: {{ netto }} | deficit: {{ deficit }} #}
+
+              {% set ns2.current = ns2.current + timedelta(hours=1) %}
+            {% endfor %}
+
+            {#===== PRE-PEAK TOTAL =====#}
+            {{ ns2.total_netto | round(2) }}
+
+            {% endif %}
+          pre_peak_profit: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              false
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_1') %}
+              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0) %}
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                false
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {# --- laddfönster --- #}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('start','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  false
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {# --- pre-peak --- #}
+                  {% set before_peak = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', peak_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if before_peak | length == 0 %}
+                    false
+                  {% else %}
+                    {% set avg_before_peak = (before_peak | sum) / (before_peak | length) %}
+                    {% set profit = avg_before_peak - avg_window %}
+                    {{ profit >= threshold }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          pre_peak_profit_value: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              -1
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_1') %}
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                -1
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('start','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  -1
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set before_peak = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', peak_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if before_peak | length == 0 %}
+                    -1
+                  {% else %}
+                    {% set avg_before_peak = (before_peak | sum) / (before_peak | length) %}
+                    {{ (avg_before_peak - avg_window) | round(3) }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          peak: >
+            {% set peak = states('sensor.sem_relative_expensive_price_1') %}
+
+            {# ===== INPUT =====
+            peak: {{ peak }} #}
+
+            {% if ' - ' not in peak %}
+            {# ❌ fel format #}
+            {% else %}
+
+            {# =========================
+            INTERVALL (PEAK)
+            ========================= #}
+
+            {% set next_charge = states('sensor.sem_battery_charge_window_cheapest_2') %}
+
+            {% set start_raw = as_datetime(peak.split(' - ')[0]) %}
+            {% set end_raw   = as_datetime(peak.split(' - ')[1]) %}
+
+            {% set start = start_raw %}
+            {% if start.minute > 0 or start.second > 0 %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% endif %}
+
+            {% set end = end_raw.replace(minute=0, second=0, microsecond=0) %}
+            {% if end <= start %}
+              {% set end = end + timedelta(days=1) %}
+            {% endif %}
+
+            {# ===== INTERVALL =====
+            start (peak): {{ start }}
+            end (peak): {{ end }} #}
+
+            {# =========================
+            ENERGIPROFIL
+            ========================= #}
+
+            {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+            {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+            {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+            {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+            {# =========================
+            SOLDATA
+            ========================= #}
+
+            {% set forecast_raw = state_attr('sensor.sem_solar_forecast','sem') %}
+            {% set forecast = forecast_raw if forecast_raw is mapping else {} %}
+            {% set wp = forecast.get('watt_hours_period', []) %}
+
+            {% set sol_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(1) %}
+
+            {% set sol_map = namespace(data={}) %}
+            {% for e in wp %}
+              {% if e is mapping %}
+                {% set d = e.get('date') %}
+                {% set v = e.get('values') %}
+                {% if d is not none and v is not none %}
+                  {% set dt = as_datetime(d) %}
+                  {% set ts_hour = dt.replace(minute=0, second=0, microsecond=0) %}
+                  {% set kwh = (v | float / 1000) * sol_factor %}
+                  {% set sol_map.data = dict(sol_map.data, **{ts_hour|string: kwh}) %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {# =========================
+            PEAK BEHOV
+            ========================= #}
+
+            {# ===== TIMME MATCH PEAK ===== #}
+
+            {% set ns2 = namespace(current=start, total_netto=0) %}
+
+            {% for i in range(0, 48) %}
+              {% if ns2.current >= end %}
+                {% break %}
+              {% endif %}
+
+              {% set h = ns2.current.hour %}
+              {% set ts_key = ns2.current.replace(minute=0, second=0, microsecond=0) | string %}
+
+              {% if 5 <= h < 10 %}
+                {% set need = k_morning %}
+                {% set label = "morgon" %}
+              {% elif 10 <= h < 15 %}
+                {% set need = k_day %}
+                {% set label = "dag" %}
+              {% elif 15 <= h < 21 %}
+                {% set need = k_evening %}
+                {% set label = "kväll" %}
+              {% else %}
+                {% set need = k_night %}
+                {% set label = "natt" %}
+              {% endif %}
+
+              {% set sol = sol_map.data.get(ts_key, 0) %}
+              {% set netto = need - sol %}
+              {% set deficit = [netto, 0] | max %}
+
+              {% set ns2.total_netto = ns2.total_netto + deficit %}
+
+              {# {{ ns2.current }} | {{ label }}
+              behov: {{ need }} kWh
+              sol: {{ sol }} kWh
+              netto: {{ netto }} kWh
+              deficit: {{ deficit }} kWh #}
+
+              {% set ns2.current = ns2.current + timedelta(hours=1) %}
+            {% endfor %}
+
+            {#===== TOTAL NETTO BEHOV PEAK =====#}
+            {{ ns2.total_netto | round(2) }} 
+
+            {% endif %}
+          peak_profit: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              false
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_1') %}
+              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0) %}
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                false
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  false
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set peak_prices = all_prices
+                    | selectattr('start','>=', peak_start_str)
+                    | selectattr('end','<=', peak_end_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if peak_prices | length == 0 %}
+                    false
+                  {% else %}
+                    {% set avg_peak = (peak_prices | sum) / (peak_prices | length) %}
+                    {% set profit = avg_peak - avg_window %}
+                    {{ profit >= threshold }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          peak_profit_value: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+
+            {% if raw in ['unknown','unavailable','none'] %}
+              -1
+            {% else %}
+
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_1') %}
+
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                -1
+              {% else %}
+
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+
+                {% if in_window | length == 0 %}
+                  -1
+                {% else %}
+
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+
+                  {% set peak_prices = all_prices
+                    | selectattr('start','>=', peak_start_str)
+                    | selectattr('end','<=', peak_end_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+
+                  {% if peak_prices | length == 0 %}
+                    -1
+                  {% else %}
+
+                    {% set avg_peak = (peak_prices | sum) / (peak_prices | length) %}
+
+                    {{ (avg_peak - avg_window) | round(3) }}
+
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          post_peak: >
+            {% set peak = states('sensor.sem_relative_expensive_price_1') %}
+
+            {# ===== INPUT =====
+            peak: {{ peak }} #}
+
+            {% if ' - ' not in peak %}
+            {# ❌ fel format #}
+            {% else %}
+
+            {# =========================
+            INTERVALL (POST-PEAK)
+            ========================= #}
+
+            {% set next_charge = states('sensor.sem_battery_charge_window_cheapest_2') %}
+
+            {% set start_raw = as_datetime(peak.split(' - ')[1]) %}
+            {% set end_raw = as_datetime(next_charge.split(' - ')[1]) %}
+
+            {% set start = start_raw %}
+            {% if start.minute > 0 or start.second > 0 %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% endif %}
+
+            {% set end = end_raw %}
+            {% if end.minute > 0 or end.second > 0 %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% else %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) %}
+            {% endif %}
+            {% if end < start %}
+              {% set end = end + timedelta(days=1) %}
+            {% endif %}
+
+            {# ===== INTERVALL =====
+            start (post-peak): {{ start }}
+            end (post-peak): {{ end }} #}
+
+            {# =========================
+            ENERGI PROFIL
+            ========================= #}
+
+            {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+            {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+            {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+            {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+            {# =========================
+            SOL DATA
+            ========================= #}
+
+            {% set forecast_raw = state_attr('sensor.sem_solar_forecast','sem') %}
+            {% set forecast = forecast_raw if forecast_raw is mapping else {} %}
+            {% set wp = forecast.get('watt_hours_period', []) %}
+
+            {% set sol_factor = state_attr('sensor.sem_battery_charge_energy_1a_2','adjustment_factor_solar_energy') | float(1) %}
+
+            {% set sol_map = namespace(data={}) %}
+            {% for e in wp %}
+              {% if e is mapping %}
+                {% set d = e.get('date') %}
+                {% set v = e.get('values') %}
+                {% if d is not none and v is not none %}
+                  {% set dt = as_datetime(d) %}
+                  {% set ts_hour = dt.replace(minute=0, second=0, microsecond=0) %}
+                  {% set kwh = (v | float / 1000) * sol_factor %}
+                  {% set sol_map.data = dict(sol_map.data, **{ts_hour|string: kwh}) %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {# =========================
+            POST-PEAK BEHOV
+            ========================= #}
+
+            {# ===== TIMME MATCH POST-PEAK ===== #}
+
+            {% set ns2 = namespace(current=start, total_netto=0) %}
+
+            {% for i in range(0, 48) %}
+              {% if ns2.current >= end %}
+                {% break %}
+              {% endif %}
+
+              {% set h = ns2.current.hour %}
+              {% set ts_key = ns2.current.replace(minute=0, second=0, microsecond=0) | string %}
+
+              {% if 5 <= h < 10 %}
+                {% set need = k_morning %}
+                {% set label = "morgon" %}
+              {% elif 10 <= h < 15 %}
+                {% set need = k_day %}
+                {% set label = "dag" %}
+              {% elif 15 <= h < 21 %}
+                {% set need = k_evening %}
+                {% set label = "kväll" %}
+              {% else %}
+                {% set need = k_night %}
+                {% set label = "natt" %}
+              {% endif %}
+
+              {% set sol = sol_map.data.get(ts_key, 0) %}
+              {% set netto = need - sol %}
+              {% set deficit = [netto, 0] | max %}
+
+              {% set ns2.total_netto = ns2.total_netto + deficit %}
+
+              {# {{ ns2.current }} | {{ label }}
+              behov: {{ need }} kWh
+              sol: {{ sol }} kWh
+              netto: {{ netto }} kWh
+              deficit: {{ deficit }} kWh #}
+
+              {% set ns2.current = ns2.current + timedelta(hours=1) %}
+            {% endfor %}
+
+            {#===== TOTAL NETTO BEHOV POST-PEAK =====#}
+            {{ ns2.total_netto | round(2) }}
+
+            {% endif %}
+          post_peak_profit: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              false
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% set next_win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0) %}
+              {% if win2_str in ['none','unknown',''] 
+                    or next_win_str in ['none','unknown',''] %}
+                false
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set next_start_str, next_end_str = next_win_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  false
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set between = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', next_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if between | length == 0 %}
+                    false
+                  {% else %}
+                    {% set avg_between = (between | sum) / (between | length) %}
+                    {% set profit = avg_between - avg_window %}
+                    {{ profit >= threshold }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          post_peak_profit_value: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              -1
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% set next_win_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% if win2_str in ['none','unknown',''] 
+                    or next_win_str in ['none','unknown',''] %}
+                -1
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set next_start_str, next_end_str = next_win_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  -1
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set between = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', next_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if between | length == 0 %}
+                    -1
+                  {% else %}
+                    {% set avg_between = (between | sum) / (between | length) %}
+                    {{ (avg_between - avg_window) | round(3) }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}   
+          battery_charge_profit: >
+            {% set pre_peak_profit = state_attr('sensor.sem_battery_charge_energy_1a_2', 'pre_peak_profit') %}
+            {% set peak_profit = state_attr('sensor.sem_battery_charge_energy_1a_2', 'peak_profit') %}
+            {% set post_peak_profit = state_attr('sensor.sem_battery_charge_energy_1a_2', 'post_peak_profit') %}
+
+            {{
+              pre_peak_profit == true
+              or peak_profit == true
+              or post_peak_profit == true
+            }}
           should_charge: >
             {% set override = states('input_select.sem_battery_charge_override_1a_2') %}
             {% set energy_needed = states('sensor.sem_battery_charge_energy_1a_2') | float(0) %}
@@ -1550,49 +2130,95 @@ template:
             {% else %}
               {{ energy_needed > 0 and is_profitable and not solar_enough }}
             {% endif %}
+  
 
-      # CALCULATES ENERGY BETWEEN 2 AND 1B
+
+
+
+# CALCULATES ENERGY BETWEEN 2 AND 1B
       - name: "sem_battery_charge_energy_2_1b"
         unique_id: sem_battery_charge_energy_2_1b
         unit_of_measurement: "kWh"
         state: >
-          {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %} 
-          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','usable_capacity') | float(0) %} 
-          {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_2_1b','weather_buffer') | float(0) %} 
-          {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_sun_interval') | float(0) %} 
-          {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_solar_energy') | float(0) %} 
-          {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_no_sun_interval') | float(0) %} 
-          {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_2_1b','avg_price') | float(0) %} 
-          {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %} 
-          {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') | float(0) %}
-          {% set extra = states('input_number.extra_2') | float(0) %} 
-          {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(0) %}
-          {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-          {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_2_1b','solar_surplus') | float(0) %}
+          {% set pre_peak  = state_attr('sensor.sem_battery_charge_energy_2_1b', 'pre_peak') | float(0) %}
+          {% set peak      = state_attr('sensor.sem_battery_charge_energy_2_1b', 'peak') | float(0) %}
+          {% set post_peak = state_attr('sensor.sem_battery_charge_energy_2_1b', 'post_peak') | float(0) %}
 
-          {% set energy_price_peak = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
-          {% set peak_deficit = max(0, energy_price_peak - battery_capacity) %}
+          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b', 'usable_capacity') | float(0) %}
+          {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b', 'battery_capacity') | float(0) %}
 
-          {# --- BERÄKNING BÖRJAR --- #}
+          {% set pre_ok  = state_attr('sensor.sem_battery_charge_energy_2_1b', 'pre_peak_profit') is true %}
+          {% set peak_ok = state_attr('sensor.sem_battery_charge_energy_2_1b', 'peak_profit') is true %}
+          {% set post_ok = state_attr('sensor.sem_battery_charge_energy_2_1b', 'post_peak_profit') is true %}
 
-          {% set solar_after_house = max(0, (estimated_solar_energy * adjustment_factor_solar_energy) - estimated_energy_sun_interval) %}
+          {% set total_kwh =
+            (pre_peak  if pre_ok  else 0) +
+            (peak      if peak_ok else 0) +
+            (post_peak if post_ok else 0)
+          %}
 
-          {% set energy_needed_until_next_window = estimated_energy_no_sun_interval + estimated_energy_sun_interval - solar_surplus %}
+          {# Begränsa först mot batteriets maxkapacitet #}
+          {% set capped_total = [total_kwh, usable_capacity] | min %}
 
-          {% if battery_capacity >= energy_needed_until_next_window %}
-              {% set net_charge_needed = 0 %}
-          {% else %}
-              {% set battery_deficit = max(0, battery_max - battery_capacity) %}
-              {% set net_charge_needed = max(0, battery_deficit - solar_after_house) %}
-          {% endif %}
+          {# Dra sedan bort energi som redan finns i batteriet #}
+          {% set charge_needed = capped_total - battery_capacity %}
 
-          {# --- TOTAL OPTIMERAD LADDNING --- #}
-          {% set total_energy_need = net_charge_needed + supercheap_charge + extra %}
+          {# Tillåt aldrig negativt värde #}
+          {% set charge_needed = [charge_needed, 0] | max %}
 
-          {# --- SÄKERSTÄLL PRISTOPP MEN LADDA INTE MER ÄN NÖDVÄNDIGT --- #}
-          {% set final_need = [total_energy_need, peak_deficit] | max %}
+          {{ charge_needed | round(2) }}
+#          {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','battery_capacity') | float(0) %}
+#          {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','usable_capacity') | float(0) %}
+#          {% set weather_buffer = state_attr('sensor.sem_battery_charge_energy_2_1b','weather_buffer') | float(0) %}
 
-          {{ [final_need, battery_max] | min }}
+#          {% set estimated_energy_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_sun_interval') | float(0) %}
+#          {% set estimated_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_solar_energy') | float(0) %}
+#          {% set estimated_energy_no_sun_interval = state_attr('sensor.sem_battery_charge_energy_2_1b','estimated_energy_no_sun_interval') | float(0) %}
+
+#          {% set avg_price_charge_window = state_attr('sensor.sem_battery_charge_energy_2_1b','avg_price') | float(0) %}
+#          {% set price_limit_supercheap = states('input_number.sem_price_limit_supercheap') | float(0) %}
+#          {% set supercheap_charge = state_attr('sensor.sem_battery_charge_energy_2_1b','supercheap_charge') | float(0) %}
+#          {% set extra = states('input_number.extra_2') | float(0) %}
+
+#          {% set adjustment_factor_solar_energy = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(0) %}
+#          {% set battery_max = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
+
+#          {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_2_1b','solar_surplus') | float(0) %}
+#          {% set energy_price_peak = state_attr('sensor.sem_relative_expensive_price_2','kwh_required') | float(0) %}
+
+#          {# --- STEG 1: PRISTOPP --- #}
+#          {% set peak_deficit = max(0, energy_price_peak - battery_capacity) %}
+
+#          {# --- STEG 2: SOL EFTER HUS --- #}
+#          {% set solar_after_house =
+#            max(0,
+#              (estimated_solar_energy * adjustment_factor_solar_energy)
+#             - estimated_energy_sun_interval
+#            )
+#          %}
+
+#          {# --- STEG 3: DAG + NATT LOGIK --- #}
+#          {% set solar_for_day = solar_surplus %}
+#         {% set day_need = max(0, estimated_energy_sun_interval - solar_for_day) %}
+#         {% set night_need = estimated_energy_no_sun_interval %}
+
+#          {% set energy_needed_until_next_window = day_need + night_need %}
+
+#          {# --- STEG 4: NETTO LADDNING --- #}
+#          {% if battery_capacity >= energy_needed_until_next_window %}
+#            {% set net_charge_needed = 0 %}
+#          {% else %}
+#            {% set battery_deficit = max(0, battery_max - battery_capacity) %}
+#            {% set net_charge_needed = max(0, battery_deficit - solar_after_house) %}
+#          {% endif %}
+
+#          {# --- STEG 5: TOTAL --- #}
+#          {% set total_energy_need = net_charge_needed + supercheap_charge + extra %}
+
+#          {# --- STEG 6: PRISTOPP SÄKRING --- #}
+#          {% set final_need = [total_energy_need, peak_deficit] | max %}
+
+#          {{ [final_need, battery_max] | min }}
         attributes:
           search_interval: >
             {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_2') %}
@@ -1850,29 +2476,38 @@ template:
               {% endfor %}
 
               {{ ns.total_kwh | round(2) }}
-            {% endif %}
+            {% endif %} 
           estimated_solar_energy: >
+            {% set raw_start = states('sensor.sem_battery_charge_window_cheapest_2') %}
+            {% set raw_end = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+            {% if ' - ' in raw_start and ' - ' in raw_end %}
+                  {% set t1 = raw_start.split(' - ')[0] %}
+                  {% set t2 = raw_end.split(' - ')[1] %}
+                  {% set start = as_datetime(t1) %}
+                  {% set end = as_datetime(t2) %}
+            {% else %}
+                  {% set start = as_datetime('1970-01-01T00:00:00+00:00') %}
+                  {% set end = as_datetime('1970-01-01T01:00:00+00:00') %}
+            {% endif %}
             {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
-            {% set t1 = states('sensor.sem_battery_charge_window_cheapest_2').split(' - ')[0] %}
-            {% set t2 = states('sensor.sem_battery_charge_window_cheapest_1a').split(' - ')[0] %}
-            {% set start = as_datetime(t1) %}
-            {% set end = as_datetime(t2) %}
             {% set solar_kwh = 0 %}
             {% if forecast and 'watt_hours_period' in forecast %}
-                          {% set start_ts = as_timestamp(start) %}
-                          {% set end_ts = as_timestamp(end) %}
-                          {% set entries = forecast['watt_hours_period']
-                                | selectattr('date', 'defined')
-                                | selectattr('date', '>=', start_ts | timestamp_local)
-                                | selectattr('date', '<=', end_ts | timestamp_local)
-                                | list %}
-                          {% set valid_entries = entries
-                                | selectattr('values', 'defined')
-                                | selectattr('values', '>', 0)
-                                | list %}
-                          {% if valid_entries | length > 0 %}
-                                    {% set solar_kwh = (valid_entries | map(attribute='values') | sum | default(0)) / 1000 * 0.9 %}
-                          {% endif %}
+                  {% set start_ts = as_timestamp(start) %}
+                  {% set end_ts = as_timestamp(end) %}
+                  {% set today_date = start.date() %}
+                  {% set entries = forecast['watt_hours_period']
+                        | selectattr('date', 'defined')
+                        | selectattr('date', '>=', start_ts | timestamp_local)
+                        | selectattr('date', '<=', end_ts | timestamp_local)
+                        | selectattr('date', 'match', '^' ~ today_date|string)
+                        | list %}
+                  {% set valid_entries = entries
+                        | selectattr('values', 'defined')
+                        | selectattr('values', '>', 0)
+                        | list %}
+                  {% if valid_entries | length > 0 %}
+                        {% set solar_kwh = (valid_entries | map(attribute='values') | sum | default(0)) / 1000 * 0.9 %}
+                  {% endif %}
             {% endif %}
             {{ solar_kwh | round(2) }}
           solar_surplus: >
@@ -1925,6 +2560,38 @@ template:
           estimated_energy_price_peak: >
             {% set price_peak = state_attr('sensor.sem_relative_expensive_price_2', 'kwh_required') | float(0) %}
             {{ price_peak | round(2) }}
+          solar_until_expensive_end: >
+            {% set raw = states('sensor.sem_relative_expensive_price_2') %}
+            {% if ' - ' in raw %}
+              {% set end_str = raw.split(' - ')[1] %}
+              {% set end = as_datetime(end_str) %}
+              {% set start = end.replace(hour=0, minute=0, second=0, microsecond=0) %}
+            {% else %}
+              {% set start = as_datetime('1970-01-01T00:00:00+00:00') %}
+              {% set end = as_datetime('1970-01-01T01:00:00+00:00') %}
+            {% endif %}
+            {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
+            {% set solar_kwh = 0 %}
+            {% if forecast and 'watt_hours_period' in forecast %}
+              {% set start_ts = as_timestamp(start) %}
+              {% set end_ts = as_timestamp(end) %}
+              {% set today_date = start.date() %}
+              {% set entries = forecast['watt_hours_period']
+                | selectattr('date', 'defined')
+                | selectattr('date', '>=', start_ts | timestamp_local)
+                | selectattr('date', '<=', end_ts | timestamp_local)
+                | selectattr('date', 'match', '^' ~ today_date|string)
+                | list %}
+              {% set valid_entries = entries
+                | selectattr('values', 'defined')
+                | selectattr('values', '>', 0)
+                | list %}
+
+              {% if valid_entries | length > 0 %}
+                {% set solar_kwh = (valid_entries | map(attribute='values') | sum | default(0)) / 1000 * 0.9 %}
+              {% endif %}
+            {% endif %}
+            {{ solar_kwh | round(2) }}
           estimated_energy_no_sun_interval: >
             {% set raw_interval = state_attr('sensor.sem_battery_charge_energy_2_1b', 'no_sun_interval') %}
             {% if not raw_interval %}
@@ -2123,11 +2790,631 @@ template:
 
               {% endif %}
             {% endif %}
-          battery_charge_profit: >
-            {% set profit = state_attr('sensor.sem_battery_charge_energy_2_1b', 'profit') | float(-1) %}
-            {% set profit_threshold = states('input_number.sem_charge_profit_threshold') | float(0.20) %}
+          pre_peak: >
+            {% set peak = states('sensor.sem_relative_expensive_price_2') %}
 
-            {{ profit >= profit_threshold }}
+            {# ===== INPUT =====
+            peak: {{ peak }} #}
+
+            {% if ' - ' not in peak %}
+            {# ❌ fel format #}
+            {% else %}
+
+            {# =========================
+            INTERVALL (PRE-PEAK)
+            ========================= #}
+
+            {% set cheap_2 = states('sensor.sem_battery_charge_window_cheapest_2') %}
+
+            {% set start_raw = as_datetime(cheap_2.split(' - ')[1]) %}
+            {% set end_raw   = as_datetime(peak.split(' - ')[0]) %}
+
+            {% set start = start_raw %}
+            {% if start.minute > 0 or start.second > 0 %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% else %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) %}
+            {% endif %}
+
+            {% set end = end_raw %}
+            {% if end.minute > 0 or end.second > 0 %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% else %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) %}
+            {% endif %}
+
+            {# ===== INTERVALL (PRE-PEAK) =====
+            raw start: {{ start_raw }}
+            raw end: {{ end_raw }}
+            start: {{ start }}
+            end: {{ end }} #}
+
+            {# =========================
+            ENERGIPROFIL
+            ========================= #}
+
+            {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+            {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+            {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+            {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+            {# =========================
+            SOLDATA
+            ========================= #}
+
+            {% set forecast_raw = state_attr('sensor.sem_solar_forecast','sem') %}
+            {% set forecast = forecast_raw if forecast_raw is mapping else {} %}
+            {% set wp = forecast.get('watt_hours_period', []) %}
+
+            {% set sol_factor = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(1) %}
+
+            {% set sol_map = namespace(data={}) %}
+            {% for e in wp %}
+              {% if e is mapping %}
+                {% set d = e.get('date') %}
+                {% set v = e.get('values') %}
+                {% if d is not none and v is not none %}
+                  {% set dt = as_datetime(d) %}
+                  {% set ts_hour = dt.replace(minute=0, second=0, microsecond=0) %}
+                  {% set kwh = (v | float / 1000) * sol_factor %}
+                  {% set sol_map.data = dict(sol_map.data, **{ts_hour|string: kwh}) %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {# =========================
+            PRE-PEAK BEHOV
+            ========================= #}
+
+            {# ===== TIMMAR (PRE-PEAK) ===== #}
+
+            {% set ns2 = namespace(current=start, total_netto=0) %}
+
+            {% for i in range(0, 48) %}
+              {% if ns2.current >= end %}
+                {% break %}
+              {% endif %}
+
+              {% set h = ns2.current.hour %}
+              {% set ts_key = ns2.current.replace(minute=0, second=0, microsecond=0) | string %}
+
+              {% if 5 <= h < 10 %}
+                {% set need = k_morning %}
+                {% set label = "morgon" %}
+              {% elif 10 <= h < 15 %}
+                {% set need = k_day %}
+                {% set label = "dag" %}
+              {% elif 15 <= h < 21 %}
+                {% set need = k_evening %}
+                {% set label = "kväll" %}
+              {% else %}
+                {% set need = k_night %}
+                {% set label = "natt" %}
+              {% endif %}
+
+              {% set sol = sol_map.data.get(ts_key, 0) %}
+              {% set netto = need - sol %}
+              {% set deficit = [netto, 0] | max %}
+
+              {% set ns2.total_netto = ns2.total_netto + deficit %}
+
+              {# {{ ns2.current }} | {{ label }} | behov: {{ need }} | sol: {{ sol }} | netto: {{ netto }} | deficit: {{ deficit }} #}
+
+              {% set ns2.current = ns2.current + timedelta(hours=1) %}
+            {% endfor %}
+
+            {#===== PRE-PEAK TOTAL =====#}
+            {{ ns2.total_netto | round(2) }}
+
+            {% endif %}
+          pre_peak_profit: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              false
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_2') %}
+              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0) %}
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                false
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {# --- laddfönster --- #}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('start','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  false
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {# --- pre-peak --- #}
+                  {% set before_peak = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', peak_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if before_peak | length == 0 %}
+                    false
+                  {% else %}
+                    {% set avg_before_peak = (before_peak | sum) / (before_peak | length) %}
+                    {% set profit = avg_before_peak - avg_window %}
+                    {{ profit >= threshold }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          pre_peak_profit_value: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              -1
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_2') %}
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                -1
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('start','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  -1
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set before_peak = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', peak_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if before_peak | length == 0 %}
+                    -1
+                  {% else %}
+                    {% set avg_before_peak = (before_peak | sum) / (before_peak | length) %}
+                    {{ (avg_before_peak - avg_window) | round(3) }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          peak: >
+            {% set peak = states('sensor.sem_relative_expensive_price_2') %}
+
+            {# ===== INPUT =====
+            peak: {{ peak }} #}
+
+            {% if ' - ' not in peak %}
+            {# ❌ fel format #}
+            {% else %}
+
+            {# =========================
+            INTERVALL (PEAK)
+            ========================= #}
+
+            {% set next_charge = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+
+            {% set start_raw = as_datetime(peak.split(' - ')[0]) %}
+            {% set end_raw   = as_datetime(peak.split(' - ')[1]) %}
+
+            {% set start = start_raw %}
+            {% if start.minute > 0 or start.second > 0 %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% endif %}
+
+            {% set end = end_raw.replace(minute=0, second=0, microsecond=0) %}
+            {% if end <= start %}
+              {% set end = end + timedelta(days=1) %}
+            {% endif %}
+
+            {# ===== INTERVALL =====
+            start (peak): {{ start }}
+            end (peak): {{ end }} #}
+
+            {# =========================
+            ENERGIPROFIL
+            ========================= #}
+
+            {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+            {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+            {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+            {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+            {# =========================
+            SOLDATA
+            ========================= #}
+
+            {% set forecast_raw = state_attr('sensor.sem_solar_forecast','sem') %}
+            {% set forecast = forecast_raw if forecast_raw is mapping else {} %}
+            {% set wp = forecast.get('watt_hours_period', []) %}
+
+            {% set sol_factor = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(1) %}
+
+            {% set sol_map = namespace(data={}) %}
+            {% for e in wp %}
+              {% if e is mapping %}
+                {% set d = e.get('date') %}
+                {% set v = e.get('values') %}
+                {% if d is not none and v is not none %}
+                  {% set dt = as_datetime(d) %}
+                  {% set ts_hour = dt.replace(minute=0, second=0, microsecond=0) %}
+                  {% set kwh = (v | float / 1000) * sol_factor %}
+                  {% set sol_map.data = dict(sol_map.data, **{ts_hour|string: kwh}) %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {# =========================
+            PEAK BEHOV
+            ========================= #}
+
+            {# ===== TIMME MATCH PEAK ===== #}
+
+            {% set ns2 = namespace(current=start, total_netto=0) %}
+
+            {% for i in range(0, 48) %}
+              {% if ns2.current >= end %}
+                {% break %}
+              {% endif %}
+
+              {% set h = ns2.current.hour %}
+              {% set ts_key = ns2.current.replace(minute=0, second=0, microsecond=0) | string %}
+
+              {% if 5 <= h < 10 %}
+                {% set need = k_morning %}
+                {% set label = "morgon" %}
+              {% elif 10 <= h < 15 %}
+                {% set need = k_day %}
+                {% set label = "dag" %}
+              {% elif 15 <= h < 21 %}
+                {% set need = k_evening %}
+                {% set label = "kväll" %}
+              {% else %}
+                {% set need = k_night %}
+                {% set label = "natt" %}
+              {% endif %}
+
+              {% set sol = sol_map.data.get(ts_key, 0) %}
+              {% set netto = need - sol %}
+              {% set deficit = [netto, 0] | max %}
+
+              {% set ns2.total_netto = ns2.total_netto + deficit %}
+
+              {# {{ ns2.current }} | {{ label }}
+              behov: {{ need }} kWh
+              sol: {{ sol }} kWh
+              netto: {{ netto }} kWh
+              deficit: {{ deficit }} kWh #}
+
+              {% set ns2.current = ns2.current + timedelta(hours=1) %}
+            {% endfor %}
+
+            {#===== TOTAL NETTO BEHOV PEAK =====#}
+            {{ ns2.total_netto | round(2) }}
+
+            {% endif %}
+          peak_profit: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              false
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_2') %}
+              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0) %}
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                false
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  false
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set peak_prices = all_prices
+                    | selectattr('start','>=', peak_start_str)
+                    | selectattr('end','<=', peak_end_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if peak_prices | length == 0 %}
+                    false
+                  {% else %}
+                    {% set avg_peak = (peak_prices | sum) / (peak_prices | length) %}
+                    {% set profit = avg_peak - avg_window %}
+                    {{ profit >= threshold }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          peak_profit_value: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+
+            {% if raw in ['unknown','unavailable','none'] %}
+              -1
+            {% else %}
+
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% set peak_str = states('sensor.sem_relative_expensive_price_2') %}
+
+              {% if win2_str in ['none','unknown',''] or peak_str in ['none','unknown',''] %}
+                -1
+              {% else %}
+
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set peak_start_str, peak_end_str = peak_str.split(' - ') %}
+
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+
+                {% if in_window | length == 0 %}
+                  -1
+                {% else %}
+
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+
+                  {% set peak_prices = all_prices
+                    | selectattr('start','>=', peak_start_str)
+                    | selectattr('end','<=', peak_end_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+
+                  {% if peak_prices | length == 0 %}
+                    -1
+                  {% else %}
+
+                    {% set avg_peak = (peak_prices | sum) / (peak_prices | length) %}
+
+                    {{ (avg_peak - avg_window) | round(3) }}
+
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          post_peak: >
+            {% set peak = states('sensor.sem_relative_expensive_price_2') %}
+
+            {# ===== INPUT =====
+            peak: {{ peak }} #}
+
+            {% if ' - ' not in peak %}
+            {# ❌ fel format #}
+            {% else %}
+
+            {# =========================
+            INTERVALL (POST-PEAK)
+            ========================= #}
+
+            {% set next_charge = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+
+            {% set start_raw = as_datetime(peak.split(' - ')[1]) %}
+            {% set end_raw = as_datetime(next_charge.split(' - ')[1]) %}
+
+            {% set start = start_raw %}
+            {% if start.minute > 0 or start.second > 0 %}
+              {% set start = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% endif %}
+
+            {% set end = end_raw %}
+            {% if end.minute > 0 or end.second > 0 %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1) %}
+            {% else %}
+              {% set end = end.replace(minute=0, second=0, microsecond=0) %}
+            {% endif %}
+            {% if end < start %}
+              {% set end = end + timedelta(days=1) %}
+            {% endif %}
+
+            {# ===== INTERVALL =====
+            start (post-peak): {{ start }}
+            end (post-peak): {{ end }} #}
+
+            {# =========================
+            ENERGI PROFIL
+            ========================= #}
+
+            {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+            {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+            {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+            {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+            {# =========================
+            SOL DATA
+            ========================= #}
+
+            {% set forecast_raw = state_attr('sensor.sem_solar_forecast','sem') %}
+            {% set forecast = forecast_raw if forecast_raw is mapping else {} %}
+            {% set wp = forecast.get('watt_hours_period', []) %}
+
+            {% set sol_factor = state_attr('sensor.sem_battery_charge_energy_2_1b','adjustment_factor_solar_energy') | float(1) %}
+
+            {% set sol_map = namespace(data={}) %}
+            {% for e in wp %}
+              {% if e is mapping %}
+                {% set d = e.get('date') %}
+                {% set v = e.get('values') %}
+                {% if d is not none and v is not none %}
+                  {% set dt = as_datetime(d) %}
+                  {% set ts_hour = dt.replace(minute=0, second=0, microsecond=0) %}
+                  {% set kwh = (v | float / 1000) * sol_factor %}
+                  {% set sol_map.data = dict(sol_map.data, **{ts_hour|string: kwh}) %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {# =========================
+            POST-PEAK BEHOV
+            ========================= #}
+
+            {# ===== TIMME MATCH POST-PEAK ===== #}
+
+            {% set ns2 = namespace(current=start, total_netto=0) %}
+
+            {% for i in range(0, 48) %}
+              {% if ns2.current >= end %}
+                {% break %}
+              {% endif %}
+
+              {% set h = ns2.current.hour %}
+              {% set ts_key = ns2.current.replace(minute=0, second=0, microsecond=0) | string %}
+
+              {% if 5 <= h < 10 %}
+                {% set need = k_morning %}
+                {% set label = "morgon" %}
+              {% elif 10 <= h < 15 %}
+                {% set need = k_day %}
+                {% set label = "dag" %}
+              {% elif 15 <= h < 21 %}
+                {% set need = k_evening %}
+                {% set label = "kväll" %}
+              {% else %}
+                {% set need = k_night %}
+                {% set label = "natt" %}
+              {% endif %}
+
+              {% set sol = sol_map.data.get(ts_key, 0) %}
+              {% set netto = need - sol %}
+              {% set deficit = [netto, 0] | max %}
+
+              {% set ns2.total_netto = ns2.total_netto + deficit %}
+
+              {# {{ ns2.current }} | {{ label }}
+              behov: {{ need }} kWh
+              sol: {{ sol }} kWh
+              netto: {{ netto }} kWh
+              deficit: {{ deficit }} kWh #}
+
+              {% set ns2.current = ns2.current + timedelta(hours=1) %}
+            {% endfor %}
+
+            {#===== TOTAL NETTO BEHOV POST-PEAK =====#}
+            {{ ns2.total_netto | round(2) }}
+
+            {% endif %}
+          post_peak_profit: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              false
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% set next_win_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% set threshold = states('input_number.sem_charge_profit_threshold') | float(0) %}
+              {% if win2_str in ['none','unknown',''] 
+                    or next_win_str in ['none','unknown',''] %}
+                false
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set next_start_str, next_end_str = next_win_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  false
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set between = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', next_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if between | length == 0 %}
+                    false
+                  {% else %}
+                    {% set avg_between = (between | sum) / (between | length) %}
+                    {% set profit = avg_between - avg_window %}
+                    {{ profit >= threshold }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          post_peak_profit_value: >
+            {% set raw = states('sensor.sem_nordpool_active') %}
+            {% if raw in ['unknown','unavailable','none'] %}
+              -1
+            {% else %}
+              {% set win2_str = states('sensor.sem_battery_charge_window_cheapest_2') %}
+              {% set next_win_str = states('sensor.sem_battery_charge_window_cheapest_1a') %}
+              {% if win2_str in ['none','unknown',''] 
+                    or next_win_str in ['none','unknown',''] %}
+                -1
+              {% else %}
+                {% set w2_start_str, w2_end_str = win2_str.split(' - ') %}
+                {% set next_start_str, next_end_str = next_win_str.split(' - ') %}
+                {% set prices_today = state_attr('sensor.sem_nordpool_active','raw_today') or [] %}
+                {% set prices_tomorrow = state_attr('sensor.sem_nordpool_active','raw_tomorrow') or [] %}
+                {% set all_prices = prices_today + prices_tomorrow %}
+                {% set in_window = all_prices
+                  | selectattr('start','>=', w2_start_str)
+                  | selectattr('end','<=', w2_end_str)
+                  | map(attribute='value')
+                  | list
+                %}
+                {% if in_window | length == 0 %}
+                  -1
+                {% else %}
+                  {% set avg_window = (in_window | sum) / (in_window | length) %}
+                  {% set between = all_prices
+                    | selectattr('start','>=', w2_end_str)
+                    | selectattr('start','<=', next_start_str)
+                    | map(attribute='value')
+                    | list
+                  %}
+                  {% if between | length == 0 %}
+                    -1
+                  {% else %}
+                    {% set avg_between = (between | sum) / (between | length) %}
+                    {{ (avg_between - avg_window) | round(3) }}
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}   
+          battery_charge_profit: >
+            {% set pre_peak_profit = state_attr('sensor.sem_battery_charge_energy_2_1b', 'pre_peak_profit') %}
+            {% set peak_profit = state_attr('sensor.sem_battery_charge_energy_2_1b', 'peak_profit') %}
+            {% set post_peak_profit = state_attr('sensor.sem_battery_charge_energy_2_1b', 'post_peak_profit') %}
+
+            {{
+              pre_peak_profit == true
+              or peak_profit == true
+              or post_peak_profit == true
+            }}
           should_charge: >
             {% set override = states('input_select.sem_battery_charge_override_2_1b') %}
             {% set energy_needed = states('sensor.sem_battery_charge_energy_2_1b') | float(0) %}
@@ -2144,11 +3431,74 @@ template:
             {% endif %}
 
   ######################### TRIGGERS ###########################################
+
+
+      # SHOWS INTERVAL WHEN SOLAREXPORT SHOULD BE REDUCED
+  - trigger:
+      - trigger: time
+        at: "01:00:00"
+    sensor:
+      - name: "sem_export_limit"
+        unique_id: sem_export_limit
+        state: >
+          {% set limit_active = is_state('input_boolean.sem_export_limit_active', 'on') %}
+          {% if not limit_active %}
+            ""
+          {% else %}
+            {% set price_threshold = 0 %}
+            {% set today = now().date() %}
+
+            {% set all_prices = state_attr('sensor.sem_nordpool_active', 'raw_today') or [] %}
+
+            {% set current_start = namespace(value=None) %}
+            {% set current_end = namespace(value=None) %}
+            {% set final_start = namespace(value=None) %}
+            {% set final_end = namespace(value=None) %}
+
+            {% for entry in all_prices %}
+              {% set price = entry['value'] | float %}
+              {% set time_start = as_datetime(entry['start']) %}
+              {% set time_end = as_datetime(entry['end']) %}
+
+              {% if time_start.date() == today %}
+
+                {% if price <= price_threshold %}
+                  {# startar nytt block om det inte finns #}
+                  {% if current_start.value is none %}
+                    {% set current_start.value = time_start %}
+                  {% endif %}
+
+                  {% set current_end.value = time_end %}
+
+                {% else %}
+                  {# block bryts → spara om det är giltigt #}
+                  {% if current_start.value is not none %}
+                    {% set final_start.value = current_start.value %}
+                    {% set final_end.value = current_end.value %}
+                  {% endif %}
+
+                  {% set current_start.value = none %}
+                  {% set current_end.value = none %}
+                {% endif %}
+
+              {% endif %}
+            {% endfor %}
+
+            {# fånga sista blocket om dagen slutar på billigt #}
+            {% if current_start.value is not none %}
+              {% set final_start.value = current_start.value %}
+              {% set final_end.value = current_end.value %}
+            {% endif %}
+
+            {% if final_start.value is not none and final_end.value is not none %}
+              {{ final_start.value }} - {{ final_end.value }}
+            {% else %}
+              ""
+            {% endif %}
+          {% endif %}
+
   # SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 6-18
   - trigger:
-      #      - trigger: state
-      #        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
-      #        to: 'on'
       - trigger: time
         at: "05:45:00"
     sensor:
@@ -2206,9 +3556,6 @@ template:
 
   # SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 18-06
   - trigger:
-      #      - trigger: state
-      #        entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
-      #        to: 'on'
       - trigger: time
         at: "17:45:00"
       - trigger: time
@@ -2264,6 +3611,10 @@ template:
       - trigger: state
         entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
         to: "on"
+      - trigger: time
+        at: "00:10:00"
+#      - trigger: state
+#        entity_id: input_button.sem_test
     sensor:
       - name: "sem_relative_expensive_price_1"
         unique_id: sem_relative_expensive_price_1
@@ -2395,54 +3746,56 @@ template:
       - name: "sem_relative_expensive_price_2"
         unique_id: sem_relative_expensive_price_2
         state: >
-          {% set data = (state_attr('sensor.sem_nordpool_active','raw_today') or []) +
-                        (state_attr('sensor.sem_nordpool_active','raw_tomorrow') or []) %}
-          {% set today = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
-          {% set interval_start = today + timedelta(days=1, hours=2) %}
-          {% set interval_end   = today + timedelta(days=1, hours=14) %}
-          {% set extend_hours = 5 %}
-
-          {% set filtered = data
-            | selectattr('start', 'defined')
-            | selectattr('value', 'defined')
-            | selectattr('start', '>=', interval_start.isoformat())
-            | selectattr('start', '<', interval_end.isoformat())
-            | list %}
-
-          {% if filtered | length == 0 %}
-            none
-          {% else %}
-            {% set values = filtered | map(attribute='value') | map('float') | list %}
-            {% set max_value = values | max %}
-            {% set peak_index = values.index(max_value) %}
-            
-            {# Hitta startindex bakåt #}
-            {% set start_index = peak_index %}
-            {% for i in range(peak_index, -1, -1) %}
-              {% if values[i] >= max_value %}
-                {% set start_index = i %}
-              {% else %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-            {% set start_index = [start_index - extend_hours, 0] | max %}
-            
-            {# Hitta slutindex framåt #}
-            {% set end_index = peak_index %}
-            {% for i in range(peak_index, (values | length)) %}
-              {% if values[i] >= max_value %}
-                {% set end_index = i %}
-              {% else %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-            {% set end_index = [end_index + extend_hours, (filtered | length) - 1] | min %}
-            
-            {% set start_dt = as_datetime(filtered[start_index].start) %}
-            {% set end_dt   = as_datetime(filtered[end_index].start) + timedelta(hours=1) %}
-            {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
-          {% endif %}
-
+            {% set data = (state_attr('sensor.sem_nordpool_active','raw_today') or []) +
+                          (state_attr('sensor.sem_nordpool_active','raw_tomorrow') or []) %}
+            {% set today = now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+            {% set interval_start = today + timedelta(days=1, hours=2) %}
+            {% set interval_end   = today + timedelta(days=1, hours=14) %}
+            {% set extend_hours = 5 %}
+            {% set shift_hours = -1 %}  {# <-- justera intervall #}
+            {% set filtered = data
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
+              | selectattr('start', '>=', interval_start.isoformat())
+              | selectattr('start', '<', interval_end.isoformat())
+              | list %}
+            {% if filtered | length == 0 %}
+              none
+            {% else %}
+              {% set values = filtered | map(attribute='value') | map('float') | list %}
+              {% set max_value = values | max %}
+              {% set peak_index = values.index(max_value) %}
+              {# =======================
+              STARTINDEX (bakåt)
+              ======================= #}
+              {% set ns_start = namespace(start_index = peak_index) %}
+              {% for i in range(peak_index, -1, -1) %}
+                {% if values[i] >= max_value * 0.90 %}
+                  {% set ns_start.start_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+              {% set start_index = [ns_start.start_index - extend_hours, 0] | max %}
+              {# =======================
+              SLUTINDEX (framåt)
+              ======================= #}
+              {% set ns_end = namespace(end_index = peak_index) %}
+              {% for i in range(peak_index, (values | length)) %}
+                {% if values[i] >= max_value * 0.90 %}
+                  {% set ns_end.end_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+              {% set end_index = [ns_end.end_index + extend_hours, (filtered | length) - 1] | min %}
+              {# =======================
+              RESULTAT
+              ======================= #}
+              {% set start_dt = as_datetime(filtered[start_index].start) + timedelta(hours=shift_hours) %}
+              {% set end_dt   = as_datetime(filtered[end_index].start) + timedelta(hours=1) + timedelta(hours=shift_hours) %}
+              {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
+            {% endif %}
         attributes:
           expensive_price: >
             {% set data = (state_attr('sensor.sem_nordpool_active','raw_today') or []) +
@@ -2589,8 +3942,12 @@ template:
                   {% set delta = max_hours - hours %}
                   {% set shift = delta / 2 %}
 
-                  {% set new_start = start - timedelta(hours=shift) %}
-                  {% set new_end   = end + timedelta(hours=shift) %}
+                  {% set candidate_start = start - timedelta(hours=shift) %}
+                  {% set candidate_end   = end + timedelta(hours=shift) %}
+
+                  {# Clamp: start får aldrig bli senare än original #}
+                  {% set new_start = [candidate_start, start] | min %}
+                  {% set new_end   = candidate_end %}
 
                   {{ new_start.isoformat() }} - {{ new_end.isoformat() }}
 
@@ -2743,8 +4100,12 @@ template:
                   {% set delta = max_hours - hours %}
                   {% set shift = delta / 2 %}
 
-                  {% set new_start = start - timedelta(hours=shift) %}
-                  {% set new_end   = end + timedelta(hours=shift) %}
+                  {% set candidate_start = start - timedelta(hours=shift) %}
+                  {% set candidate_end   = end + timedelta(hours=shift) %}
+
+                  {# Clamp: start får aldrig bli senare än original #}
+                  {% set new_start = [candidate_start, start] | min %}
+                  {% set new_end   = candidate_end %}
 
                   {{ new_start.isoformat() }} - {{ new_end.isoformat() }}
 
@@ -2905,7 +4266,7 @@ template:
           {%- endif -%}
       # Trigger 2: Klockan 18:00 varje dag
       - trigger: time
-        at: "18:00:00"
+        at: "19:12:00"
     sensor:
       - name: "sem_battery_charge_window_cheapest_1a"
         state: >
@@ -3072,24 +4433,25 @@ template:
             ====================
             ENHETER
             ====================
+
             - Energi: kWh
             - Boolean: true/false
-            - Tid: text
+            - Tid: HH:MM-HH:MM
 
             ====================
             DATA
             ====================
 
-            Should_charge:
+            Laddning tillåten:
             {{ state_attr('sensor.sem_battery_charge_energy_1a_2','should_charge') }}
 
-            Battery_solar_enough_today:
+            Solen räcker idag:
             {{ state_attr('sensor.sem_battery_charge_energy_1a_2','battery_solar_enough_today') }}
 
-            Battery_charge_profit:
+            Lönsam laddning:
             {{ state_attr('sensor.sem_battery_charge_energy_1a_2','battery_charge_profit') }}
 
-            Laddnings_behov:
+            Laddningsbehov:
             {{ states('sensor.sem_battery_charge_energy_1a_2') }}
 
             Laddningsfönster:
@@ -3099,41 +4461,164 @@ template:
             {{ states('input_select.sem_battery_charge_override_1a_2') }}
 
             ====================
-            REGLER
+            VIKTIGT
             ====================
 
-            - Should_charge = true → batteriet laddas
-            - Should_charge = false → batteriet laddas inte
+            - "Laddning tillåten" är det slutgiltiga AI-beslutet.
+            - Övriga sensorer används endast för att motivera beslutet.
+            - Om "Laddning tillåten = true" får svaret aldrig säga att laddning inte planeras.
+            - Om "Laddning tillåten = false" får svaret aldrig säga att laddning planeras.
+            - Systemläge kan manuellt överskrida AI-beslutet.
 
-            Förklaring:
-            - Om Battery_solar_enough_today = true → laddning behövs inte p.g.a. solel
-            - Om Energi_behov > 0 → laddning behövs
-            - Om Battery_charge_profit = true → laddning är lönsam
-            - Om Battery_charge_profit = false → laddning är inte lönsam
-            - Om Systemläge = Ladda → användaren har överskridit systemet
-            - Om Systemläge = Ladda ej → användaren har stoppat laddning
-            - Om Systemläge = Auto → systemets beslut gäller
-            - Laddningstid måste alltid skrivas exakt som HH:MM-HH:MM
-            - Skriv aldrig tid i textform (t.ex. "tretton och femton")
-            - Om format inte kan följas, skriv "tid ej tillgänglig"
+            ====================
+            TOLKNING AV DATA
+            ====================
+
+            - Om Laddningsbehov > 0:
+              → det finns ett laddningsbehov
+
+            - Om Laddningsbehov <= 0:
+              → det finns inget laddningsbehov
+
+            - Om Lönsam laddning = true:
+              → det är lönsamt att ladda batteriet
+
+            - Om Lönsam laddning = false:
+              → det är inte lönsamt att ladda batteriet
+
+            - Om Solen räcker idag = true:
+              → solproduktionen räcker för batteriet
+
+            - Om Solen räcker idag = false:
+              → solproduktionen räcker inte för batteriet
+
+            - Om Laddning tillåten = true:
+              → jag som AI har beslutat att laddning ska genomföras
+
+            - Om Laddning tillåten = false:
+              → jag som AI har beslutat att laddning inte ska genomföras
+
+            ====================
+            REGLER (PRIORITERINGSORDNING)
+            ====================
+
+            1. SYSTEMLÄGE HAR HÖGST PRIORITET
+
+            - Om Systemläge = "Ladda":
+              → användaren har manuellt överskridit mitt AI-beslut och valt att batteriet ska laddas
+
+            - Om Systemläge = "Ladda ej":
+              → användaren har manuellt överskridit mitt AI-beslut och valt att batteriet inte ska laddas
+
+            - Om Systemläge = "Auto":
+              → mitt AI-beslut gäller
+
+            2. AI-BESLUT AVGÖRS AV LADDNING TILLÅTEN
+
+            - Om Laddning tillåten = true:
+              → laddning är planerad
+
+            - Om Laddning tillåten = false:
+              → laddning är inte planerad
+
+            3. LADDNINGSTID
+
+            - Laddningstid måste alltid skrivas exakt som:
+              HH:MM-HH:MM
+
+            - Inga andra tidsformat får användas
+
+            - Om laddning är planerad:
+              - använd exakt värde från Laddningsfönster
+              - om värdet är tomt, null, unknown eller ogiltigt:
+                → skriv "tid ej tillgänglig"
+
+            - Om laddning inte är planerad:
+              → skriv aldrig något tidsintervall
+
+            ====================
+            REGLER FÖR FÖRKLARING
+            ====================
+
+            - Laddning tillåten är det slutgiltiga AI-beslutet.
+
+            - Om Laddning tillåten = true:
+              → jag har beslutat att laddning ska genomföras
+              → förklaringen måste stödja detta beslut
+              → om det finns laddningsbehov:
+                förklara att batteriet behöver laddas
+              → om laddning är lönsam:
+                förklara att laddning är ekonomiskt fördelaktig
+              → om solproduktionen inte räcker:
+                förklara att nätladdning behövs
+
+            - Om Laddning tillåten = false:
+              → jag har beslutat att laddning inte ska genomföras
+
+            - Om det inte finns laddningsbehov:
+              → förklara att batteriet inte behöver laddas
+
+            - Om solproduktionen räcker:
+              → förklara att solproduktionen bedöms täcka behovet
+
+            - Om laddning inte är lönsam:
+              → förklara att laddning inte är ekonomiskt fördelaktig
+
+            - Om användaren manuellt stoppat laddning:
+              → förklara att användaren har överskridit mitt AI-beslut
+
+            - Om användaren manuellt tvingat laddning:
+              → förklara att användaren har överskridit mitt AI-beslut
 
             ====================
             SVAR
             ====================
-            Svara på svenska med max 250 tecken. Skriv kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
 
-            Struktur:
-            1. Börja alltid med: "När det gäller laddning av batteriet har jag planerat att ladda ..." eller "har jag inte planerat att ladda..."
-            2. Ange laddningstid EXAKT i formatet HH:MM-HH:MM. Inga undantag. Ingen text, endast siffror och bindestreck.
-            3. Förklara kort varför (sol, behov, lönsamhet).
+            Svara på svenska med max 250 tecken.
 
-            Regler:
-            - Använd inga siffror för energi eller värden (endast klockslag är tillåtet).
-            - Skriv naturligt och sammanhängande (inte punktlista).
-            - Skriv i jag-form (AI är avsändaren).
-            - Om Systemläge = Ladda eller Ladda ej: skriv att användaren har tagit ett manuellt beslut som skriver över mitt beslut.
-            - Om Systemläge = Auto: nämn inte systemläge alls.
-            - Det ska tydligt framgå att det är en AI som fattat beslutet.
+            Skriv kort, tydligt och konsekvent.
+
+            ====================
+            SVARSSTRUKTUR (MÅSTE FÖLJAS)
+            ====================
+
+            1. Börja alltid med exakt EN av dessa meningar:
+
+            - "När det gäller laddning av batteriet har jag planerat att ladda ..."
+            - "När det gäller laddning av batteriet har jag inte planerat att ladda batteriet."
+
+            2. Om laddning är planerad:
+            - ange laddningstid exakt som HH:MM-HH:MM
+
+            3. Avsluta med en kort förklaring baserad ENDAST på:
+            - laddningsbehov
+            - lönsamhet
+            - solproduktion
+            - AI-beslut
+            - manuellt override
+
+            ====================
+            REGLER FÖR TEXTEN
+            ====================
+
+            - Använd inga energisiffror
+            - Endast tid får innehålla siffror
+            - Skriv alltid i jag-form
+            - Det ska tydligt framgå att beslutet kommer från mig som AI
+            - Ingen punktlista
+            - Endast sammanhängande text
+            - Ingen extra text före eller efter svaret
+            - Ingen metaforik eller mänskliga uttryck
+            - Ingen egen tolkning utanför datan
+
+            - Om Systemläge = Auto:
+              → nämn inte systemläget
+
+            - Om användaren gjort manuellt override:
+              → skriv tydligt att användaren har överskridit mitt AI-beslut
+
+            - Om laddning inte är planerad:
+              → orsaken måste framgå tydligt
         response_variable: result_1a_2
     sensor:
       - name: "sem_ai_analys_1"
@@ -3178,19 +4663,19 @@ template:
             ====================
             - Energi: kWh
             - Boolean: true/false
-            - Tid: text
+            - Tid: HH:MM-HH:MM
 
             ====================
             DATA
             ====================
 
-            Should_charge:
+            Laddning tillåten:
             {{ state_attr('sensor.sem_battery_charge_energy_2_1b','should_charge') }}
 
-            Battery_charge_profit:
+            Lönsam laddning:
             {{ state_attr('sensor.sem_battery_charge_energy_2_1b','battery_charge_profit') }}
 
-            Laddnings_behov:
+            Laddningsbehov:
             {{ states('sensor.sem_battery_charge_energy_2_1b') }}
 
             Laddningsfönster:
@@ -3200,39 +4685,129 @@ template:
             {{ states('input_select.sem_battery_charge_override_2_1b') }}
 
             ====================
-            REGLER
+            TOLKNING AV DATA
             ====================
 
-            - Should_charge = true → systemet beslutar att batteriet tillåts att laddas
-            - Should_charge = false → systemet beslutar att batteriet inte tillåts att laddas
+            - Om Laddningsbehov > 0:
+              → det finns ett laddningsbehov
 
-            Förklaring:
-            - Om Energi_behov = > 0 → det finns ett laddningsbehov
-            - Om Battery_charge_profit = true → systemet har beslutat att det är lönsamt att ladda batteriet
-            - Om Battery_charge_profit = false → systemet har beslutat att det inte är lönsamt att ladda batteriet
-            - Om Systemläge = Ladda → användaren har överskridit systemet beslut med att ladda batteriet
-            - Om Systemläge = Ladda ej → användaren har överskridit systemets beslut med att inte ladda batteriet
-            - Om Systemläge = Auto → systemet beslut följs
-            - Laddningstid måste alltid skrivas exakt som HH:MM-HH:MM
-            - Skriv aldrig tid i textform (t.ex. "tretton och femton")
-            - Om format inte kan följas, skriv "tid ej tillgänglig"
+            - Om Laddningsbehov <= 0:
+              → det finns inget laddningsbehov
+
+            - Om Lönsam laddning = true:
+              → det är lönsamt att ladda batteriet
+
+            - Om Lönsam laddning = false:
+              → det är inte lönsamt att ladda batteriet
+
+            - Om Laddning tillåten = true:
+              → jag som AI har beslutat att laddning ska genomföras
+
+            - Om Laddning tillåten = false:
+              → jag som AI har beslutat att laddning inte ska genomföras
+
+            ====================
+            REGLER (PRIORITERINGSORDNING)
+            ====================
+
+            1. SYSTEMLÄGE HAR HÖGST PRIORITET
+
+            - Om Systemläge = "Ladda":
+              → användaren har manuellt överskridit mitt AI-beslut och valt att batteriet ska laddas
+
+            - Om Systemläge = "Ladda ej":
+              → användaren har manuellt överskridit mitt AI-beslut och valt att batteriet inte ska laddas
+
+            - Om Systemläge = "Auto":
+              → mitt AI-beslut gäller
+
+            2. AI-BESLUT AVGÖRS AV LADDNING TILLÅTEN
+
+            - Om Laddning tillåten = true:
+              → laddning är planerad
+
+            - Om Laddning tillåten = false:
+              → laddning är inte planerad
+
+            3. LADDNINGSTID
+
+            - Laddningstid måste alltid skrivas exakt som:
+              HH:MM-HH:MM
+
+            - Inga andra tidsformat får användas
+
+            - Om laddning är planerad:
+              - använd exakt värde från Laddningsfönster
+              - om värdet är tomt, null, unknown eller ogiltigt:
+                → skriv "tid ej tillgänglig"
+
+            - Om laddning inte är planerad:
+              → skriv aldrig något tidsintervall
 
             ====================
             SVAR
             ====================
-            Svara på svenska med max 250 tecken. Skriv kort och tydligt. Svara alltid som att du som AI har tagit besluten. Det ska vara tydligt att det är du (AI) som är avsändaren.
-            Struktur:
-            1. Börja alltid med: "När det gäller laddning av batteriet har jag planerat att ladda ..." eller "har jag inte planerat att ladda..."
-            2. Ange laddningstid EXAKT i formatet HH:MM-HH:MM. Inga undantag. Ingen text, endast siffror och bindestreck.
-            3. Förklara kort varför batteriet laddas eller inte (baserat på behov och lönsamhet).
 
-            Regler:
-            - Använd inga siffror kopplade till energibehov (endast klockslag är tillåtet).
-            - Skriv naturligt och sammanhängande (inte punktlista).
-            - Skriv i jag-form (AI är avsändaren).
-            - Om systemläge = Ladda eller Ladda ej: skriv att användaren har tagit ett manuellt beslut.
-            - Om systemläge = Auto: skriv INTE ut att systemet är i läget auto.
-            - Det ska tydligt framgå att det är en AI som fattat beslutet (använd formuleringar som "jag som AI" eller motsvarande).
+            Svara på svenska med max 250 tecken.
+
+            Skriv kort, tydligt och konsekvent.
+
+            ====================
+            SVARSSTRUKTUR (MÅSTE FÖLJAS)
+            ====================
+
+            1. Börja alltid med exakt EN av dessa meningar:
+
+            - "När det gäller laddning av batteriet har jag planerat att ladda ..."
+            - "När det gäller laddning av batteriet har jag inte planerat att ladda batteriet."
+
+            2. Om laddning är planerad:
+            - ange laddningstid exakt som HH:MM-HH:MM
+
+            3. Avsluta med en kort förklaring baserad ENDAST på:
+            - laddningsbehov
+            - lönsamhet
+            - AI-beslut
+            - manuellt override
+
+            ====================
+            REGLER FÖR FÖRKLARING
+            ====================
+
+            - Om det inte finns ett laddningsbehov:
+              → förklara att batteriet inte behöver laddas
+
+            - Om det finns ett laddningsbehov men laddning inte är lönsam:
+              → förklara att laddning inte är ekonomiskt fördelaktig
+
+            - Om laddning är planerad:
+              → förklara att jag som AI har bedömt att laddning är lönsam och nödvändig
+
+            - Om användaren manuellt stoppat laddning:
+              → förklara att användaren har överskridit mitt AI-beslut
+
+            - Om användaren manuellt tvingat laddning:
+              → förklara att användaren har överskridit mitt AI-beslut
+
+            ====================
+            REGLER FÖR TEXTEN
+            ====================
+
+            - Använd inga energisiffror
+            - Endast tid får nämnas
+            - Skriv alltid i jag-form
+            - Det ska tydligt framgå att beslutet kommer från mig som AI
+            - Ingen punktlista
+            - Endast sammanhängande text
+
+            - Om Systemläge = Auto:
+              → nämn inte systemläget alls
+
+            - Om användaren gjort manuellt override:
+              → skriv tydligt att användaren har överskridit mitt AI-beslut
+
+            - Om laddning inte är planerad:
+              → orsaken måste framgå tydligt
         response_variable: result_2_1b
     sensor:
       - name: "sem_ai_analys_2"
