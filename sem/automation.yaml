@@ -1,5 +1,21 @@
 automation:
 
+################################################################################
+  - alias: SEM - Reload NordPool at 14:30
+    mode: single
+    triggers:
+      - trigger: time
+        at: "14:30:00"
+    conditions:
+      - condition: template
+        value_template: >
+          {% set entity = states('input_text.sem_nordpool_sensor_inofficial') %}
+          {{ entity not in ['unknown', 'unavailable', '', None] }}
+    actions:
+      - action: homeassistant.reload_config_entry
+        target:
+          entity_id: >
+            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
 
 ################################################################################
   - alias: SEM - Update Smart Charging When New Prices Arrive
@@ -24,6 +40,31 @@ automation:
       - action: input_button.press
         target:
           entity_id: input_button.sem_update_battery_cheapest_charge
+
+################################################################################
+  - alias: SEM - Reset battery override to Auto 1
+    mode: single
+    triggers:
+      - trigger: time
+        at: "23:30:00"
+    actions:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.sem_battery_charge_override_1a_2
+        data:
+          option: "Auto"
+
+  - alias: SEM - Reset battery override to Auto 2
+    mode: single
+    triggers:
+      - trigger: time
+        at: "13:15:00"
+    actions:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.sem_battery_charge_override_2_1b
+        data:
+          option: "Auto"
 
 ################################################################################
   - alias: SEM - Scheduled charging 1a-2 with SoC control
@@ -735,7 +776,6 @@ automation:
           {% else %}
             false
           {% endif %}
-
       - trigger: template
         value_template: >
           {% set w = states('sensor.sem_battery_charge_window_cheapest_2') %}
@@ -748,7 +788,6 @@ automation:
           {% endif %}
       - trigger: time_pattern
         minutes: "/15"
-
     condition:
       - condition: state
         entity_id: input_boolean.sem_ev_charging_protection_enabled
@@ -780,24 +819,11 @@ automation:
                   {% set s2 = states('sensor.sem_ev_sensor_state_2') %}
                   {% set c1 = states('input_text.sem_ev_charging_state') %}
                   {% set c2 = states('input_text.sem_ev_charging_state_2') %}
-
                   {% set valid1 = s1 not in ['unknown','unavailable','none'] %}
                   {% set valid2 = s2 not in ['unknown','unavailable','none'] %}
-
                   {{ (valid1 and s1 == c1) or (valid2 and s2 == c2) }}
-
-    #          - condition: state
-    #            entity_id: input_boolean.sem_battery_cheap_mode
-    #            state: "off"
-
-    #          - condition: state
-    #            entity_id: input_boolean.sem_battery_save
-    #            state: "off"
-
             sequence:
-
               - choose:
-
                   # ==========================================
                   # 🟢 Ladda elbil först
                   # ==========================================
@@ -805,20 +831,16 @@ automation:
                       - condition: state
                         entity_id: input_select.sem_ev_battery_strategy
                         state: "Ladda elbil först"
-
                     sequence:
-
                       # Stoppa ALLTID urladdning
                       - action: number.set_value
                         target:
                           entity_id: number.batteries_maximum_discharging_power
                         data:
-                          value: 0
-                          
+                          value: 0                          
                       - action: input_boolean.turn_on
                         target:
                           entity_id: input_boolean.sem_ev_charging_protection_status
-
                       # Kontrollera laddningsfönster
                       - choose:
                           - conditions:
@@ -828,7 +850,6 @@ automation:
                                   {% set w1 = states('sensor.sem_battery_charge_window_cheapest_1a') %}
                                   {% set w2 = states('sensor.sem_battery_charge_window_cheapest_2') %}
                                   {% set ns = namespace(in_window=false) %}
-
                                   {% for w in [w1, w2] %}
                                     {% if w not in ['unknown','unavailable',''] and ' - ' in w %}
                                       {% set start = as_timestamp(w.split(' - ')[0]) %}
@@ -838,22 +859,14 @@ automation:
                                       {% endif %}
                                     {% endif %}
                                   {% endfor %}
-
                                   {{ ns.in_window }}
                             sequence:
-
                               # Endast inom fönster → stoppa grid charge
                               - action: number.set_value
                                 target:
                                   entity_id: number.batteries_grid_charge_maximum_power
                                 data:
                                   value: 0
-
-#                              - action: input_boolean.turn_on
-#                                target:
-#                                  entity_id: input_boolean.sem_ev_charging_protection_status
-
-
                   # ==========================================
                   # Dela effekt
                   # ==========================================
@@ -861,9 +874,7 @@ automation:
                       - condition: state
                         entity_id: input_select.sem_ev_battery_strategy
                         state: "Dela effekt"
-
                     sequence:
-
                       - action: number.set_value
                         target:
                           entity_id: number.batteries_maximum_discharging_power
@@ -875,7 +886,6 @@ automation:
                         data:
                           value: >
                             {{ (states('input_number.sem_battery_grid_normal_power') | float) * 1000 }} 
-
                       - action: input_boolean.turn_on
                         target:
                           entity_id: input_boolean.sem_ev_charging_protection_status
@@ -891,7 +901,6 @@ automation:
                         entity_id: input_boolean.sem_ev_integrated
                         state: "on"
                     sequence:
-
                       - choose:
                           # Elbil under mål → all effekt till EV, batteriet laddar ej
                           - conditions:
@@ -905,12 +914,10 @@ automation:
                               target:
                                 entity_id: number.batteries_maximum_discharging_power
                               data:
-                                value: 0
-                          
+                                value: 0                          
                             - action: input_boolean.turn_on
                               target:
                                 entity_id: input_boolean.sem_ev_charging_protection_status
-
                             # Kontrollera laddningsfönster
                             - choose:
                                 - conditions:
@@ -920,7 +927,6 @@ automation:
                                         {% set w1 = states('sensor.sem_battery_charge_window_cheapest_1a') %}
                                         {% set w2 = states('sensor.sem_battery_charge_window_cheapest_2') %}
                                         {% set ns = namespace(in_window=false) %}
-
                                         {% for w in [w1, w2] %}
                                           {% if w not in ['unknown','unavailable',''] and ' - ' in w %}
                                             {% set start = as_timestamp(w.split(' - ')[0]) %}
@@ -930,17 +936,14 @@ automation:
                                             {% endif %}
                                           {% endif %}
                                         {% endfor %}
-
                                         {{ ns.in_window }}
                                   sequence:
-
                                     # Endast inom fönster → stoppa grid charge
                                     - action: number.set_value
                                       target:
                                         entity_id: number.batteries_grid_charge_maximum_power
                                       data:
                                         value: 0
-
                           # Elbil uppnått mål → återställning
                           - conditions:
                               - condition: template
@@ -1316,11 +1319,13 @@ automation:
                     false
                   {% else %}
                     {% set start = as_datetime(raw.split(' - ')[0]) %}
-                    {{ now() < start }}
+                    {% set now_ok = now() < start %}
+                    {% set required = state_attr('sensor.sem_relative_expensive_price_1', 'kwh_required') | float(0) %}
+                    {% set soc = states('sensor.batteries_state_of_capacity') | float(0) %}
+                    {% set capacity = state_attr('sensor.sem_battery_charge_energy_1a_2', 'usable_capacity') | float(0) %}
+                  {% set current_kwh = soc / 100 * capacity %}
+                    {{ now_ok and required > 0 and current_kwh + 0.5 <= required }}
                   {% endif %}
-#              - condition: state
-#                entity_id: input_boolean.sem_battery_cheap_mode
-#                state: "off"
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "off"
@@ -1344,9 +1349,6 @@ automation:
                     {% set start = as_datetime(raw.split(' - ')[0]) %}
                     {{ now() >= start }}
                   {% endif %}
-#              - condition: state
-#                entity_id: input_boolean.sem_battery_cheap_mode
-#                state: "off"
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
@@ -1399,11 +1401,13 @@ automation:
                     false
                   {% else %}
                     {% set start = as_datetime(raw.split(' - ')[0]) %}
-                    {{ now() < start }}
+                    {% set now_ok = now() < start %}
+                    {% set required = state_attr('sensor.sem_relative_expensive_price_2', 'kwh_required') | float(0) %}
+                    {% set soc = states('sensor.batteries_state_of_capacity') | float(0) %}
+                    {% set capacity = state_attr('sensor.sem_battery_charge_energy_2_1b', 'usable_capacity') | float(0) %}
+                  {% set current_kwh = soc / 100 * capacity %}
+                    {{ now_ok and required > 0 and current_kwh + 0.5 <= required }}
                   {% endif %}
-#              - condition: state
-#                entity_id: input_boolean.sem_battery_cheap_mode
-#                state: "off"
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "off"
@@ -1427,9 +1431,6 @@ automation:
                     {% set start = as_datetime(raw.split(' - ')[0]) %}
                     {{ now() >= start }}
                   {% endif %}
-#              - condition: state
-#                entity_id: input_boolean.sem_battery_cheap_mode
-#                state: "off"
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
