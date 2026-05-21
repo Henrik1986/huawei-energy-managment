@@ -17,13 +17,11 @@ command_line:
       json_attributes:
         - sem
 
-  
   - sensor:
       scan_interval: 60
       name: "sem_sys_state"
       unique_id: sem_sys_state
       command: "grep 'access_data:' /config/packages/sem/data/sys_cache.db | cut -d':' -f2"
-
 
   - sensor:
       scan_interval: 60
