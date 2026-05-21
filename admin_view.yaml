@@ -1,6 +1,5 @@
 type: sections
 max_columns: 3
-title: Smart Energy System
 path: smart-energy-system
 icon: mdi:dots-circle
 sections:
@@ -33,13 +32,14 @@ sections:
               name: Laddbox
               color: teal
               icon: mdi:ev-plug-type2
+              display_zero: true
           home:
             name: Ditt hem
         clickable_entities: false
         display_zero_lines: true
         use_new_flow_rate_model: false
         energy_date_selection: false
-        wh_decimals: 2
+        wh_decimals: 1
         kwh_decimals: 1
         min_flow_rate: 1
         max_flow_rate: 6
@@ -570,11 +570,9 @@ sections:
                 hide_state: false
                 vertical: false
                 tap_action:
-                  action: navigate
-                  navigation_path: "#battery"
+                  action: none
                 icon_tap_action:
-                  action: navigate
-                  navigation_path: "#battery"
+                  action: none
                 features_position: bottom
               - type: tile
                 entity: sensor.batteries_state_of_capacity
@@ -585,11 +583,9 @@ sections:
                 hide_state: false
                 vertical: false
                 tap_action:
-                  action: navigate
-                  navigation_path: "#battery"
+                  action: none
                 icon_tap_action:
-                  action: navigate
-                  navigation_path: "#battery"
+                  action: none
                 features_position: inline
             columns: 2
         view_layout:
@@ -787,16 +783,19 @@ sections:
               rows: 1
   - type: grid
     cards:
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#config_1"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#config_1"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -1007,16 +1006,19 @@ sections:
                   action: navigate
                   navigation_path: "#config_2"
                 features_position: bottom
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#config_2"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#config_2"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -1199,16 +1201,19 @@ sections:
               - type: markdown
                 content: |
                   <center> 1 av 4 </center>
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#config_3"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#config_3"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -1466,16 +1471,19 @@ sections:
               - type: markdown
                 content: |
                   <center> 2 av 4 </center>
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#config_4"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#config_4"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -1519,7 +1527,7 @@ sections:
 
                   **Laddningsvinst** anger det minsta prisskillnadskravet för
                   att laddning ska genomföras. Detta är en avgörande faktor för
-                  systemets lönsamhet. Ett rimligt startvärde är 0,5 SEK/kWh.
+                  systemets lönsamhet. Ett rimligt startvärde är 0,3 SEK/kWh.
               - type: heading
                 icon: ""
                 heading: Elpriser
@@ -1533,8 +1541,11 @@ sections:
                     name: Lågt elpris
                     icon: mdi:finance
                   - entity: input_number.sem_grid_fees
-                    name: Påslag el
+                    name: Påslag köpt el
                     icon: mdi:transmission-tower-import
+                  - entity: input_number.sem_export_addon
+                    name: Påslag såld el
+                    icon: mdi:transmission-tower-export
               - type: markdown
                 content: >-
                   **ℹ️Information**
@@ -1550,9 +1561,14 @@ sections:
                   batteriet. Ett rimligt startvärde är 0,7 SEK/kWh.
 
 
-                  **Påslag el** är det totala påslaget på din köpta el (t.ex.
-                  skatt, avgifter och elnätskostnader). Värdet används för att
-                  beräkna faktiska kostnader och besparingar.
+                  **Påslag köpt el** är det totala påslaget på din köpta el
+                  (t.ex. skatt, avgifter och elnätskostnader). Värdet används
+                  för att beräkna faktiska kostnader och besparingar.
+
+
+                  **Påslag såld el** är det totala påslaget på din sålda el.
+                  Värdet används för att beräkna din förtjänst då du exporterar
+                  el. 
               - type: heading
                 icon: ""
                 heading_style: subtitle
@@ -1707,16 +1723,19 @@ sections:
               - type: markdown
                 content: |
                   <center> 3 av 4 </center>
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#config_5"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#config_5"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -2054,16 +2073,19 @@ sections:
               - type: markdown
                 content: |
                   <center> 4 av 4 </center>
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#config_6"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#config_6"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -2099,12 +2121,15 @@ sections:
                 features_position: bottom
   - type: grid
     cards:
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#battery"
+        show_header: false
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#battery"
-            show_header: false
           - type: heading
             icon: mdi:home-battery
             heading_style: title
@@ -2289,14 +2314,15 @@ sections:
                   Alternativen ovan ger dig möjlighet att lägga till **extra
                   kwh** på ett laddningstillfälle.
                 text_only: true
-        view_layout:
-          position: main
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#grid"
+        show_header: false
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#grid"
-            show_header: false
           - type: heading
             icon: mdi:transmission-tower
             heading_style: title
@@ -2438,12 +2464,15 @@ sections:
                   - entity: input_number.sem_grid_fees
                     name: Påslag el
                     icon: mdi:transmission-tower-import
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#solar"
+        show_header: false
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#solar"
-            show_header: false
           - type: heading
             icon: mdi:solar-power-variant
             heading_style: title
@@ -2615,12 +2644,15 @@ sections:
                   system**. På hemskärmens kan du se om den smarta funktionen är
                   aktiv. 
                 text_only: true
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#charge_information"
+        show_header: false
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#charge_information"
-            show_header: false
           - type: heading
             icon: mdi:battery-clock
             heading: Planerad laddning
@@ -3024,19 +3056,21 @@ sections:
                       features:
                         - type: select-options
                       features_position: inline
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#wallbox"
+        button_type: name
+        name: Laddning
+        icon: mdi:ev-station
+        show_header: false
+        scrolling_effect: true
+        show_icon: true
+        show_name: true
+        width_desktop: 540px
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#wallbox"
-            button_type: name
-            name: Laddning
-            icon: mdi:ev-station
-            show_header: false
-            scrolling_effect: true
-            show_icon: true
-            show_name: true
-            width_desktop: 540px
           - type: heading
             icon: mdi:ev-plug-type2
             heading: Laddbox
@@ -3120,18 +3154,21 @@ sections:
                         batteriet på tillgänglig effekt. 
   - type: grid
     cards:
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#settings"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
           - type: heading
             icon: mdi:account
             heading: Mitt system
             heading_style: title
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#settings"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -3353,17 +3390,20 @@ sections:
                   ✨Önska [ny
                   funktion](https://github.com/Henrik1986/huawei-energy-managment/discussions)
                   på Github
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#buy_key"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          action: navigate
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#buy_key"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              action: navigate
-              navigation_path: "#settings"
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -3450,16 +3490,19 @@ sections:
 
                         Henrik
                       text_only: true
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#settings_fast"
+        show_header: false
+        background_update: false
+        width_desktop: 600px
+        close_action:
+          navigation_path: "#settings"
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#settings_fast"
-            show_header: false
-            background_update: false
-            width_desktop: 600px
-            close_action:
-              navigation_path: "#settings"
           - type: heading
             icon: mdi:order-bool-descending
             heading: Snabbval
@@ -3529,13 +3572,16 @@ sections:
                   Under **extra kWh** kan du lägga till extra kWh på ett
                   laddningstillfälle. Detta kan vara användbart om du vill ladda
                   mer än vad systemet föreslår. 
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#system_plan"
+        show_header: false
+        width_desktop: 540px
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#system_plan"
-            show_header: false
-            width_desktop: 540px
           - type: heading
             icon: mdi:auto-mode
             heading_style: title
@@ -4409,17 +4455,16 @@ sections:
               - entity: input_boolean.sem_more_info_system
                 name: Mer information
                 icon: mdi:information
-      - type: vertical-stack
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#savings"
+        show_header: false
+        width_desktop: 540px
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
         cards:
-          - type: custom:bubble-card
-            card_type: pop-up
-            hash: "#savings"
-            show_header: false
-            width_desktop: 540px
-            button_type: name
-            sub_button:
-              main: []
-              bottom: []
           - type: heading
             icon: mdi:finance
             heading_style: title
@@ -4536,7 +4581,7 @@ sections:
                           title:
                             text: SEK
                       series:
-                        - entity: sensor.sem_savings_monthly
+                        - entity: sensor.sem_savings_weekly
                           name: Besparing
                           type: column
                           color: "#1d4ed8"
@@ -4555,8 +4600,39 @@ sections:
                       icon: mdi:calendar-week
                       heading: Månad
                       heading_style: subtitle
-                    - type: markdown
-                      content: Under utveckling
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing per månad
+                      graph_span: 1month
+                      span:
+                        start: month
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                          padding:
+                            left: 40
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_savings_tot
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1week
+                            func: diff
               - type: conditional
                 conditions:
                   - condition: state
@@ -4569,21 +4645,282 @@ sections:
                       icon: mdi:calendar-week
                       heading: År
                       heading_style: subtitle
-                    - type: markdown
-                      content: Under utveckling
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing per månad (år)
+                      graph_span: 1year
+                      span:
+                        start: year
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                          padding:
+                            left: 40
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_savings_tot
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1month
+                            func: diff
           - type: entities
             entities:
               - entity: input_select.sem_savings
                 name: Välj graf
+      - type: custom:bubble-card
+        card_type: pop-up
+        hash: "#earnings"
+        show_header: false
+        width_desktop: 540px
+        button_type: name
+        sub_button:
+          main: []
+          bottom: []
+        cards:
+          - type: heading
+            icon: mdi:finance
+            heading_style: title
+            heading: Förtjänst
+          - type: markdown
+            content: >-
+              Nedan visas förtjänst du har gjort med hjälp av solenergi, samt
+              det du sålt från ditt batteri. 
+          - type: heading
+            icon: mdi:apps
+            heading: Översikt
+            heading_style: subtitle
+          - type: entities
+            entities:
+              - entity: sensor.sem_earnings_daily
+                name: Idag
+                icon: mdi:calendar-today
+              - entity: sensor.sem_earnings_weekly
+                name: Vecka
+                icon: mdi:calendar-week
+              - entity: sensor.sem_earnings_monthly
+                name: Månad
+                icon: mdi:calendar-month
+              - entity: sensor.sem_earnings_yearly
+                name: År
+                icon: mdi:calendar-multiple
+              - entity: sensor.sem_earnings_tot
+                name: Totalt
+                icon: mdi:all-inclusive
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_select.sem_savings
+                    state: Idag
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-today
+                      heading: Idag
+                      heading_style: subtitle
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing idag
+                      graph_span: 24h
+                      span:
+                        start: day
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_earnings_daily
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1h
+                            func: diff
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_select.sem_savings
+                    state: Vecka
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-week
+                      heading: Vecka
+                      heading_style: subtitle
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing vecka
+                      graph_span: 7d
+                      span:
+                        start: isoWeek
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                          padding:
+                            left: 40
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                            maxWidth: 40
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_earnings_weekly
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1d
+                            func: diff
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_select.sem_savings
+                    state: Månad
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-week
+                      heading: Månad
+                      heading_style: subtitle
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing per månad
+                      graph_span: 1month
+                      span:
+                        start: month
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                          padding:
+                            left: 40
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_earnings_tot
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1week
+                            func: diff
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_select.sem_savings
+                    state: År
+                card:
+                  type: vertical-stack
+                  cards:
+                    - type: heading
+                      icon: mdi:calendar-week
+                      heading: År
+                      heading_style: subtitle
+                    - type: custom:apexcharts-card
+                      header:
+                        show: false
+                        title: Besparing per månad (år)
+                      graph_span: 1year
+                      span:
+                        start: year
+                      apex_config:
+                        chart:
+                          toolbar:
+                            show: false
+                        grid:
+                          borderColor: "#e5e7eb"
+                          padding:
+                            left: 40
+                        plotOptions:
+                          bar:
+                            borderRadius: 4
+                            columnWidth: 55%
+                        fill:
+                          type: solid
+                          opacity: 0.85
+                        yaxis:
+                          title:
+                            text: SEK
+                      series:
+                        - entity: sensor.sem_earnings_tot
+                          name: Besparing
+                          type: column
+                          color: "#1d4ed8"
+                          group_by:
+                            duration: 1month
+                            func: diff
+          - type: entities
+            entities:
+              - entity: input_select.sem_savings
+                name: Välj graf
+        card_layout: large
 badges:
   - type: entity
     show_name: true
     show_state: true
     show_icon: true
     visibility:
-      - condition: state
-        entity: input_boolean.sem_export_limit_active
-        state: "on"
+      - condition: and
+        conditions:
+          - condition: state
+            entity: input_boolean.sem_max_export_active
+            state: "on"
+          - condition: state
+            entity: input_boolean.sem_export_limit_active
+            state: "on"
     entity: input_boolean.sem_max_export_active
     name: Begränsar solexport
     icon: mdi:weather-sunny-off
@@ -4597,9 +4934,14 @@ badges:
     show_state: true
     show_icon: true
     visibility:
-      - condition: state
-        entity: input_boolean.sem_discharge_high_prices
-        state: "on"
+      - condition: and
+        conditions:
+          - condition: state
+            entity: input_boolean.sem_discharge_high_prices
+            state: "on"
+          - condition: state
+            entity: input_boolean.sem_discharge
+            state: "on"
     entity: input_boolean.sem_discharge
     name: Säljer batteriöverskott
     icon: mdi:battery-negative
@@ -4613,9 +4955,14 @@ badges:
     show_state: true
     show_icon: true
     visibility:
-      - condition: state
-        entity: input_boolean.sem_ev_charging_protection_enabled
-        state: "on"
+      - condition: and
+        conditions:
+          - condition: state
+            entity: input_boolean.sem_ev_charging_protection_status
+            state: "on"
+          - condition: state
+            entity: input_boolean.sem_ev_charging_protection_enabled
+            state: "on"
     entity: input_boolean.sem_ev_charging_protection_status
     name: Skydd vid elbilsladdning
     icon: mdi:ev-plug-type2
@@ -4651,6 +4998,10 @@ badges:
     color: green
     hold_action:
       action: more-info
+    visibility:
+      - condition: state
+        entity: input_boolean.sem_battery_cheap_mode
+        state: "on"
   - type: entity
     show_name: true
     show_state: true
@@ -4663,6 +5014,10 @@ badges:
     color: green
     hold_action:
       action: more-info
+    visibility:
+      - condition: state
+        entity: input_boolean.sem_battery_save
+        state: "on"
   - type: entity
     show_name: true
     show_state: true
@@ -4677,6 +5032,17 @@ badges:
   - type: entity
     show_name: true
     show_state: true
+    show_icon: true
+    entity: sensor.sem_earnings_daily
+    name: Förtjänst (Idag)
+    icon: mdi:finance
+    color: green
+    tap_action:
+      action: navigate
+      navigation_path: "#earnings"
+  - type: entity
+    show_name: true
+    show_state: true
     show_icon: false
     entity: sensor.sem_update_status
     icon: mdi:database
@@ -4685,3 +5051,7 @@ badges:
       navigation_path: "#settings"
     name: Mitt system
 cards: []
+header:
+  layout: center
+  badges_position: bottom
+  badges_wrap: scroll
