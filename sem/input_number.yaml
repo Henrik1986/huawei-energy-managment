@@ -271,7 +271,7 @@ input_number:
   grid_charge_start_1a: 
     name: Grid charge start 1a
     min: 0
-    max: 100
+    max: 100000000000000000000000
     step: 0.001
     unit_of_measurement: "kWh"
     mode: box
@@ -279,7 +279,7 @@ input_number:
   grid_charge_stop_1a: 
     name: Grid charge stop 1a
     min: 0
-    max: 100
+    max: 100000000000000000000000
     step: 0.001
     unit_of_measurement: "kWh"
     mode: box
@@ -287,15 +287,15 @@ input_number:
   grid_charge_start_2: 
     name: Grid charge start 2
     min: 0
-    max: 100
+    max: 100000000000000000000000
     step: 0.001
     unit_of_measurement: "kWh"
     mode: box
   
-  grid_charge_stop_2: 
+  grid_charge_stop_2:
     name: Grid charge stop 2
     min: 0
-    max: 100
+    max: 100000000000000000000000
     step: 0.001
     unit_of_measurement: "kWh"
     mode: box
@@ -311,7 +311,7 @@ input_number:
   sem_export_addon:
     name: Export tillägg
     min: 0
-    max: 2
+    max: 10
     step: 0.01
     unit_of_measurement: "SEK/kWh"
     mode: box
