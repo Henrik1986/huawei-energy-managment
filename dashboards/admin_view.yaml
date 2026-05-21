@@ -1,7 +1,7 @@
 views:
   - type: sections
     max_columns: 3
-    path: smart-energistyrning
+    path: smart-energy-system
     icon: mdi:dots-circle
     sections:
       - type: grid
@@ -5092,18 +5092,6 @@ views:
           action: navigate
           navigation_path: '#settings'
         name: Mitt system
-      - type: entity
-        show_name: true
-        show_state: true
-        show_icon: true
-        entity: sensor.sem_battery_charge_energy_1a_2
-        name: 1a_2
-      - type: entity
-        show_name: true
-        show_state: true
-        show_icon: true
-        entity: sensor.sem_battery_charge_energy_2_1b
-        name: 2_1a
     cards: []
     header:
       layout: center
