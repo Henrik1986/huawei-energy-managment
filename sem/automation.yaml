@@ -716,11 +716,15 @@ automation:
                 - condition: template
                   value_template: >
                     {% set interval = states('sensor.sem_export_limit') %}
+
                     {% if interval and ' - ' in interval %}
-                      {% set start = strptime(interval.split(' - ')[0], '%Y-%m-%dT%H:%M:%S%z') %}
-                      {% set end   = strptime(interval.split(' - ')[1], '%Y-%m-%dT%H:%M:%S%z') %}
-                      {{ now() >= start and now() <= end
-                        and is_state('input_boolean.sem_max_export_active', 'off') }}
+                      {% set start = as_datetime(interval.split(' - ')[0]) %}
+                      {% set end   = as_datetime(interval.split(' - ')[1]) %}
+
+                      {{ now() >= start
+                         and now() <= end
+                         and is_state('input_boolean.sem_max_export_active', 'off') }}
+
                     {% else %}
                       false
                     {% endif %}
@@ -738,11 +742,14 @@ automation:
                 - condition: template
                   value_template: >
                     {% set interval = states('sensor.sem_export_limit') %}
+
                     {% if interval and ' - ' in interval %}
-                      {% set start = strptime(interval.split(' - ')[0], '%Y-%m-%dT%H:%M:%S%z') %}
-                      {% set end   = strptime(interval.split(' - ')[1], '%Y-%m-%dT%H:%M:%S%z') %}
+                      {% set start = as_datetime(interval.split(' - ')[0]) %}
+                      {% set end   = as_datetime(interval.split(' - ')[1]) %}
+
                       {{ (now() < start or now() > end)
-                        and is_state('input_boolean.sem_max_export_active', 'on') }}
+                         and is_state('input_boolean.sem_max_export_active', 'on') }}
+
                     {% else %}
                       true
                     {% endif %}
