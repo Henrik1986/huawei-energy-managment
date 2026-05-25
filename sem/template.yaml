@@ -3437,25 +3437,32 @@ template:
   - trigger:
       - trigger: time
         at: "01:00:00"
+#      - trigger: state
+#        entity_id: input_button.sem_test
     sensor:
       - name: "sem_export_limit"
         unique_id: sem_export_limit
         state: >
           {% set limit_active = is_state('input_boolean.sem_export_limit_active', 'on') %}
+
           {% if not limit_active %}
             ""
+
           {% else %}
+
             {% set price_threshold = 0 %}
             {% set today = now().date() %}
-
             {% set all_prices = state_attr('sensor.sem_nordpool_active', 'raw_today') or [] %}
 
             {% set current_start = namespace(value=None) %}
             {% set current_end = namespace(value=None) %}
-            {% set final_start = namespace(value=None) %}
-            {% set final_end = namespace(value=None) %}
+
+            {% set best_start = namespace(value=None) %}
+            {% set best_end = namespace(value=None) %}
+            {% set best_duration = namespace(value=0) %}
 
             {% for entry in all_prices %}
+
               {% set price = entry['value'] | float %}
               {% set time_start = as_datetime(entry['start']) %}
               {% set time_end = as_datetime(entry['end']) %}
@@ -3463,7 +3470,7 @@ template:
               {% if time_start.date() == today %}
 
                 {% if price <= price_threshold %}
-                  {# startar nytt block om det inte finns #}
+
                   {% if current_start.value is none %}
                     {% set current_start.value = time_start %}
                   {% endif %}
@@ -3471,30 +3478,51 @@ template:
                   {% set current_end.value = time_end %}
 
                 {% else %}
-                  {# block bryts → spara om det är giltigt #}
+
                   {% if current_start.value is not none %}
-                    {% set final_start.value = current_start.value %}
-                    {% set final_end.value = current_end.value %}
+
+                    {% set duration =
+                      (as_timestamp(current_end.value) - as_timestamp(current_start.value))
+                    %}
+
+                    {% if duration > best_duration.value %}
+                      {% set best_duration.value = duration %}
+                      {% set best_start.value = current_start.value %}
+                      {% set best_end.value = current_end.value %}
+                    {% endif %}
+
                   {% endif %}
 
                   {% set current_start.value = none %}
                   {% set current_end.value = none %}
+
                 {% endif %}
 
               {% endif %}
+
             {% endfor %}
 
-            {# fånga sista blocket om dagen slutar på billigt #}
+            {# fånga sista blocket #}
             {% if current_start.value is not none %}
-              {% set final_start.value = current_start.value %}
-              {% set final_end.value = current_end.value %}
+
+              {% set duration =
+                (as_timestamp(current_end.value) - as_timestamp(current_start.value))
+              %}
+
+              {% if duration > best_duration.value %}
+                {% set best_duration.value = duration %}
+                {% set best_start.value = current_start.value %}
+                {% set best_end.value = current_end.value %}
+              {% endif %}
+
             {% endif %}
 
-            {% if final_start.value is not none and final_end.value is not none %}
-              {{ final_start.value }} - {{ final_end.value }}
+            {% if best_start.value is not none %}
+              {{ best_start.value }} - {{ best_end.value }}
             {% else %}
               ""
             {% endif %}
+
           {% endif %}
 
   # SEARCH CHEAP INTEVALL - USE WHEN BATTERY SHOULD BE IN IDLE 6-18
@@ -3613,8 +3641,6 @@ template:
         to: "on"
       - trigger: time
         at: "00:10:00"
-#      - trigger: state
-#        entity_id: input_button.sem_test
     sensor:
       - name: "sem_relative_expensive_price_1"
         unique_id: sem_relative_expensive_price_1
