@@ -13,7 +13,7 @@ Funktioner:
 Designat för att ge högre självförsörjning, bättre ekonomi och full kontroll över din energianläggning.
 
 
-<img width="1593" height="871" alt="Skärmbild 2026-04-18 195353" src="https://github.com/user-attachments/assets/8687fc68-f4dc-4e85-812d-50ed9e951a0b" />
+<img width="1573" height="877" alt="Skärmbild 2026-06-16 211824" src="https://github.com/user-attachments/assets/3ad851a5-e7d3-47ec-b99c-bde30b7b985d" />
 Bilden ovan visar systemets dashboard
 
 
