@@ -1023,13 +1023,9 @@ sections:
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
-                icon: ""
-                heading_style: title
-                heading: Generell information
-              - type: heading
-                icon: ""
+                icon: mdi:finance
                 heading: Nordpool
-                heading_style: subtitle
+                heading_style: title
               - type: tile
                 entity: input_boolean.sem_use_official_nordpool
                 name: Officiella integrationen
@@ -1089,6 +1085,7 @@ sections:
                         UI-läget -> Välj nordpool.get_prices_for_date under
                         åtgärd -> Välj konfigurationspost -> Klicka på gå till
                         yaml-läge.
+                      text_only: true
               - type: conditional
                 conditions:
                   - condition: state
@@ -1101,25 +1098,47 @@ sections:
                       entities:
                         - entity: input_text.sem_nordpool_sensor_inofficial
                           name: Din inofficiella Nordpool sensor
+                          icon: mdi:identifier
                           tap_action:
                             action: none
                           icon_tap_action:
                             action: none
                     - type: markdown
-                      content: >
-                        **Systemet föreslår följande sensorer. Välj den sensorn
-                        som visar elpriset i SEK/kWh.**
+                      content: >-
+                        {% set sensors = states.sensor
+                           | selectattr('entity_id', 'match', '^sensor\.nordpool_kw')
+                           | list %}
 
-                        {% for s in states.sensor
-                           if s.entity_id.startswith('sensor.nordpool_kw') %}
+                        {% if sensors | count > 0 %}
+
+                        **Nordpool-sensor hittades.**
+                          Fyll i sensorn som visar elpriset i SEK/kWh i rutan ovanför.
+
+                        {% for s in sensors %}
+
                         {% set unit = s.attributes.unit_of_measurement if
-                        s.attributes.unit_of_measurement is defined else '' %} -
-                        {{ s.entity_id }} 
+                        s.attributes.unit_of_measurement is defined else '' %}
+
+                        - `{{ s.entity_id }}`
                           {{ s.state }}{{ ' ' + unit if unit else '' }}
                         {% endfor %}
+
+
+                        {% else %}
+
+                        **Systemet hittade ingen Nord Pool-sensor.**
+
+
+                        Kontrollera att du konfiguerat integrationen rätt och
+                        att du hittar den under **Inställningar → Enheter och
+                        tjänster**. Finns där en sensor som visar elpriset i
+                        SEK/kWh anger du den ovan. 
+                          **Exempel <i>sensor.ditt_sensor_namn**
+                        {% endif %}
+                      text_only: true
               - type: heading
-                icon: ""
-                heading_style: subtitle
+                icon: mdi:battery
+                heading_style: title
                 heading: Huawei batteri ID
               - type: entities
                 entities:
@@ -1131,18 +1150,25 @@ sections:
               - type: markdown
                 content: >
                   {% set id = device_id('sensor.batteries_state_of_capacity') %}
-                  {% if id %} **Systemet har hittat ett Huawei batteri ID - fyll
-                  i det ovanför** 
-                    {{ id }}
-                  {% else %} **ℹ️ Information**  
+                  {% if id %} **Ditt Huawei batteri ID hittades** 
+                    Fyll i följande ID i rutan ovanför 
+                    - `{{ id }}`
+                  {% else %} 
 
-                    Hitta ditt Huawei batteri ID:  
-                  - Utvecklarverktyg → Åtgärder   - Sök: huawei   - Välj
+
+                  **Systemet har inte hittat ditt Huawei batteri ID.** 
+                    Säkerställ att du konfigerat Huawei intergrationen korrekt. Detta gör du via **Inställningar → Enheter och tjänster**. 
+
+                  Du hittar ditt Huawei batteri ID på följande sätt:
+                  **Utvecklarverktyg → Åtgärder   - Sök: huawei   - Välj
                   *forcible charge*   - Gå till UI-läge   - Välj *Batteries*   -
-                  Gå till YAML-läge {% endif %}
+                  Gå till YAML-läge** 
+
+                    Fyll i ditt Huawei batteri ID i rutan ovanför
+                  {% endif %}
               - type: heading
-                icon: ""
-                heading_style: subtitle
+                icon: phu:huawei-solar-inverter
+                heading_style: title
                 heading: Huawei inverter ID
               - type: entities
                 entities:
@@ -1154,33 +1180,61 @@ sections:
               - type: markdown
                 content: >
                   {% set id = device_id('sensor.inverter_active_power') %} {% if
-                  id %} **Systemet har hittat ett Huawei inverter ID - fyll i
-                  det ovanför.**
+                  id %} **Ditt Huawei inverter ID hittades.**
+                    Fyll i följande ID i rutan ovanför 
+                    - `{{ id }}` {% else %}
+                  **Systemet hittade inte ditt Huawei inverter ID** 
+                    Säkerställ att du konfigerat Huawei intergrationen korrekt. Detta gör du via **Inställningar → Enheter och tjänster**. 
 
-                  {{ id }} {% else %}
+                  Du hittar ditt Huawei inverter ID på följande sätt: 
 
-                  **ℹ️Information**   Hitta ditt Huawei inverter ID:  
-                  Utvecklarverktyg → Åtgärder → Klicka på åtgärd → Skriv huawei
-                  → Välj *limit the power fed to grid* → Klicka på gå till
-                  UI-läge → Välj *Inverter* i rullgardinen på raden inverter →
-                  Klicka på gå till YAML-läge {% endif %}
+                  **Utvecklarverktyg → Åtgärder → Klicka på åtgärd → Skriv
+                  huawei → Välj limit the power fed to grid → Klicka på gå till
+                  UI-läge → Välj Inverter i rullgardinen på raden inverter →
+                  Klicka på gå till YAML-läge** 
+
+
+                  Fyll i ditt Huawei inverter ID i rutan ovanför
+
+                  {% endif %}
               - type: heading
-                heading_style: subtitle
+                heading_style: title
                 heading: Väderprognos
+                icon: mdi:weather-partly-cloudy
               - type: entities
                 entities:
                   - entity: input_text.sem_weather_sensor
                     name: Din SMHI sensor
-                    icon: mdi:weather-partly-cloudy
+                    icon: mdi:identifier
                     tap_action:
                       action: none
                     icon_tap_action:
                       action: none
               - type: markdown
-                content: |-
-                  ℹ️**Information**
-                  Systemet använder sig av weather.smhi_home
-                  Fyll i det ovanför
+                content: >-
+                  {% if states('weather.smhi_home') not in ['unknown',
+                  'unavailable'] %}
+
+                  **SMHI-vädersensorn hittades.**
+
+                  Fyll i följande sensor i rutan ovanför:
+
+                  - `weather.smhi_home`
+
+
+                  {% else %}
+
+                  **Ingen SMHI-vädersensor hittades.**
+
+                  Du behöver skapa en SMHI-vädersensor med namnet:
+
+                  - `weather.smhi_home`
+
+
+                  När sensorn har skapats kommer systemet automatiskt att hitta
+                  den.
+
+                  {% endif %}
               - square: false
                 type: grid
                 cards:
@@ -1248,11 +1302,22 @@ sections:
                     icon: mdi:earth
                     name: Longitud
               - type: markdown
-                content: |-
-                  **ℹ️Information**
-                  Latitud: söder= -90 och norr= 90.
-                  Longitud: väst= -180 och öst= 180. 
-                  https://www.gps-coordinates.net/ 
+                content: >-
+                  {% if has_value('zone.home') %}
+                    {% set lat = state_attr('zone.home', 'latitude') %}
+                    {% set lon = state_attr('zone.home', 'longitude') %}
+                    **Systemet hittade din position**
+                    Du kan dubellkolla den här: https://www.gps-coordinates.net/
+                    - `Latitude: {{ lat }}`
+                    - `Longitud: {{ lon }}`
+                  {% else %}
+
+                  **Systemet hittade inte din position.**
+
+                  Sök upp din position via https://www.gps-coordinates.net/ och
+                  fyll i rutorna ovan. 
+                     
+                  {% endif %}
               - type: tile
                 entity: input_boolean.sem_solar_2
                 name: Två anläggningar
@@ -1314,36 +1379,43 @@ sections:
                       content: >-
                         **ℹ️Information**
 
-                        Lutning
+                        **Lutning**
 
-                        0° = helt plant (horisontellt)
+                        `0° = helt plant (horisontellt)`
 
-                        90° = rakt upp (vertikalt)
-
-
-                        Riktning 
-
-                        180° = norr
-
-                        -90° = öst
-
-                        0° = syd
-
-                        90° = väst
+                        `90° = rakt upp (vertikalt)`
 
 
-                        Kapacitet (kWp)
+                        **Riktning** 
+
+                        `180° = norr`
+
+                        `-90° = öst`
+
+                        `0° = syd`
+
+                        `90° = väst`
+
+
+                        **Kapacitet (kWp)**
 
                         Den totala installerade effekten för panelgruppen.
 
                         Läs mer: https://doc.forecast.solar/api:estimate
 
 
-                        Om laddningen från solen underskattas höj värdet. Om
-                        laddningen överskattas sänk värdet
+                        **Dämpningsfaktor**
+
+                        Damping används för att justera ned solprognosen om din
+                        anläggning producerar mindre än den teoretiska modellen.
+                        Värdet anges mellan 0 (ingen justering) och 1 (maximal
+                        dämpning). Ju högre värde, desto lägre blir den
+                        beräknade produktionen.
 
 
-                        Rekommenderat startvärde dämpingsfaktor: 0.6 
+                        Börja med 0 och öka värdet stegvis om prognosen
+                        konsekvent överskattar din faktiska produktion.
+
 
                         Läs mer: https://doc.forecast.solar/damping
               - type: conditional
@@ -1524,7 +1596,7 @@ sections:
                     name: Manuell laddningseffekt
                     icon: mdi:flash
                   - entity: input_number.sem_battery_discharge_power_ev_limit
-                    name: Max urladdningseffekt
+                    name: Urladdningseffekt
                     icon: mdi:flash
                   - entity: input_number.sem_charge_profit_threshold
                     name: Laddningsvinst
@@ -1565,7 +1637,7 @@ sections:
                 content: >-
                   **ℹ️Information**
 
-                  **Superbillig el** anger gränsen för när elpriset anses vara
+                  **Superbilligt** anger gränsen för när elpriset anses vara
                   mycket lågt. När detta värde underskrids kan batteriet laddas
                   extra eftersom det är särskilt lönsamt. Ett rimligt startvärde
                   är 0,35 SEK/kWh.
@@ -1618,32 +1690,39 @@ sections:
                         - entity: input_number.sem_battery_discharge_power_ev_limit
                           name: Återställningseffekt
                           icon: mdi:flash
-                        - entity: input_number.sem_expensive_electricity
+                        - entity: input_number.sem_export_profit_margin
+                          name: Vinstmarginal
                           icon: mdi:finance
-                          name: Säljgräns
-                        - entity: input_number.sem_battery_charge_price
-                          name: Laddgräns
-                          icon: mdi:finance
+                        - entity: input_number.sem_battery_wear_cost
+                          name: Batterislitage
+                          icon: mdi:battery-minus
+                        - entity: input_number.sem_battery_export_reserve
+                          name: Buffert
+                          icon: mdi:chart-bar-stacked
                     - type: markdown
                       content: >-
                         **ℹ️Information**
 
                         **Urladdningseffekt** anger den maximala effekt som
-                        batteriet får använda när det säljer el.
-                        **Återställningseffekt** är den effekt som återställs
-                        efter att exportfönstret har avslutats.
+                        batteriet får använda vid export av el.
+                        **Återställningseffekt** anger vilken maximal
+                        urladdningseffekt som automatiskt återställs när
+                        exportfönstret har avslutats, så att batteriet återgår
+                        till normal drift.
 
 
-                        **Säljgräns** är det elpris som minst måste uppnås för
-                        att batteriet ska sälja överskott. Ett rimligt
-                        startvärde är 3,5 SEK/kWh. **Laddgräns** anger högsta
-                        elpris för att ladda batteriet efter ett
-                        försäljningsfönster. Ett rimligt startvärde är 0,5
-                        SEK/kWh.
+                        Ange den **vinstmarginal** du vill uppnå vid export av
+                        energiöverskott. Ett rimligt startvärde är 1,0 SEK/kWh.
+                        I fältet **batterislitage** anger du den uppskattade
+                        kostnaden för batterislitage vid export. Ett rimligt
+                        startvärde är 0,7 SEK/kWh. **Vinstmarginal** och
+                        **batterislitage** summeras och utgör lägsta vistkravet
+                        för att systemet ska exportera energiöverskott.
 
 
-                        För att försäljning ska ske måste båda prisvillkoren
-                        vara uppfyllda.
+                        Ange slutligen en eventuell **buffert** för att
+                        säkerställa att systemet inte exporterar mer energi än
+                        önskat.
               - type: conditional
                 conditions:
                   - condition: state
@@ -1707,9 +1786,10 @@ sections:
                             {% set ns.found = true %}
                           - {{ s.entity_id }}
                           {% endfor %}
+                              
 
                           {% if not ns.found %}
-                          Inga AI agenter hittades
+                          Inga AI agenter hittades. Installera en AI-agent via integrationer. 
                           {% endif %}
               - square: false
                 type: grid
