@@ -68,7 +68,7 @@ views:
                   - state
             tap_action:
               action: navigate
-              navigation_path: '#system_plan'
+              navigation_path: "#system_plan"
           - type: custom:vertical-stack-in-card
             cards:
               - type: custom:apexcharts-card
@@ -136,8 +136,8 @@ views:
                   plotOptions:
                     candlestick:
                       colors:
-                        upward: '#00B746'
-                        downward: '#EF403C'
+                        upward: "#00B746"
+                        downward: "#EF403C"
                       wick:
                         useFillColor: true
                 all_series_config:
@@ -172,11 +172,11 @@ views:
                     stroke_width: 3
                     color_threshold:
                       - value: 0
-                        color: '#fff9c4'
+                        color: "#fff9c4"
                       - value: 5
-                        color: '#ffeb3b'
+                        color: "#ffeb3b"
                       - value: 15
-                        color: '#fbc02d'
+                        color: "#fbc02d"
                   - entity: sensor.sem_nordpool_active
                     yaxis_id: spotpris
                     type: area
@@ -201,7 +201,7 @@ views:
                       - value: -1
                         color: 1E90FF
                       - value: 0.5
-                        color: '008000'
+                        color: "008000"
                       - value: 1
                         color: DAA520
                       - value: 2
@@ -234,7 +234,7 @@ views:
                       - value: -1
                         color: 1E90FF
                       - value: 0.5
-                        color: '008000'
+                        color: "008000"
                       - value: 1
                         color: DAA520
                       - value: 2
@@ -249,7 +249,7 @@ views:
                     yaxis_id: charge/expensive
                     name: Laddningsfönster
                     opacity: 0.7
-                    color: '#00406c'
+                    color: "#00406c"
                     type: area
                     data_generator: |
                       const data = [];
@@ -276,7 +276,7 @@ views:
                     yaxis_id: charge/expensive
                     name: Laddningsfönster 2
                     opacity: 0.7
-                    color: '#00406c'
+                    color: "#00406c"
                     type: area
                     data_generator: |
                       const data = [];
@@ -303,7 +303,7 @@ views:
                     yaxis_id: charge/expensive
                     name: Viloläge
                     opacity: 0.7
-                    color: '#D3D3D3'
+                    color: "#D3D3D3"
                     type: area
                     data_generator: |
                       const data = [];
@@ -330,7 +330,7 @@ views:
                     yaxis_id: charge/expensive
                     name: Viloläge
                     opacity: 0.7
-                    color: '#D3D3D3'
+                    color: "#D3D3D3"
                     type: area
                     data_generator: |
                       const data = [];
@@ -488,13 +488,13 @@ views:
                 vertical: false
                 tap_action:
                   action: navigate
-                  navigation_path: '#house'
+                  navigation_path: "#house"
                 hold_action:
                   action: navigate
-                  navigation_path: '#house'
+                  navigation_path: "#house"
                 icon_tap_action:
                   action: navigate
-                  navigation_path: '#house'
+                  navigation_path: "#house"
                 features:
                   - type: trend-graph
                 features_position: bottom
@@ -509,10 +509,10 @@ views:
                     vertical: false
                     tap_action:
                       action: navigate
-                      navigation_path: '#grid'
+                      navigation_path: "#grid"
                     icon_tap_action:
                       action: navigate
-                      navigation_path: '#grid'
+                      navigation_path: "#grid"
                     features_position: bottom
                   - type: tile
                     entity: sensor.sem_input_power_with_efficiency_loss_kw
@@ -522,16 +522,16 @@ views:
                     vertical: false
                     tap_action:
                       action: navigate
-                      navigation_path: '#solar'
+                      navigation_path: "#solar"
                     icon_tap_action:
                       action: navigate
-                      navigation_path: '#solar'
+                      navigation_path: "#solar"
                     features_position: inline
                   - type: conditional
                     conditions:
                       - condition: state
                         entity: sensor.sem_wallbox_check
-                        state: 'True'
+                        state: "True"
                     card:
                       type: tile
                       entity: sensor.sem_ev_sensor_power
@@ -541,10 +541,10 @@ views:
                       vertical: false
                       tap_action:
                         action: navigate
-                        navigation_path: '#wallbox'
+                        navigation_path: "#wallbox"
                       icon_tap_action:
                         action: navigate
-                        navigation_path: '#wallbox'
+                        navigation_path: "#wallbox"
                       features_position: inline
               - type: tile
                 entity: sensor.batteries_charge_discharge_power
@@ -554,10 +554,10 @@ views:
                 vertical: false
                 tap_action:
                   action: navigate
-                  navigation_path: '#battery'
+                  navigation_path: "#battery"
                 icon_tap_action:
                   action: navigate
-                  navigation_path: '#battery'
+                  navigation_path: "#battery"
                 features:
                   - type: trend-graph
                 features_position: bottom
@@ -598,7 +598,7 @@ views:
             icon: mdi:creation
             tap_action:
               action: navigate
-              navigation_path: '#charge_information'
+              navigation_path: "#charge_information"
             badges:
               - type: entity
                 show_state: true
@@ -608,19 +608,19 @@ views:
                 icon: mdi:order-bool-descending
                 tap_action:
                   action: navigate
-                  navigation_path: '#settings_fast'
+                  navigation_path: "#settings_fast"
                 state_content: name
             visibility:
               - condition: state
                 entity: input_boolean.sem_activate_ai
-                state: 'on'
+                state: "on"
           - type: heading
             heading_style: subtitle
             heading: Nästa laddning
             icon: mdi:creation
             tap_action:
               action: navigate
-              navigation_path: '#charge_information'
+              navigation_path: "#charge_information"
             badges:
               - type: entity
                 show_state: true
@@ -630,12 +630,12 @@ views:
                 icon: mdi:order-bool-descending
                 tap_action:
                   action: navigate
-                  navigation_path: '#settings_fast'
+                  navigation_path: "#settings_fast"
                 state_content: name
             visibility:
               - condition: state
                 entity: input_boolean.sem_activate_ai
-                state: 'off'
+                state: "off"
           - type: custom:vertical-stack-in-card
             cards:
               - type: conditional
@@ -645,7 +645,7 @@ views:
                   conditions:
                     - condition: state
                       entity: sensor.sem_battery_charging_interval_next
-                      state: '2'
+                      state: "2"
                   card:
                     type: custom:vertical-stack-in-card
                     cards:
@@ -653,7 +653,7 @@ views:
                         conditions:
                           - condition: state
                             entity: input_boolean.sem_activate_ai
-                            state: 'off'
+                            state: "off"
                         card:
                           type: markdown
                           content: |2
@@ -683,12 +683,12 @@ views:
                               {% endif %}
                           tap_action:
                             action: navigate
-                            navigation_path: '#settings'
+                            navigation_path: "#settings"
                       - type: conditional
                         conditions:
                           - condition: state
                             entity: input_boolean.sem_activate_ai
-                            state: 'on'
+                            state: "on"
                         card:
                           type: markdown
                           content: >
@@ -713,7 +713,7 @@ views:
                   conditions:
                     - condition: state
                       entity: sensor.sem_battery_charging_interval_next
-                      state: '1'
+                      state: "1"
                   card:
                     type: custom:vertical-stack-in-card
                     cards:
@@ -721,7 +721,7 @@ views:
                         conditions:
                           - condition: state
                             entity: input_boolean.sem_activate_ai
-                            state: 'on'
+                            state: "on"
                         card:
                           type: markdown
                           content: >-
@@ -746,7 +746,7 @@ views:
                         conditions:
                           - condition: state
                             entity: input_boolean.sem_activate_ai
-                            state: 'off'
+                            state: "off"
                         card:
                           type: markdown
                           content: >-
@@ -782,7 +782,7 @@ views:
                             {% else %} Ingen tid tillgänglig {% endif %}
                           tap_action:
                             action: navigate
-                            navigation_path: '#settings'
+                            navigation_path: "#settings"
                 grid_options:
                   columns: 12
                   rows: 1
@@ -790,12 +790,12 @@ views:
         cards:
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#config_1'
+            hash: "#config_1"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -804,7 +804,7 @@ views:
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: title
                     heading: Konfiguration
                   - type: picture-elements
@@ -1009,19 +1009,19 @@ views:
                     vertical: true
                     tap_action:
                       action: navigate
-                      navigation_path: '#config_2'
+                      navigation_path: "#config_2"
                     icon_tap_action:
                       action: navigate
-                      navigation_path: '#config_2'
+                      navigation_path: "#config_2"
                     features_position: bottom
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#config_2'
+            hash: "#config_2"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -1030,13 +1030,9 @@ views:
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: heading
-                    icon: ''
-                    heading_style: title
-                    heading: Generell information
-                  - type: heading
-                    icon: ''
+                    icon: mdi:finance
                     heading: Nordpool
-                    heading_style: subtitle
+                    heading_style: title
                   - type: tile
                     entity: input_boolean.sem_use_official_nordpool
                     name: Officiella integrationen
@@ -1055,7 +1051,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_use_official_nordpool
-                        state: 'off'
+                        state: "off"
                     card:
                       type: markdown
                       content: >-
@@ -1068,7 +1064,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_use_official_nordpool
-                        state: 'on'
+                        state: "on"
                     card:
                       type: vertical-stack
                       cards:
@@ -1096,11 +1092,12 @@ views:
                             UI-läget -> Välj nordpool.get_prices_for_date under
                             åtgärd -> Välj konfigurationspost -> Klicka på gå
                             till yaml-läge.
+                          text_only: true
                   - type: conditional
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_use_official_nordpool
-                        state: 'off'
+                        state: "off"
                     card:
                       type: vertical-stack
                       cards:
@@ -1108,25 +1105,48 @@ views:
                           entities:
                             - entity: input_text.sem_nordpool_sensor_inofficial
                               name: Din inofficiella Nordpool sensor
+                              icon: mdi:identifier
                               tap_action:
                                 action: none
                               icon_tap_action:
                                 action: none
                         - type: markdown
-                          content: >
-                            **Systemet föreslår följande sensorer. Välj den
-                            sensorn som visar elpriset i SEK/kWh.**
+                          content: >-
+                            {% set sensors = states.sensor
+                               | selectattr('entity_id', 'match', '^sensor\.nordpool_kw')
+                               | list %}
 
-                            {% for s in states.sensor
-                               if s.entity_id.startswith('sensor.nordpool_kw') %}
+                            {% if sensors | count > 0 %}
+
+                            **Nordpool-sensor hittades.**
+                              Fyll i sensorn som visar elpriset i SEK/kWh i rutan ovanför.
+
+                            {% for s in sensors %}
+
                             {% set unit = s.attributes.unit_of_measurement if
                             s.attributes.unit_of_measurement is defined else ''
-                            %} - {{ s.entity_id }} 
+                            %}
+
+                            - `{{ s.entity_id }}`
                               {{ s.state }}{{ ' ' + unit if unit else '' }}
                             {% endfor %}
+
+
+                            {% else %}
+
+                            **Systemet hittade ingen Nord Pool-sensor.**
+
+
+                            Kontrollera att du konfiguerat integrationen rätt
+                            och att du hittar den under **Inställningar →
+                            Enheter och tjänster**. Finns där en sensor som
+                            visar elpriset i SEK/kWh anger du den ovan. 
+                              **Exempel <i>sensor.ditt_sensor_namn**
+                            {% endif %}
+                          text_only: true
                   - type: heading
-                    icon: ''
-                    heading_style: subtitle
+                    icon: mdi:battery
+                    heading_style: title
                     heading: Huawei batteri ID
                   - type: entities
                     entities:
@@ -1139,18 +1159,25 @@ views:
                     content: >
                       {% set id =
                       device_id('sensor.batteries_state_of_capacity') %} {% if
-                      id %} **Systemet har hittat ett Huawei batteri ID - fyll i
-                      det ovanför** 
-                        {{ id }}
-                      {% else %} **ℹ️ Information**  
+                      id %} **Ditt Huawei batteri ID hittades** 
+                        Fyll i följande ID i rutan ovanför 
+                        - `{{ id }}`
+                      {% else %} 
 
-                        Hitta ditt Huawei batteri ID:  
-                      - Utvecklarverktyg → Åtgärder   - Sök: huawei   - Välj
+
+                      **Systemet har inte hittat ditt Huawei batteri ID.** 
+                        Säkerställ att du konfigerat Huawei intergrationen korrekt. Detta gör du via **Inställningar → Enheter och tjänster**. 
+
+                      Du hittar ditt Huawei batteri ID på följande sätt:
+                      **Utvecklarverktyg → Åtgärder   - Sök: huawei   - Välj
                       *forcible charge*   - Gå till UI-läge   - Välj
-                      *Batteries*   - Gå till YAML-läge {% endif %}
+                      *Batteries*   - Gå till YAML-läge** 
+
+                        Fyll i ditt Huawei batteri ID i rutan ovanför
+                      {% endif %}
                   - type: heading
-                    icon: ''
-                    heading_style: subtitle
+                    icon: phu:huawei-solar-inverter
+                    heading_style: title
                     heading: Huawei inverter ID
                   - type: entities
                     entities:
@@ -1162,33 +1189,61 @@ views:
                   - type: markdown
                     content: >
                       {% set id = device_id('sensor.inverter_active_power') %}
-                      {% if id %} **Systemet har hittat ett Huawei inverter ID -
-                      fyll i det ovanför.**
+                      {% if id %} **Ditt Huawei inverter ID hittades.**
+                        Fyll i följande ID i rutan ovanför 
+                        - `{{ id }}` {% else %}
+                      **Systemet hittade inte ditt Huawei inverter ID** 
+                        Säkerställ att du konfigerat Huawei intergrationen korrekt. Detta gör du via **Inställningar → Enheter och tjänster**. 
 
-                      {{ id }} {% else %}
+                      Du hittar ditt Huawei inverter ID på följande sätt: 
 
-                      **ℹ️Information**   Hitta ditt Huawei inverter ID:  
-                      Utvecklarverktyg → Åtgärder → Klicka på åtgärd → Skriv
-                      huawei → Välj *limit the power fed to grid* → Klicka på gå
-                      till UI-läge → Välj *Inverter* i rullgardinen på raden
-                      inverter → Klicka på gå till YAML-läge {% endif %}
+                      **Utvecklarverktyg → Åtgärder → Klicka på åtgärd → Skriv
+                      huawei → Välj limit the power fed to grid → Klicka på gå
+                      till UI-läge → Välj Inverter i rullgardinen på raden
+                      inverter → Klicka på gå till YAML-läge** 
+
+
+                      Fyll i ditt Huawei inverter ID i rutan ovanför
+
+                      {% endif %}
                   - type: heading
-                    heading_style: subtitle
+                    heading_style: title
                     heading: Väderprognos
+                    icon: mdi:weather-partly-cloudy
                   - type: entities
                     entities:
                       - entity: input_text.sem_weather_sensor
                         name: Din SMHI sensor
-                        icon: mdi:weather-partly-cloudy
+                        icon: mdi:identifier
                         tap_action:
                           action: none
                         icon_tap_action:
                           action: none
                   - type: markdown
-                    content: |-
-                      ℹ️**Information**
-                      Systemet använder sig av weather.smhi_home
-                      Fyll i det ovanför
+                    content: >-
+                      {% if states('weather.smhi_home') not in ['unknown',
+                      'unavailable'] %}
+
+                      **SMHI-vädersensorn hittades.**
+
+                      Fyll i följande sensor i rutan ovanför:
+
+                      - `weather.smhi_home`
+
+
+                      {% else %}
+
+                      **Ingen SMHI-vädersensor hittades.**
+
+                      Du behöver skapa en SMHI-vädersensor med namnet:
+
+                      - `weather.smhi_home`
+
+
+                      När sensorn har skapats kommer systemet automatiskt att
+                      hitta den.
+
+                      {% endif %}
                   - square: false
                     type: grid
                     cards:
@@ -1201,10 +1256,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_1'
+                          navigation_path: "#config_1"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_1'
+                          navigation_path: "#config_1"
                         features_position: bottom
                       - type: tile
                         entity: input_boolean.sem_step_1
@@ -1215,10 +1270,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_3'
+                          navigation_path: "#config_3"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_3'
+                          navigation_path: "#config_3"
                         features_position: bottom
                     columns: 2
                   - type: markdown
@@ -1226,12 +1281,12 @@ views:
                       <center> 1 av 4 </center>
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#config_3'
+            hash: "#config_3"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -1244,7 +1299,7 @@ views:
                     heading_style: title
                     heading: Solceller
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading: Din plats
                     heading_style: subtitle
                   - type: entities
@@ -1256,11 +1311,22 @@ views:
                         icon: mdi:earth
                         name: Longitud
                   - type: markdown
-                    content: |-
-                      **ℹ️Information**
-                      Latitud: söder= -90 och norr= 90.
-                      Longitud: väst= -180 och öst= 180. 
-                      https://www.gps-coordinates.net/ 
+                    content: >-
+                      {% if has_value('zone.home') %}
+                        {% set lat = state_attr('zone.home', 'latitude') %}
+                        {% set lon = state_attr('zone.home', 'longitude') %}
+                        **Systemet hittade din position**
+                        Du kan dubellkolla den här: https://www.gps-coordinates.net/
+                        - `Latitude: {{ lat }}`
+                        - `Longitud: {{ lon }}`
+                      {% else %}
+
+                      **Systemet hittade inte din position.**
+
+                      Sök upp din position via https://www.gps-coordinates.net/
+                      och fyll i rutorna ovan. 
+                         
+                      {% endif %}
                   - type: tile
                     entity: input_boolean.sem_solar_2
                     name: Två anläggningar
@@ -1274,14 +1340,14 @@ views:
                       - type: toggle
                     features_position: inline
                   - type: heading
-                    icon: ''
-                    heading: 'Din installation '
+                    icon: ""
+                    heading: "Din installation "
                     heading_style: subtitle
                   - type: conditional
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_solar_2
-                        state: 'off'
+                        state: "off"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1293,7 +1359,7 @@ views:
                           conditions:
                             - condition: state
                               entity: input_boolean.sem_solar_2
-                              state: 'off'
+                              state: "off"
                           card:
                             type: entities
                             entities:
@@ -1307,7 +1373,7 @@ views:
                                 name: Kapacitet
                                 icon: mdi:solar-panel
                         - type: heading
-                          icon: ''
+                          icon: ""
                           heading: Dämpingsfaktor
                           heading_style: subtitle
                         - type: entities
@@ -1322,43 +1388,50 @@ views:
                           content: >-
                             **ℹ️Information**
 
-                            Lutning
+                            **Lutning**
 
-                            0° = helt plant (horisontellt)
+                            `0° = helt plant (horisontellt)`
 
-                            90° = rakt upp (vertikalt)
-
-
-                            Riktning 
-
-                            180° = norr
-
-                            -90° = öst
-
-                            0° = syd
-
-                            90° = väst
+                            `90° = rakt upp (vertikalt)`
 
 
-                            Kapacitet (kWp)
+                            **Riktning** 
+
+                            `180° = norr`
+
+                            `-90° = öst`
+
+                            `0° = syd`
+
+                            `90° = väst`
+
+
+                            **Kapacitet (kWp)**
 
                             Den totala installerade effekten för panelgruppen.
 
                             Läs mer: https://doc.forecast.solar/api:estimate
 
 
-                            Om laddningen från solen underskattas höj värdet. Om
-                            laddningen överskattas sänk värdet
+                            **Dämpningsfaktor**
+
+                            Damping används för att justera ned solprognosen om
+                            din anläggning producerar mindre än den teoretiska
+                            modellen. Värdet anges mellan 0 (ingen justering)
+                            och 1 (maximal dämpning). Ju högre värde, desto
+                            lägre blir den beräknade produktionen.
 
 
-                            Rekommenderat startvärde dämpingsfaktor: 0.6 
+                            Börja med 0 och öka värdet stegvis om prognosen
+                            konsekvent överskattar din faktiska produktion.
+
 
                             Läs mer: https://doc.forecast.solar/damping
                   - type: conditional
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_solar_2
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1378,7 +1451,7 @@ views:
                               name: Kapacitet
                               icon: mdi:solar-panel
                         - type: heading
-                          icon: ''
+                          icon: ""
                           heading: Dämpingsfaktor
                           heading_style: subtitle
                         - type: entities
@@ -1406,7 +1479,7 @@ views:
                               name: Kapacitet
                               icon: mdi:solar-panel
                         - type: heading
-                          icon: ''
+                          icon: ""
                           heading: Dämpingsfaktor
                           heading_style: subtitle
                         - type: entities
@@ -1471,10 +1544,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_2'
+                          navigation_path: "#config_2"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_2'
+                          navigation_path: "#config_2"
                         features_position: bottom
                       - type: tile
                         entity: input_boolean.sem_step_2
@@ -1485,10 +1558,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_4'
+                          navigation_path: "#config_4"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_4'
+                          navigation_path: "#config_4"
                         features_position: bottom
                     columns: 2
                   - type: markdown
@@ -1496,12 +1569,12 @@ views:
                       <center> 2 av 4 </center>
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#config_4'
+            hash: "#config_4"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -1510,11 +1583,11 @@ views:
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: title
                     heading: Smart styrning 1/2
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: subtitle
                     heading: Batteri och laddning
                   - type: entities
@@ -1532,7 +1605,7 @@ views:
                         name: Manuell laddningseffekt
                         icon: mdi:flash
                       - entity: input_number.sem_battery_discharge_power_ev_limit
-                        name: Max urladdningseffekt
+                        name: Urladdningseffekt
                         icon: mdi:flash
                       - entity: input_number.sem_charge_profit_threshold
                         name: Laddningsvinst
@@ -1554,7 +1627,7 @@ views:
                       faktor för systemets lönsamhet. Ett rimligt startvärde är
                       0,3 SEK/kWh.
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading: Elpriser
                     heading_style: subtitle
                   - type: entities
@@ -1575,10 +1648,10 @@ views:
                     content: >-
                       **ℹ️Information**
 
-                      **Superbillig el** anger gränsen för när elpriset anses
-                      vara mycket lågt. När detta värde underskrids kan
-                      batteriet laddas extra eftersom det är särskilt lönsamt.
-                      Ett rimligt startvärde är 0,35 SEK/kWh.
+                      **Superbilligt** anger gränsen för när elpriset anses vara
+                      mycket lågt. När detta värde underskrids kan batteriet
+                      laddas extra eftersom det är särskilt lönsamt. Ett rimligt
+                      startvärde är 0,35 SEK/kWh.
 
 
                       **Lågt elpris** anger nivån där batteriet istället sätts i
@@ -1596,7 +1669,7 @@ views:
                       Värdet används för att beräkna din förtjänst då du
                       exporterar el. 
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: subtitle
                     heading: Sälja överskott
                   - features:
@@ -1617,7 +1690,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_discharge_high_prices
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1630,37 +1703,45 @@ views:
                                 input_number.sem_battery_discharge_power_ev_limit
                               name: Återställningseffekt
                               icon: mdi:flash
-                            - entity: input_number.sem_expensive_electricity
+                            - entity: input_number.sem_export_profit_margin
+                              name: Vinstmarginal
                               icon: mdi:finance
-                              name: Säljgräns
-                            - entity: input_number.sem_battery_charge_price
-                              name: Laddgräns
-                              icon: mdi:finance
+                            - entity: input_number.sem_battery_wear_cost
+                              name: Batterislitage
+                              icon: mdi:battery-minus
+                            - entity: input_number.sem_battery_export_reserve
+                              name: Buffert
+                              icon: mdi:chart-bar-stacked
                         - type: markdown
                           content: >-
                             **ℹ️Information**
 
                             **Urladdningseffekt** anger den maximala effekt som
-                            batteriet får använda när det säljer el.
-                            **Återställningseffekt** är den effekt som
-                            återställs efter att exportfönstret har avslutats.
+                            batteriet får använda vid export av el.
+                            **Återställningseffekt** anger vilken maximal
+                            urladdningseffekt som automatiskt återställs när
+                            exportfönstret har avslutats, så att batteriet
+                            återgår till normal drift.
 
 
-                            **Säljgräns** är det elpris som minst måste uppnås
-                            för att batteriet ska sälja överskott. Ett rimligt
-                            startvärde är 3,5 SEK/kWh. **Laddgräns** anger
-                            högsta elpris för att ladda batteriet efter ett
-                            försäljningsfönster. Ett rimligt startvärde är 0,5
-                            SEK/kWh.
+                            Ange den **vinstmarginal** du vill uppnå vid export
+                            av energiöverskott. Ett rimligt startvärde är 1,0
+                            SEK/kWh. I fältet **batterislitage** anger du den
+                            uppskattade kostnaden för batterislitage vid export.
+                            Ett rimligt startvärde är 0,7 SEK/kWh.
+                            **Vinstmarginal** och **batterislitage** summeras
+                            och utgör lägsta vistkravet för att systemet ska
+                            exportera energiöverskott.
 
 
-                            För att försäljning ska ske måste båda prisvillkoren
-                            vara uppfyllda.
+                            Ange slutligen en eventuell **buffert** för att
+                            säkerställa att systemet inte exporterar mer energi
+                            än önskat.
                   - type: conditional
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_discharge_high_prices
-                        state: 'off'
+                        state: "off"
                     card:
                       type: markdown
                       content: >-
@@ -1687,7 +1768,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_activate_ai
-                        state: 'off'
+                        state: "off"
                     card:
                       type: markdown
                       content: >-
@@ -1701,7 +1782,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_activate_ai
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1719,9 +1800,10 @@ views:
                                 {% set ns.found = true %}
                               - {{ s.entity_id }}
                               {% endfor %}
+                                  
 
                               {% if not ns.found %}
-                              Inga AI agenter hittades
+                              Inga AI agenter hittades. Installera en AI-agent via integrationer. 
                               {% endif %}
                   - square: false
                     type: grid
@@ -1735,10 +1817,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_3'
+                          navigation_path: "#config_3"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_3'
+                          navigation_path: "#config_3"
                         features_position: bottom
                       - type: tile
                         entity: input_boolean.sem_step_3
@@ -1749,10 +1831,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_5'
+                          navigation_path: "#config_5"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_5'
+                          navigation_path: "#config_5"
                         features_position: bottom
                     columns: 2
                   - type: markdown
@@ -1760,12 +1842,12 @@ views:
                       <center> 3 av 4 </center>
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#config_5'
+            hash: "#config_5"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -1774,11 +1856,11 @@ views:
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: title
                     heading: Smart styrning 2/2
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading: Export av solöverskottet
                     heading_style: subtitle
                   - type: tile
@@ -1802,7 +1884,7 @@ views:
                       Aktivera reglaget för att automatiskt stoppa export av
                       solel när elpriset är 0 eller lägre.
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: subtitle
                     heading: Laddbox och elbil
                   - type: tile
@@ -1831,10 +1913,10 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_wallbox_multi
-                        state: 'off'
+                        state: "off"
                       - condition: state
                         entity: input_boolean.sem_ev_wallbox_single
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1853,7 +1935,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_wallbox_multi
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1877,10 +1959,10 @@ views:
                         conditions:
                           - condition: state
                             entity: input_boolean.sem_ev_wallbox_single
-                            state: 'on'
+                            state: "on"
                           - condition: state
                             entity: input_boolean.sem_ev_wallbox_multi
-                            state: 'on'
+                            state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1902,7 +1984,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_charging_protection_enabled
-                        state: 'off'
+                        state: "off"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1916,7 +1998,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_charging_protection_enabled
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -1924,7 +2006,7 @@ views:
                           conditions:
                             - condition: state
                               entity: input_boolean.sem_ev_wallbox_multi
-                              state: 'off'
+                              state: "off"
                           card:
                             type: entities
                             entities:
@@ -1942,7 +2024,7 @@ views:
                           conditions:
                             - condition: state
                               entity: input_boolean.sem_ev_wallbox_multi
-                              state: 'on'
+                              state: "on"
                           card:
                             type: entities
                             entities:
@@ -1986,7 +2068,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_charging_protection_enabled
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -2015,7 +2097,7 @@ views:
                           conditions:
                             - condition: state
                               entity: input_boolean.sem_ev_integrated
-                              state: 'on'
+                              state: "on"
                           card:
                             type: custom:vertical-stack-in-card
                             cards:
@@ -2031,7 +2113,7 @@ views:
                           conditions:
                             - condition: state
                               entity: input_boolean.sem_ev_integrated
-                              state: 'off'
+                              state: "off"
                           card:
                             type: markdown
                             content: >
@@ -2053,7 +2135,7 @@ views:
                           conditions:
                             - condition: state
                               entity: input_boolean.sem_ev_integrated
-                              state: 'on'
+                              state: "on"
                           card:
                             type: custom:vertical-stack-in-card
                             cards:
@@ -2091,10 +2173,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_4'
+                          navigation_path: "#config_4"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_4'
+                          navigation_path: "#config_4"
                         features_position: bottom
                       - type: tile
                         entity: input_boolean.sem_step_4
@@ -2105,10 +2187,10 @@ views:
                         vertical: false
                         tap_action:
                           action: navigate
-                          navigation_path: '#config_6'
+                          navigation_path: "#config_6"
                         icon_tap_action:
                           action: navigate
-                          navigation_path: '#config_6'
+                          navigation_path: "#config_6"
                         features_position: bottom
                     columns: 2
                   - type: markdown
@@ -2116,12 +2198,12 @@ views:
                       <center> 4 av 4 </center>
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#config_6'
+            hash: "#config_6"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -2130,9 +2212,9 @@ views:
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: title
-                    heading: '🥳 Konfigurationen är klar! '
+                    heading: "🥳 Konfigurationen är klar! "
                   - type: markdown
                     content: >-
                       **💾 Är det första gången du konfiguerarar systemet?** 
@@ -2166,7 +2248,7 @@ views:
         cards:
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#battery'
+            hash: "#battery"
             show_header: false
             button_type: name
             sub_button:
@@ -2214,11 +2296,11 @@ views:
                         color: blue
                         color_threshold:
                           - value: 0
-                            color: '#cce5ff'
+                            color: "#cce5ff"
                           - value: 2
-                            color: '#3399ff'
+                            color: "#3399ff"
                           - value: 5
-                            color: '#003366'
+                            color: "#003366"
                         group_by:
                           duration: 15m
                           func: last
@@ -2251,8 +2333,8 @@ views:
                       plotOptions:
                         candlestick:
                           colors:
-                            upward: '#00B746'
-                            downward: '#EF403C'
+                            upward: "#00B746"
+                            downward: "#EF403C"
                           wick:
                             useFillColor: true
                       grid:
@@ -2359,7 +2441,7 @@ views:
                     text_only: true
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#grid'
+            hash: "#grid"
             show_header: false
             button_type: name
             sub_button:
@@ -2405,11 +2487,11 @@ views:
                         opacity: 0.6
                         color_threshold:
                           - value: 0
-                            color: '#ccffcc'
+                            color: "#ccffcc"
                           - value: 2
-                            color: '#66ff66'
+                            color: "#66ff66"
                           - value: 5
-                            color: '#009900'
+                            color: "#009900"
                         group_by:
                           func: delta
                           duration: 1h
@@ -2422,11 +2504,11 @@ views:
                         opacity: 0.6
                         color_threshold:
                           - value: 0
-                            color: '#ffcccc'
+                            color: "#ffcccc"
                           - value: 2
-                            color: '#ff6666'
+                            color: "#ff6666"
                           - value: 5
-                            color: '#cc0000'
+                            color: "#cc0000"
                         group_by:
                           func: delta
                           duration: 1h
@@ -2460,8 +2542,8 @@ views:
                       plotOptions:
                         candlestick:
                           colors:
-                            upward: '#00B746'
-                            downward: '#EF403C'
+                            upward: "#00B746"
+                            downward: "#EF403C"
                           wick:
                             useFillColor: true
                     all_series_config:
@@ -2509,7 +2591,7 @@ views:
                         icon: mdi:transmission-tower-import
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#solar'
+            hash: "#solar"
             show_header: false
             button_type: name
             sub_button:
@@ -2557,11 +2639,11 @@ views:
                         opacity: 0.6
                         color_threshold:
                           - value: 0
-                            color: '#fff066'
+                            color: "#fff066"
                           - value: 2
-                            color: '#ffd700'
+                            color: "#ffd700"
                           - value: 5
-                            color: '#ffb300'
+                            color: "#ffb300"
                         group_by:
                           func: delta
                           duration: 1h
@@ -2576,11 +2658,11 @@ views:
                         color: blue
                         color_threshold:
                           - value: 0
-                            color: '#cce5ff'
+                            color: "#cce5ff"
                           - value: 2
-                            color: '#3399ff'
+                            color: "#3399ff"
                           - value: 5
-                            color: '#003366'
+                            color: "#003366"
                         group_by:
                           duration: 1h
                           func: delta
@@ -2613,8 +2695,8 @@ views:
                       plotOptions:
                         candlestick:
                           colors:
-                            upward: '#00B746'
-                            downward: '#EF403C'
+                            upward: "#00B746"
+                            downward: "#EF403C"
                           wick:
                             useFillColor: true
                       grid:
@@ -2689,7 +2771,7 @@ views:
                     text_only: true
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#charge_information'
+            hash: "#charge_information"
             show_header: false
             button_type: name
             sub_button:
@@ -2706,7 +2788,7 @@ views:
                     conditions:
                       - condition: state
                         entity: sensor.sem_battery_charging_interval_next
-                        state: '2'
+                        state: "2"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -2912,7 +2994,7 @@ views:
                     conditions:
                       - condition: state
                         entity: sensor.sem_battery_charging_interval_next
-                        state: '1'
+                        state: "1"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -3110,7 +3192,7 @@ views:
                           features_position: inline
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#wallbox'
+            hash: "#wallbox"
             button_type: name
             name: Laddning
             icon: mdi:ev-station
@@ -3145,7 +3227,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_integrated
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -3161,7 +3243,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_integrated
-                        state: 'off'
+                        state: "off"
                     card:
                       type: markdown
                       content: >
@@ -3181,7 +3263,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_ev_integrated
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -3210,7 +3292,7 @@ views:
         cards:
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#settings'
+            hash: "#settings"
             show_header: false
             background_update: false
             width_desktop: 600px
@@ -3259,7 +3341,7 @@ views:
                 conditions:
                   - condition: state
                     entity: input_boolean.manual_update_packages
-                    state: 'off'
+                    state: "off"
                 card:
                   type: custom:vertical-stack-in-card
                   cards:
@@ -3294,7 +3376,7 @@ views:
                 conditions:
                   - condition: state
                     entity: input_boolean.sem_download
-                    state: 'on'
+                    state: "on"
                 card:
                   type: custom:vertical-stack-in-card
                   cards:
@@ -3325,7 +3407,7 @@ views:
                 conditions:
                   - condition: state
                     entity: input_boolean.sem_download_finished
-                    state: 'on'
+                    state: "on"
                 card:
                   type: custom:vertical-stack-in-card
                   cards:
@@ -3374,7 +3456,7 @@ views:
                 cards:
                   - type: heading
                     icon: mdi:account-cog
-                    heading: 'Konfigurera '
+                    heading: "Konfigurera "
                     heading_style: subtitle
                   - type: tile
                     entity: input_button.sem_config_1
@@ -3385,10 +3467,10 @@ views:
                     vertical: true
                     tap_action:
                       action: navigate
-                      navigation_path: '#config_1'
+                      navigation_path: "#config_1"
                     icon_tap_action:
                       action: navigate
-                      navigation_path: '#config_1'
+                      navigation_path: "#config_1"
                     features_position: bottom
                   - type: markdown
                     content: >-
@@ -3418,10 +3500,10 @@ views:
                     vertical: true
                     tap_action:
                       action: navigate
-                      navigation_path: '#buy_key'
+                      navigation_path: "#buy_key"
                     icon_tap_action:
                       action: navigate
-                      navigation_path: '#buy_key'
+                      navigation_path: "#buy_key"
                     features_position: bottom
                   - type: markdown
                     content: >-
@@ -3447,13 +3529,13 @@ views:
                       på Github
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#buy_key'
+            hash: "#buy_key"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
               action: navigate
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -3507,7 +3589,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_submit_user_info
-                        state: 'off'
+                        state: "off"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -3519,7 +3601,7 @@ views:
                           conditions:
                             - condition: state
                               entity: input_boolean.sem_submit_user_info
-                              state: 'off'
+                              state: "off"
                           card:
                             type: entities
                             entities:
@@ -3539,7 +3621,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_submit_user_info
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -3559,12 +3641,12 @@ views:
                           text_only: true
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#settings_fast'
+            hash: "#settings_fast"
             show_header: false
             background_update: false
             width_desktop: 600px
             close_action:
-              navigation_path: '#settings'
+              navigation_path: "#settings"
             button_type: name
             sub_button:
               main: []
@@ -3577,9 +3659,9 @@ views:
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: subtitle
-                    heading: 'Ladda manuellt '
+                    heading: "Ladda manuellt "
                   - type: entities
                     entities:
                       - entity: input_number.sem_max_charge_manual_charging
@@ -3612,7 +3694,7 @@ views:
                       hand. Välj laddningseffekt och tid för att sen aktivera
                       laddningen genom reglaget på **ladda nu**.
                   - type: heading
-                    icon: ''
+                    icon: ""
                     heading_style: subtitle
                     heading: Extra kWh
                   - type: entities
@@ -3641,7 +3723,7 @@ views:
                       ladda mer än vad systemet föreslår. 
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#system_plan'
+            hash: "#system_plan"
             show_header: false
             width_desktop: 540px
             button_type: name
@@ -3719,8 +3801,8 @@ views:
                       plotOptions:
                         candlestick:
                           colors:
-                            upward: '#00B746'
-                            downward: '#EF403C'
+                            upward: "#00B746"
+                            downward: "#EF403C"
                           wick:
                             useFillColor: true
                     all_series_config:
@@ -3740,7 +3822,7 @@ views:
                         yaxis_id: charge/expensive
                         name: Laddningsfönster
                         opacity: 0.7
-                        color: '#00406c'
+                        color: "#00406c"
                         type: area
                         data_generator: |
                           const data = [];
@@ -3767,7 +3849,7 @@ views:
                         yaxis_id: charge/expensive
                         name: Laddningsfönster 2
                         opacity: 0.7
-                        color: '#00406c'
+                        color: "#00406c"
                         type: area
                         data_generator: |
                           const data = [];
@@ -3794,7 +3876,7 @@ views:
                         yaxis_id: charge/expensive
                         name: Viloläge
                         opacity: 0.7
-                        color: '#D3D3D3'
+                        color: "#D3D3D3"
                         type: area
                         data_generator: |
                           const data = [];
@@ -3821,7 +3903,7 @@ views:
                         yaxis_id: charge/expensive
                         name: Viloläge
                         opacity: 0.7
-                        color: '#D3D3D3'
+                        color: "#D3D3D3"
                         type: area
                         data_generator: |
                           const data = [];
@@ -3984,7 +4066,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_more_info_system
-                        state: 'off'
+                        state: "off"
                     card:
                       type: markdown
                       content: >-
@@ -4075,7 +4157,7 @@ views:
                     conditions:
                       - condition: state
                         entity: input_boolean.sem_more_info_system
-                        state: 'on'
+                        state: "on"
                     card:
                       type: custom:vertical-stack-in-card
                       cards:
@@ -4085,7 +4167,7 @@ views:
                               conditions:
                                 - condition: state
                                   entity: sensor.sem_system_plan
-                                  state: '2'
+                                  state: "2"
                               card:
                                 type: markdown
                                 content: >+
@@ -4284,7 +4366,7 @@ views:
                               conditions:
                                 - condition: state
                                   entity: sensor.sem_system_plan
-                                  state: '1'
+                                  state: "1"
                               card:
                                 type: markdown
                                 content: >+
@@ -4533,7 +4615,7 @@ views:
                     icon: mdi:information
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#savings'
+            hash: "#savings"
             show_header: false
             width_desktop: 540px
             button_type: name
@@ -4600,7 +4682,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                             plotOptions:
                               bar:
                                 borderRadius: 4
@@ -4615,7 +4697,7 @@ views:
                             - entity: sensor.sem_savings_daily
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1h
                                 func: diff
@@ -4643,7 +4725,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                               padding:
                                 left: 40
                             plotOptions:
@@ -4661,7 +4743,7 @@ views:
                             - entity: sensor.sem_savings_weekly
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1d
                                 func: diff
@@ -4689,7 +4771,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                               padding:
                                 left: 40
                             plotOptions:
@@ -4706,7 +4788,7 @@ views:
                             - entity: sensor.sem_savings_tot
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1week
                                 func: diff
@@ -4734,7 +4816,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                               padding:
                                 left: 40
                             plotOptions:
@@ -4751,7 +4833,7 @@ views:
                             - entity: sensor.sem_savings_tot
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1month
                                 func: diff
@@ -4761,7 +4843,7 @@ views:
                     name: Välj graf
           - type: custom:bubble-card
             card_type: pop-up
-            hash: '#earnings'
+            hash: "#earnings"
             show_header: false
             width_desktop: 540px
             button_type: name
@@ -4824,7 +4906,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                             plotOptions:
                               bar:
                                 borderRadius: 4
@@ -4839,7 +4921,7 @@ views:
                             - entity: sensor.sem_earnings_daily
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1h
                                 func: diff
@@ -4867,7 +4949,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                               padding:
                                 left: 40
                             plotOptions:
@@ -4885,7 +4967,7 @@ views:
                             - entity: sensor.sem_earnings_weekly
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1d
                                 func: diff
@@ -4913,7 +4995,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                               padding:
                                 left: 40
                             plotOptions:
@@ -4930,7 +5012,7 @@ views:
                             - entity: sensor.sem_earnings_tot
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1week
                                 func: diff
@@ -4958,7 +5040,7 @@ views:
                               toolbar:
                                 show: false
                             grid:
-                              borderColor: '#e5e7eb'
+                              borderColor: "#e5e7eb"
                               padding:
                                 left: 40
                             plotOptions:
@@ -4975,7 +5057,7 @@ views:
                             - entity: sensor.sem_earnings_tot
                               name: Besparing
                               type: column
-                              color: '#1d4ed8'
+                              color: "#1d4ed8"
                               group_by:
                                 duration: 1month
                                 func: diff
@@ -4994,10 +5076,10 @@ views:
             conditions:
               - condition: state
                 entity: input_boolean.sem_max_export_active
-                state: 'on'
+                state: "on"
               - condition: state
                 entity: input_boolean.sem_export_limit_active
-                state: 'on'
+                state: "on"
         entity: input_boolean.sem_max_export_active
         name: Begränsar solexport
         icon: mdi:weather-sunny-off
@@ -5015,10 +5097,10 @@ views:
             conditions:
               - condition: state
                 entity: input_boolean.sem_discharge_high_prices
-                state: 'on'
+                state: "on"
               - condition: state
                 entity: input_boolean.sem_discharge
-                state: 'on'
+                state: "on"
         entity: input_boolean.sem_discharge
         name: Säljer batteriöverskott
         icon: mdi:battery-negative
@@ -5036,10 +5118,10 @@ views:
             conditions:
               - condition: state
                 entity: input_boolean.sem_ev_charging_protection_status
-                state: 'on'
+                state: "on"
               - condition: state
                 entity: input_boolean.sem_ev_charging_protection_enabled
-                state: 'on'
+                state: "on"
         entity: input_boolean.sem_ev_charging_protection_status
         name: Skydd vid elbilsladdning
         icon: mdi:ev-plug-type2
@@ -5057,7 +5139,7 @@ views:
         visibility:
           - condition: state
             entity: input_boolean.sem_manual_charge
-            state: 'on'
+            state: "on"
         color: green
         tap_action:
           action: none
@@ -5078,7 +5160,7 @@ views:
         visibility:
           - condition: state
             entity: input_boolean.sem_battery_cheap_mode
-            state: 'on'
+            state: "on"
       - type: entity
         show_name: true
         show_state: true
@@ -5094,7 +5176,7 @@ views:
         visibility:
           - condition: state
             entity: input_boolean.sem_battery_save
-            state: 'on'
+            state: "on"
       - type: entity
         show_name: true
         show_state: true
@@ -5105,7 +5187,7 @@ views:
         name: Besparing (Idag)
         tap_action:
           action: navigate
-          navigation_path: '#savings'
+          navigation_path: "#savings"
       - type: entity
         show_name: true
         show_state: true
@@ -5116,7 +5198,7 @@ views:
         color: green
         tap_action:
           action: navigate
-          navigation_path: '#earnings'
+          navigation_path: "#earnings"
       - type: entity
         show_name: true
         show_state: true
@@ -5125,7 +5207,7 @@ views:
         icon: mdi:database
         tap_action:
           action: navigate
-          navigation_path: '#settings'
+          navigation_path: "#settings"
         name: Mitt system
     cards: []
     header:
