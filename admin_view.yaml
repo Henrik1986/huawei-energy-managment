@@ -111,7 +111,7 @@ sections:
                 animations:
                   enabled: true
                   easing: easeinout
-                  speed: 800
+                  speed: 10
                   animateGradually:
                     enabled: true
                     delay: 150
@@ -260,7 +260,7 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.2]);
+                  data.push([startTime, 0]);
                   data.push([startTime, 0.2]);
                   data.push([endTime, 0.2]);
                   data.push([endTime, 0]);
@@ -287,9 +287,63 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.2]);
+                  data.push([startTime, 0]);
                   data.push([startTime, 0.2]);
                   data.push([endTime, 0.2]);
+                  data.push([endTime, 0]);
+                  return data;
+                show:
+                  legend_value: false
+                  datalabels: false
+                  extremas: false
+                  in_brush: false
+                  in_legend: false
+              - entity: sensor.sem_export_window_2_active
+                yaxis_id: charge/expensive
+                name: Exportfönster
+                opacity: 0.8
+                color: "#96319B"
+                type: area
+                data_generator: |
+                  const data = [];
+                  const sensorData = entity.state.split(' - ');
+                  function parseLocalTime(str) {
+                    const parts = str.split(/[- :T]/).map(Number);
+                    const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                    return date.getTime();
+                  }
+                  const startTime = parseLocalTime(sensorData[0]);
+                  const endTime = parseLocalTime(sensorData[1]);
+                  data.push([startTime, 0.]);
+                  data.push([startTime, 0.15]);
+                  data.push([endTime, 0.15]);
+                  data.push([endTime, 0]);
+                  return data;
+                show:
+                  legend_value: false
+                  datalabels: false
+                  extremas: false
+                  in_brush: false
+                  in_legend: true
+              - entity: sensor.sem_export_window_1_active
+                yaxis_id: charge/expensive
+                name: Exportfönster
+                opacity: 0.8
+                color: "#96319B"
+                type: area
+                data_generator: |
+                  const data = [];
+                  const sensorData = entity.state.split(' - ');
+                  function parseLocalTime(str) {
+                    const parts = str.split(/[- :T]/).map(Number);
+                    const date = new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]);
+                    return date.getTime();
+                  }
+                  const startTime = parseLocalTime(sensorData[0]);
+                  const endTime = parseLocalTime(sensorData[1]);
+                  data.push([startTime, 0]);
+                  data.push([startTime, 0.15]);
+                  data.push([endTime, 0.15]);
                   data.push([endTime, 0]);
                   return data;
                 show:
@@ -314,7 +368,7 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.14]);
+                  data.push([startTime, 0]);
                   data.push([startTime, 0.14]);
                   data.push([endTime, 0.14]);
                   data.push([endTime, 0]);
@@ -341,7 +395,7 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.14]);
+                  data.push([startTime, 0]);
                   data.push([startTime, 0.14]);
                   data.push([endTime, 0.14]);
                   data.push([endTime, 0]);
@@ -368,7 +422,7 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.12]);
+                  data.push([startTime, 0]);
                   data.push([startTime, 0.12]);
                   data.push([endTime, 0.12]);
                   data.push([endTime, 0]);
@@ -395,7 +449,7 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.1]);
+                  data.push([startTime, 0]);
                   data.push([startTime, 0.1]);
                   data.push([endTime, 0.1]);
                   data.push([endTime, 0]);
@@ -409,7 +463,7 @@ sections:
               - entity: sensor.sem_battery_use_interval_2
                 yaxis_id: charge/expensive
                 name: Prioterad batteridrift
-                opacity: 0.4
+                opacity: 4
                 color: lime
                 type: area
                 data_generator: |
@@ -422,7 +476,7 @@ sections:
                   }
                   const startTime = parseLocalTime(sensorData[0]);
                   const endTime = parseLocalTime(sensorData[1]);
-                  data.push([startTime, 0.1]);
+                  data.push([startTime, 0]);
                   data.push([startTime, 0.1]);
                   data.push([endTime, 0.1]);
                   data.push([endTime, 0]);
@@ -436,7 +490,7 @@ sections:
           - type: custom:vertical-stack-in-card
             cards: []
         grid_options:
-          columns: 24
+          columns: full
           rows: auto
     column_span: 2
   - type: grid
