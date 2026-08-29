@@ -47,6 +47,8 @@ Sök efter **SEM Energy Manager** i HACS och klicka på **Download**.
 
 När installationen av integrationen är klar behöver du starta om Home Assistant. Därefter visas SEM som en integration i Home Assistant. 
 
+Videoklipp hur du laddar ner SEM från HACS - [Klicka här](https://drive.google.com/file/d/1lD3Xn5wkz_DDYr9zARwxn4JH-MZ9uwGO/view?usp=sharing)
+
 ### 3. Följ installationsguiden
 
 SEM är utformad för att göra installationen så enkel som möjligt. När integrationen laddats ner kan du startar en **installationsguide (wizard)** som steg för steg hjälper dig att konfigurera systemet och visar vilka komponenter och inställningar som behöver finnas på plats.
