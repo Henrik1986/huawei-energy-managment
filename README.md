@@ -55,6 +55,8 @@ SEM är utformad för att göra installationen så enkel som möjligt. När inte
 
 Installationen görs bäst på en **dator**. Genom att ha Home Assistant och installationsguiden öppna i två fönster bredvid varandra blir det enklare att följa instruktionerna och samtidigt göra de inställningar som krävs.
 
+Videoklipp som visar hur du startar installationsguiden - [Klicka här](https://drive.google.com/file/d/1Pn8AXn_xB9325W0WqvzVwqpP2utj2Kdc/view?usp=sharing)
+
 ### 4. Konfigurera och uppdatera SEM
 
 När installationen är klar behöver du normalt inte arbeta direkt med konfigurationsfiler. **Inställningar, justeringar och framtida uppdateringar av systemet hanteras direkt från SEM:s egen sida i Home Assistants sidofält.**
