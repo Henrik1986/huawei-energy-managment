@@ -9,6 +9,7 @@ Funktioner:
 - Begränsar export vid negativa elpriser
 - Förhindrar att elbilen laddas från batteriet
 - Stöd för AI-analys som förbättrar styrning och beslut över tid
+- Stöd för att styra laddningen av elbilar
 
 Designat för att ge högre självförsörjning, bättre ekonomi och full kontroll över din energianläggning.
 
@@ -18,13 +19,46 @@ Bilden ovan visar systemets dashboard
 
 
 
-## Installation
-Installationen är uppdelad för att passa olika system. Klicka på länken som motsvarar din anläggning (t.ex. Huawei) och följ den guiden för att installera rätt version.
+## Installation 🛠️
 
-- Huawei: https://docs.google.com/document/d/1_qAXYVRXgEK1pouuwgJIZP4IhOvSD-b93DUH2uMakvI/edit?tab=t.0#heading=h.toqkzckdahul
+SEM installeras via **HACS (Home Assistant Community Store)** som ett custom repository.
 
-> [!NOTE]
-> För att få full funktionallitet behöver du en nyckel. Det finns nycklar som ger dig tillgång till systemet i 30 dagar. Därefter kostar en användarkod 399 kr/år. Ansök om en demokod under "mitt system". Efter dina 30 dagar kommer jag att kontakta dig för att erbjuda en årskod. 
+### 1. Lägg till SEM i HACS
+
+Öppna **HACS** i Home Assistant och gå till **Integrations**.
+
+1. Klicka på menyn med **tre punkter (⋮)** uppe till höger.
+
+2. Välj **Custom repositories**.
+
+3. Klistra in följande adress i fältet för repository:
+
+   `https://github.com/Henrik1986/sem-energy-manager`
+
+4. Välj **Integration** som kategori.
+
+5. Klicka på **Add**.
+
+SEM finns nu tillgängligt i HACS och kan installeras därifrån.
+
+### 2. Installera SEM
+
+Sök efter **SEM Energy Manager** i HACS och klicka på **Download**.
+
+När installationen av integrationen är klar behöver du starta om Home Assistant. Därefter visas SEM som en integration i Home Assistant. 
+
+### 3. Följ installationsguiden
+
+SEM är utformad för att göra installationen så enkel som möjligt. När integrationen laddats ner kan du startar en **installationsguide (wizard)** som steg för steg hjälper dig att konfigurera systemet och visar vilka komponenter och inställningar som behöver finnas på plats.
+
+Installationen görs bäst på en **dator**. Genom att ha Home Assistant och installationsguiden öppna i två fönster bredvid varandra blir det enklare att följa instruktionerna och samtidigt göra de inställningar som krävs.
+
+### 4. Konfigurera och uppdatera SEM
+
+När installationen är klar behöver du normalt inte arbeta direkt med konfigurationsfiler. **Inställningar, justeringar och framtida uppdateringar av systemet hanteras direkt från SEM:s egen sida i Home Assistants sidofält.**
+
+Det gör att SEM kan konfigureras och anpassas direkt från Home Assistants gränssnitt utan att du behöver redigera YAML-filer manuellt.
+
 
 ## Saknar du stöd för ditt system? 💬
 Vill du göra din anläggning kompatibel är du välkommen att öppna en diskussion på GitHub eller kontakta mig, så tittar vi på möjligheterna att lägga till stöd.
