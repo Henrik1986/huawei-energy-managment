@@ -57,11 +57,17 @@ Installationen görs bäst på en **dator**. Genom att ha Home Assistant och ins
 
 Videoklipp som visar hur du startar installationsguiden - [Klicka här](https://drive.google.com/file/d/1Pn8AXn_xB9325W0WqvzVwqpP2utj2Kdc/view?usp=sharing)
 
-### 4. Konfigurera och uppdatera SEM
+### 4. Konfigurera SEM
 
-När installationen är klar behöver du normalt inte arbeta direkt med konfigurationsfiler. **Inställningar, justeringar och framtida uppdateringar av systemet hanteras direkt från SEM:s egen sida i Home Assistants sidofält.**
+När installationen är klar behöver du starta om Home Assistant. Efter omstarten visas en ny sida i Home Assistants sidofält.
 
-Det gör att SEM kan konfigureras och anpassas direkt från Home Assistants gränssnitt utan att du behöver redigera YAML-filer manuellt.
+Nu är det dags att konfigurera systemet efter din anläggning och dina önskemål. Klicka på "Mitt system" i menyn högst upp och välj sedan "Konfigurera".
+
+### 5. Uppdatera SEM
+
+När en ny version av SEM finns tillgänglig visas detta via "Mitt system". Klicka på "Mitt system" och välj "Uppdatera" för att ladda ner och installera den nya versionen.
+
+Efter uppdateringen behöver du starta om Home Assistant för att den nya versionen och eventuella uppdaterade dashboards ska börja användas.
 
 
 ## Saknar du stöd för ditt system? 💬
