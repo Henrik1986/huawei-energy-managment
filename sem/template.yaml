@@ -105,6 +105,25 @@ template:
             0
           {% endif %}
 
+      # SHOWS CHARGE TIME IN WALLBOX CHART
+      - name: sem_ev_charge_window_apex
+        unique_id: sem_ev_charge_window_apex
+        state: >
+          {% set start = states('input_datetime.sem_ev_charge_start') %}
+          {% set end = states('input_datetime.sem_ev_charge_end') %}
+
+          {% if start not in ['unknown', 'unavailable', ''] and
+                end not in ['unknown', 'unavailable', ''] %}
+
+            {% set start_dt = as_datetime(start) %}
+            {% set end_dt = as_datetime(end) %}
+
+            {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
+
+          {% else %}
+            unavailable
+          {% endif %}
+
       ################################ ELECTRICITY ####################################################
       #SHOWS NORDPOOL STATE (KOLLA OM DEN FINNS MED I KODEN - BYT DÅ TILL sem_nordpool_active)
       - name: "sem_nordpool_sensor_state"
@@ -744,6 +763,41 @@ template:
                     2
           {% endif %}
 
+
+      - name: "SEM - Next export window"
+        unique_id: sem_next_export_window
+        state: >
+          {% set now_time = now() %}
+
+          {% set window_1 = states('sensor.sem_export_window_1') %}
+          {% set window_2 = states('sensor.sem_export_window_2') %}
+
+          {% set start_1 = window_1.split(' - ')[0] | as_datetime if window_1 not in ['unknown', 'unavailable', ''] and ' - ' in window_1 else none %}
+          {% set end_1 = window_1.split(' - ')[1] | as_datetime if window_1 not in ['unknown', 'unavailable', ''] and ' - ' in window_1 else none %}
+
+          {% set start_2 = window_2.split(' - ')[0] | as_datetime if window_2 not in ['unknown', 'unavailable', ''] and ' - ' in window_2 else none %}
+          {% set end_2 = window_2.split(' - ')[1] | as_datetime if window_2 not in ['unknown', 'unavailable', ''] and ' - ' in window_2 else none %}
+
+          {% set valid_1 = start_1 is not none and end_1 is not none and end_1 > now_time %}
+          {% set valid_2 = start_2 is not none and end_2 is not none and end_2 > now_time %}
+
+          {% if valid_1 and valid_2 %}
+            {% if start_1 <= start_2 %}
+              1
+            {% else %}
+              2
+            {% endif %}
+
+          {% elif valid_1 %}
+            1
+
+          {% elif valid_2 %}
+            2
+
+          {% else %}
+            0
+          {% endif %}
+
       ################################ SMART LOGIC ####################################################
 
       # CALCULATES EXPORT THRESHOLD
@@ -1064,11 +1118,29 @@ template:
 
             {% endif %}
           final_decision: >
-            {{
-              state_attr('sensor.sem_available_export_energy_1', 'export_possible') | bool(false)
-              and
-              states('sensor.sem_available_export_energy_1') | float(0) > 0
-            }}
+            {% set override = states('input_select.sem_export_override_1') %}
+
+            {% if override == 'Exportera' %}
+              true
+
+            {% elif override == 'Exportera ej' %}
+              false
+
+            {% else %}
+              {{
+                state_attr('sensor.sem_available_export_energy_1', 'export_possible') | bool(false)
+                and
+                (
+                  state_attr('sensor.sem_export_window_1', 'avg_price') | float(0)
+                  >=
+                  (
+                    states('input_number.sem_battery_wear_cost') | float(0)
+                    +
+                    states('input_number.sem_export_profit_margin') | float(0)
+                  )
+                )
+              }}
+            {% endif %}
 
       # SHOWS EXPORT TIME IN APEX_CHART
       - name: sem_export_window_1_active
@@ -1330,11 +1402,30 @@ template:
 
             {% endif %}
           final_decision: >
-            {{
-              state_attr('sensor.sem_available_export_energy_2', 'export_possible') | bool(false)
-              and
-              states('sensor.sem_available_export_energy_2') | float(0) > 0
-            }}
+            {% set override = states('input_select.sem_export_override_2') %}
+
+            {% if override == 'Exportera' %}
+              true
+
+            {% elif override == 'Exportera ej' %}
+              false
+
+            {% else %}
+              {{
+                state_attr('sensor.sem_available_export_energy_2', 'export_possible') | bool(false)
+                and
+                (
+                  state_attr('sensor.sem_export_window_2', 'avg_price') | float(0)
+                  >=
+                  (
+                    states('input_number.sem_battery_wear_cost') | float(0)
+                    +
+                    states('input_number.sem_export_profit_margin') | float(0)
+                  )
+                )
+              }}
+            {% endif %}
+
 
       # SHOWS EXPORT TIME IN APEX_CHART
       - name: sem_export_window_2_active
@@ -1421,9 +1512,15 @@ template:
           {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2', 'usable_capacity') | float(0) %}
           {% set battery_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2', 'battery_capacity') | float(0) %}
 
+          {% set solar_surplus = state_attr('sensor.sem_battery_charge_energy_1a_2', 'estimated_remaining_solar_surplus') | float(0) %}
+
           {% set pre_ok  = state_attr('sensor.sem_battery_charge_energy_1a_2', 'pre_peak_profit') is true %}
           {% set peak_ok = state_attr('sensor.sem_battery_charge_energy_1a_2', 'peak_profit') is true %}
           {% set post_ok = state_attr('sensor.sem_battery_charge_energy_1a_2', 'post_peak_profit') is true %}
+
+          {# =========================
+            TOTALT ENERGIBEHOV
+            ========================= #}
 
           {% set total_kwh =
             (pre_peak  if pre_ok  else 0) +
@@ -1431,11 +1528,14 @@ template:
             (post_peak if post_ok else 0)
           %}
 
-          {# Begränsa först mot batteriets maxkapacitet #}
+          {# Begränsa mot batteriets maxkapacitet #}
           {% set capped_total = [total_kwh, usable_capacity] | min %}
 
-          {# Dra sedan bort energi som redan finns i batteriet #}
+          {# Dra bort energi som redan finns i batteriet #}
           {% set charge_needed = capped_total - battery_capacity %}
+
+          {# Dra bort framtida solöverskott #}
+          {% set charge_needed = charge_needed - solar_surplus %}
 
           {# Tillåt aldrig negativt värde #}
           {% set charge_needed = [charge_needed, 0] | max %}
@@ -1855,6 +1955,64 @@ template:
             {% endif %}
 
             {{ (solar.wh / 1000 * 0.85) | round(2) }}
+          estimated_remaining_solar_surplus: >
+            {% set forecast = state_attr('sensor.sem_solar_forecast', 'sem') %}
+            {% set now_dt = now() %}
+            {% set today = now_dt.date() %}
+            {% set midnight = now_dt.replace(hour=23, minute=59, second=59, microsecond=0) %}
+
+            {% set k_morning = states('sensor.sem_energy_avg_morning') | float(0) %}
+            {% set k_day     = states('sensor.sem_energy_avg_day') | float(0) %}
+            {% set k_evening = states('sensor.sem_energy_avg_evening') | float(0) %}
+            {% set k_night   = states('sensor.sem_energy_avg_night') | float(0) %}
+
+            {% set ns = namespace(surplus=0) %}
+
+            {% if forecast and 'watt_hours_period' in forecast %}
+
+              {% for e in forecast['watt_hours_period'] %}
+
+                {% if e is mapping %}
+
+                  {% set d = e.get('date') %}
+                  {% set v = e.get('values') | float(0) %}
+
+                  {% if d is not none %}
+
+                    {% set dt = as_datetime(d) %}
+
+                    {% if dt >= now_dt
+                          and dt.date() == today
+                          and dt <= midnight
+                          and v > 0 %}
+
+                      {% set solar_kwh = v / 1000 %}
+
+                      {% if 5 <= dt.hour < 10 %}
+                        {% set need = k_morning %}
+                      {% elif 10 <= dt.hour < 15 %}
+                        {% set need = k_day %}
+                      {% elif 15 <= dt.hour < 21 %}
+                        {% set need = k_evening %}
+                      {% else %}
+                        {% set need = k_night %}
+                      {% endif %}
+
+                      {% set hourly_surplus = [solar_kwh - need, 0] | max %}
+
+                      {% set ns.surplus = ns.surplus + hourly_surplus %}
+
+                    {% endif %}
+
+                  {% endif %}
+
+                {% endif %}
+
+              {% endfor %}
+
+            {% endif %}
+
+            {{ ns.surplus | round(2) }}
           solar_surplus: >
             {% set solar_production = state_attr('sensor.sem_battery_charge_energy_1a_2', 'estimated_solar_energy') | float(0) %}
             {% set house_demand = state_attr('sensor.sem_battery_charge_energy_1a_2', 'estimated_energy_sun_interval') | float(0) %}
@@ -2731,6 +2889,19 @@ template:
             {% else %}
               {{ energy_needed > 0 and is_profitable and not solar_enough }}
             {% endif %}
+
+
+
+      # SHOWS CHEAPEST CHARGING TIME IN APEX_CHART
+
+      - name: sem_battery_charge_window_cheapest_1a_active
+        unique_id: sem_battery_charge_window_cheapest_1a_active
+        state: >
+          {% if state_attr('sensor.sem_battery_charge_energy_1a_2', 'should_charge') | bool(false) %}
+          {{ states('sensor.sem_battery_charge_window_cheapest_1a') }}
+          {% else %}
+          1900-01-01T00:00:00-1900-01-01T00:15:00
+          {% endif %}
 
       # CALCULATES ENERGY BETWEEN 2 AND 1B
       - name: "sem_battery_charge_energy_2_1b"
@@ -4027,6 +4198,17 @@ template:
               {{ energy_needed > 0 and is_profitable }}
             {% endif %}
 
+      # SHOWS CHEAPEST CHARGING TIME IN APEX_CHART
+
+      - name: sem_battery_charge_window_cheapest_2_active
+        unique_id: sem_battery_charge_window_cheapest_2_active
+        state: >
+          {% if state_attr('sensor.sem_battery_charge_energy_2_1b', 'should_charge') | bool(false) %}
+          {{ states('sensor.sem_battery_charge_window_cheapest_2') }}
+          {% else %}
+          1900-01-01T00:00:00-1900-01-01T00:15:00
+          {% endif %}
+
   ######################### TRIGGERS ###########################################
 
   # SHOWS INTERVAL WHEN SOLAREXPORT SHOULD BE REDUCED
@@ -4539,65 +4721,363 @@ template:
       - name: sem_export_window_1
         unique_id: sem_export_window_1
         state: >
-          {% set data=(state_attr('sensor.sem_nordpool_active','raw_today') or []) + (state_attr('sensor.sem_nordpool_active','raw_tomorrow') or []) %}
-          {% set base_day=now().replace(hour=0,minute=0,second=0,microsecond=0) %}
-          {% set target_day=base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
-          {% set interval_start=target_day %}
-          {% set interval_end=target_day + timedelta(hours=12) %}
-          {% set filtered=data | selectattr('start','defined') | selectattr('value','defined') | selectattr('start','>=',interval_start.isoformat()) | selectattr('start','<',interval_end.isoformat()) | list %}
+          {% set data =
+            (state_attr('sensor.sem_nordpool_active', 'raw_today') or [])
+            +
+            (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+          {% set base_day =
+            now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
+          {% set target_day =
+            base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
+
+          {% set interval_start = target_day %}
+          {% set interval_end = target_day + timedelta(hours=12) %}
+
+          {% set filtered = data
+            | selectattr('start', 'defined')
+            | selectattr('value', 'defined')
+            | selectattr('start', '>=', interval_start.isoformat())
+            | selectattr('start', '<', interval_end.isoformat())
+            | list %}
+
+          {% set profit_margin =
+            states('input_number.sem_export_profit_margin') | float(0) %}
+
+          {% set battery_wear =
+            states('input_number.sem_battery_wear_cost') | float(0) %}
+
+          {% set required_price =
+            profit_margin + battery_wear %}
+
           {% if filtered | length == 0 %}
             none
           {% else %}
-            {% set values=filtered | map(attribute='value') | map('float') | list %}
-            {% set max_value=values | max %}
-            {% set peak_index=values.index(max_value) %}
-            {% set start_index=[peak_index - 1,0] | max %}
-            {% set end_index=[peak_index + 1,(filtered | length) - 1] | min %}
-            {% set start_dt=as_datetime(filtered[start_index].start) %}
-            {% set end_dt=as_datetime(filtered[end_index].start) + timedelta(hours=1) %}
-            {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
+
+            {% set values =
+              filtered
+              | map(attribute='value')
+              | map('float')
+              | list %}
+
+            {% set peak_price = values | max %}
+            {% set peak_index = values.index(peak_price) %}
+
+            {% if peak_price < required_price %}
+              none
+            {% else %}
+
+              {# =====================================================
+                STEG 1:
+                Förläng framåt från pristoppen.
+                Detta har högsta prioritet.
+                ===================================================== #}
+
+              {% set forward =
+                namespace(end_index=peak_index) %}
+
+              {% for i in range(peak_index + 1, filtered | length) %}
+                {% if values[i] >= required_price %}
+                  {% set forward.end_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+
+              {# =====================================================
+                STEG 2:
+                Endast om vi INTE kunde förlänga framåt alls
+                tidigarelägger vi exporten.
+                ===================================================== #}
+
+              {% set ns =
+                namespace(start_index=peak_index) %}
+
+              {% if forward.end_index == peak_index %}
+
+                {% for i in range(peak_index - 1, -1, -1) %}
+                  {% if values[i] >= required_price %}
+                    {% set ns.start_index = i %}
+                  {% else %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+
+              {% endif %}
+
+              {% set start_dt =
+                as_datetime(filtered[ns.start_index].start) %}
+
+              {% if filtered | length > 1 %}
+                {% set interval_duration =
+                  as_datetime(filtered[1].start)
+                  - as_datetime(filtered[0].start) %}
+              {% else %}
+                {% set interval_duration =
+                  timedelta(minutes=15) %}
+              {% endif %}
+
+              {% set end_dt =
+                as_datetime(filtered[forward.end_index].start)
+                + interval_duration %}
+
+              {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
+
+            {% endif %}
           {% endif %}
+
         attributes:
+
           peak_price: >
-            {% set data=(state_attr('sensor.sem_nordpool_active','raw_today') or []) + (state_attr('sensor.sem_nordpool_active','raw_tomorrow') or []) %}
-            {% set base_day=now().replace(hour=0,minute=0,second=0,microsecond=0) %}
-            {% set target_day=base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
-            {% set interval_start=target_day %}
-            {% set interval_end=target_day + timedelta(hours=12) %}
-            {% set filtered=data | selectattr('start','>=',interval_start.isoformat()) | selectattr('start','<',interval_end.isoformat()) | list %}
-            {{ ((filtered | map(attribute='value') | map('float') | max) if filtered | length > 0 else 0) | round(3) }}
-          peak_hour: >
-            {% set data=(state_attr('sensor.sem_nordpool_active','raw_today') or []) + (state_attr('sensor.sem_nordpool_active','raw_tomorrow') or []) %}
-            {% set base_day=now().replace(hour=0,minute=0,second=0,microsecond=0) %}
-            {% set target_day=base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
-            {% set interval_start=target_day %}
-            {% set interval_end=target_day + timedelta(hours=12) %}
-            {% set filtered=data | selectattr('start','>=',interval_start.isoformat()) | selectattr('start','<',interval_end.isoformat()) | list %}
+            {% set data =
+              (state_attr('sensor.sem_nordpool_active', 'raw_today') or [])
+              +
+              (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+            {% set base_day =
+              now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
+            {% set target_day =
+              base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
+
+            {% set interval_start = target_day %}
+            {% set interval_end = target_day + timedelta(hours=12) %}
+
+            {% set filtered = data
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
+              | selectattr('start', '>=', interval_start.isoformat())
+              | selectattr('start', '<', interval_end.isoformat())
+              | list %}
+
             {% if filtered | length > 0 %}
-              {% set values=filtered | map(attribute='value') | map('float') | list %}
-              {% set max_value=values | max %}
-              {% set peak_index=values.index(max_value) %}
+              {{
+                (
+                  filtered
+                  | map(attribute='value')
+                  | map('float')
+                  | max
+                ) | round(3)
+              }}
+            {% else %}
+              none
+            {% endif %}
+
+          peak_hour: >
+            {% set data =
+              (state_attr('sensor.sem_nordpool_active', 'raw_today') or [])
+              +
+              (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+            {% set base_day =
+              now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
+            {% set target_day =
+              base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
+
+            {% set interval_start = target_day %}
+            {% set interval_end = target_day + timedelta(hours=12) %}
+
+            {% set filtered = data
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
+              | selectattr('start', '>=', interval_start.isoformat())
+              | selectattr('start', '<', interval_end.isoformat())
+              | list %}
+
+            {% if filtered | length > 0 %}
+              {% set values =
+                filtered
+                | map(attribute='value')
+                | map('float')
+                | list %}
+
+              {% set max_value = values | max %}
+              {% set peak_index = values.index(max_value) %}
+
               {{ as_datetime(filtered[peak_index].start).hour }}
             {% else %}
               none
             {% endif %}
+
           avg_price: >
-            {% set data=(state_attr('sensor.sem_nordpool_active','raw_today') or []) + (state_attr('sensor.sem_nordpool_active','raw_tomorrow') or []) %}
-            {% set base_day=now().replace(hour=0,minute=0,second=0,microsecond=0) %}
-            {% set target_day=base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
-            {% set interval_start=target_day %}
-            {% set interval_end=target_day + timedelta(hours=12) %}
-            {% set filtered=data | selectattr('start','defined') | selectattr('value','defined') | selectattr('start','>=',interval_start.isoformat()) | selectattr('start','<',interval_end.isoformat()) | list %}
+            {% set data =
+              (state_attr('sensor.sem_nordpool_active', 'raw_today') or [])
+              +
+              (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+            {% set base_day =
+              now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
+            {% set target_day =
+              base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
+
+            {% set interval_start = target_day %}
+            {% set interval_end = target_day + timedelta(hours=12) %}
+
+            {% set filtered = data
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
+              | selectattr('start', '>=', interval_start.isoformat())
+              | selectattr('start', '<', interval_end.isoformat())
+              | list %}
+
+            {% set profit_margin =
+              states('input_number.sem_export_profit_margin') | float(0) %}
+
+            {% set battery_wear =
+              states('input_number.sem_battery_wear_cost') | float(0) %}
+
+            {% set required_price =
+              profit_margin + battery_wear %}
+
             {% if filtered | length == 0 %}
               none
             {% else %}
-              {% set values=filtered | map(attribute='value') | map('float') | list %}
-              {% set max_value=values | max %}
-              {% set peak_index=values.index(max_value) %}
-              {% set start_index=[peak_index - 1,0] | max %}
-              {% set end_index=[peak_index + 1,(filtered | length) - 1] | min %}
-              {% set window_values=values[start_index:end_index + 1] %}
-              {{ (window_values | sum / (window_values | length)) | round(3) }}
+
+              {% set values =
+                filtered
+                | map(attribute='value')
+                | map('float')
+                | list %}
+
+              {% set peak_index =
+                values.index(values | max) %}
+
+              {% set forward =
+                namespace(end_index=peak_index) %}
+
+              {% for i in range(peak_index + 1, filtered | length) %}
+                {% if values[i] >= required_price %}
+                  {% set forward.end_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+
+              {% set ns =
+                namespace(start_index=peak_index) %}
+
+              {% if forward.end_index == peak_index %}
+                {% for i in range(peak_index - 1, -1, -1) %}
+                  {% if values[i] >= required_price %}
+                    {% set ns.start_index = i %}
+                  {% else %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {% set window_values =
+                values[ns.start_index:forward.end_index + 1] %}
+
+              {{
+                (window_values | sum / window_values | length)
+                | round(3)
+              }}
+
+            {% endif %}
+
+          required_export_price: >
+            {{
+              (
+                states('input_number.sem_export_profit_margin') | float(0)
+                +
+                states('input_number.sem_battery_wear_cost') | float(0)
+              ) | round(3)
+            }}
+
+          window_duration: >
+            {% set data =
+              (state_attr('sensor.sem_nordpool_active', 'raw_today') or [])
+              +
+              (state_attr('sensor.sem_nordpool_active', 'raw_tomorrow') or []) %}
+
+            {% set base_day =
+              now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
+            {% set target_day =
+              base_day + timedelta(days=1) if now().hour >= 12 else base_day %}
+
+            {% set interval_start = target_day %}
+            {% set interval_end = target_day + timedelta(hours=12) %}
+
+            {% set filtered = data
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
+              | selectattr('start', '>=', interval_start.isoformat())
+              | selectattr('start', '<', interval_end.isoformat())
+              | list %}
+
+            {% set profit_margin =
+              states('input_number.sem_export_profit_margin') | float(0) %}
+
+            {% set battery_wear =
+              states('input_number.sem_battery_wear_cost') | float(0) %}
+
+            {% set required_price =
+              profit_margin + battery_wear %}
+
+            {% if filtered | length == 0 %}
+              0
+            {% else %}
+
+              {% set values =
+                filtered
+                | map(attribute='value')
+                | map('float')
+                | list %}
+
+              {% set peak_index =
+                values.index(values | max) %}
+
+              {% set forward =
+                namespace(end_index=peak_index) %}
+
+              {% for i in range(peak_index + 1, filtered | length) %}
+                {% if values[i] >= required_price %}
+                  {% set forward.end_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+
+              {% set start_index = peak_index %}
+
+              {% if forward.end_index == peak_index %}
+                {% set ns =
+                  namespace(start_index=peak_index) %}
+
+                {% for i in range(peak_index - 1, -1, -1) %}
+                  {% if values[i] >= required_price %}
+                    {% set ns.start_index = i %}
+                  {% else %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+
+                {% set start_index = ns.start_index %}
+              {% endif %}
+
+              {% if filtered | length > 1 %}
+                {% set interval_duration =
+                  as_datetime(filtered[1].start)
+                  - as_datetime(filtered[0].start) %}
+              {% else %}
+                {% set interval_duration =
+                  timedelta(minutes=15) %}
+              {% endif %}
+
+              {% set start_dt =
+                as_datetime(filtered[start_index].start) %}
+
+              {% set end_dt =
+                as_datetime(filtered[forward.end_index].start)
+                + interval_duration %}
+
+              {{ (end_dt - start_dt).total_seconds() / 3600 }}
+
             {% endif %}
 
   # CALCULATES EXPORT INTERVAL BETWEEN 12-00
@@ -4622,46 +5102,117 @@ template:
         state: >
           {% set data =
             state_attr('sensor.sem_nordpool_active', 'raw_today') or [] %}
+
           {% set today =
             now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
           {% set interval_start = today + timedelta(hours=12) %}
-          {% set interval_end   = today + timedelta(days=1) %}
+          {% set interval_end = today + timedelta(days=1) %}
+
           {% set filtered = data
             | selectattr('start', 'defined')
             | selectattr('value', 'defined')
             | selectattr('start', '>=', interval_start.isoformat())
             | selectattr('start', '<', interval_end.isoformat())
             | list %}
+
+          {% set profit_margin =
+            states('input_number.sem_export_profit_margin') | float(0) %}
+
+          {% set battery_wear =
+            states('input_number.sem_battery_wear_cost') | float(0) %}
+
+          {% set required_price =
+            profit_margin + battery_wear %}
+
           {% if filtered | length == 0 %}
             none
           {% else %}
+
             {% set values =
-              filtered | map(attribute='value') | map('float') | list %}
-            {% set max_value = values | max %}
-            {% set peak_index = values.index(max_value) %}
-            {% set start_index =
-              [peak_index - 1, 0] | max %}
-            {% set end_index =
-              [peak_index + 1, (filtered | length) - 1] | min %}
-            {% set start_dt =
-              as_datetime(filtered[start_index].start) %}
-            {% set end_dt =
-              as_datetime(filtered[end_index].start)
-              + timedelta(hours=1) %}
-            {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
+              filtered
+              | map(attribute='value')
+              | map('float')
+              | list %}
+
+            {% set peak_price = values | max %}
+            {% set peak_index = values.index(peak_price) %}
+
+            {% if peak_price < required_price %}
+              none
+            {% else %}
+
+              {# Först förlänger vi alltid framåt från pristoppen #}
+
+              {% set forward =
+                namespace(end_index=peak_index) %}
+
+              {% for i in range(peak_index + 1, filtered | length) %}
+                {% if values[i] >= required_price %}
+                  {% set forward.end_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+
+              {# Endast om priset direkt efter toppen är för lågt
+                börjar vi tidigarelägga exporten. #}
+
+              {% set ns =
+                namespace(start_index=peak_index) %}
+
+              {% if forward.end_index == peak_index %}
+
+                {% for i in range(peak_index - 1, -1, -1) %}
+                  {% if values[i] >= required_price %}
+                    {% set ns.start_index = i %}
+                  {% else %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+
+              {% endif %}
+
+              {% set start_dt =
+                as_datetime(filtered[ns.start_index].start) %}
+
+              {% if filtered | length > 1 %}
+                {% set interval_duration =
+                  as_datetime(filtered[1].start)
+                  - as_datetime(filtered[0].start) %}
+              {% else %}
+                {% set interval_duration =
+                  timedelta(minutes=15) %}
+              {% endif %}
+
+              {% set end_dt =
+                as_datetime(filtered[forward.end_index].start)
+                + interval_duration %}
+
+              {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
+
+            {% endif %}
           {% endif %}
+
         attributes:
+
           peak_price: >
             {% set data =
               state_attr('sensor.sem_nordpool_active', 'raw_today') or [] %}
+
             {% set today =
               now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
             {% set interval_start = today + timedelta(hours=12) %}
-            {% set interval_end   = today + timedelta(days=1) %}
+            {% set interval_end = today + timedelta(days=1) %}
+
             {% set filtered = data
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
               | selectattr('start', '>=', interval_start.isoformat())
               | selectattr('start', '<', interval_end.isoformat())
               | list %}
+
             {% if filtered | length > 0 %}
               {{
                 (
@@ -4674,55 +5225,206 @@ template:
             {% else %}
               none
             {% endif %}
+
           peak_hour: >
             {% set data =
               state_attr('sensor.sem_nordpool_active', 'raw_today') or [] %}
+
             {% set today =
               now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
             {% set interval_start = today + timedelta(hours=12) %}
-            {% set interval_end   = today + timedelta(days=1) %}
+            {% set interval_end = today + timedelta(days=1) %}
+
             {% set filtered = data
-              | selectattr('start', '>=', interval_start.isoformat())
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
               | selectattr('start', '<', interval_end.isoformat())
+              | selectattr('start', '>=', interval_start.isoformat())
               | list %}
+
             {% if filtered | length > 0 %}
               {% set values =
-                filtered | map(attribute='value') | map('float') | list %}
-              {% set max_value = values | max %}
-              {% set peak_index = values.index(max_value) %}
-              {{
-                as_datetime(filtered[peak_index].start).hour
-              }}
+                filtered
+                | map(attribute='value')
+                | map('float')
+                | list %}
+
+              {% set peak_index =
+                values.index(values | max) %}
+
+              {{ as_datetime(filtered[peak_index].start).hour }}
             {% else %}
               none
             {% endif %}
+
           avg_price: >
             {% set data =
               state_attr('sensor.sem_nordpool_active', 'raw_today') or [] %}
+
             {% set today =
               now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
             {% set interval_start = today + timedelta(hours=12) %}
-            {% set interval_end   = today + timedelta(days=1) %}
+            {% set interval_end = today + timedelta(days=1) %}
+
             {% set filtered = data
               | selectattr('start', 'defined')
               | selectattr('value', 'defined')
               | selectattr('start', '>=', interval_start.isoformat())
               | selectattr('start', '<', interval_end.isoformat())
               | list %}
+
+            {% set profit_margin =
+              states('input_number.sem_export_profit_margin') | float(0) %}
+
+            {% set battery_wear =
+              states('input_number.sem_battery_wear_cost') | float(0) %}
+
+            {% set required_price =
+              profit_margin + battery_wear %}
+
             {% if filtered | length == 0 %}
               none
             {% else %}
+
               {% set values =
-                filtered | map(attribute='value') | map('float') | list %}
-              {% set max_value = values | max %}
-              {% set peak_index = values.index(max_value) %}
-              {% set start_index =
-                [peak_index - 1, 0] | max %}
-              {% set end_index =
-                [peak_index + 1, (filtered | length) - 1] | min %}
+                filtered
+                | map(attribute='value')
+                | map('float')
+                | list %}
+
+              {% set peak_index =
+                values.index(values | max) %}
+
+              {% set forward =
+                namespace(end_index=peak_index) %}
+
+              {% for i in range(peak_index + 1, filtered | length) %}
+                {% if values[i] >= required_price %}
+                  {% set forward.end_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+
+              {% set ns =
+                namespace(start_index=peak_index) %}
+
+              {% if forward.end_index == peak_index %}
+                {% for i in range(peak_index - 1, -1, -1) %}
+                  {% if values[i] >= required_price %}
+                    {% set ns.start_index = i %}
+                  {% else %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
               {% set window_values =
-                values[start_index:end_index + 1] %}
-              {{ (window_values | sum / window_values | length) | round(3) }}
+                values[ns.start_index:forward.end_index + 1] %}
+
+              {{
+                (window_values | sum / (window_values | length))
+                | round(3)
+              }}
+
+            {% endif %}
+
+          required_export_price: >
+            {{
+              (
+                states('input_number.sem_export_profit_margin') | float(0)
+                +
+                states('input_number.sem_battery_wear_cost') | float(0)
+              ) | round(3)
+            }}
+
+          window_duration: >
+            {% set data =
+              state_attr('sensor.sem_nordpool_active', 'raw_today') or [] %}
+
+            {% set today =
+              now().replace(hour=0, minute=0, second=0, microsecond=0) %}
+
+            {% set interval_start = today + timedelta(hours=12) %}
+            {% set interval_end = today + timedelta(days=1) %}
+
+            {% set filtered = data
+              | selectattr('start', 'defined')
+              | selectattr('value', 'defined')
+              | selectattr('start', '>=', interval_start.isoformat())
+              | selectattr('start', '<', interval_end.isoformat())
+              | list %}
+
+            {% set profit_margin =
+              states('input_number.sem_export_profit_margin') | float(0) %}
+
+            {% set battery_wear =
+              states('input_number.sem_battery_wear_cost') | float(0) %}
+
+            {% set required_price =
+              profit_margin + battery_wear %}
+
+            {% if filtered | length == 0 %}
+              0
+            {% else %}
+
+              {% set values =
+                filtered
+                | map(attribute='value')
+                | map('float')
+                | list %}
+
+              {% set peak_index =
+                values.index(values | max) %}
+
+              {% set forward =
+                namespace(end_index=peak_index) %}
+
+              {% for i in range(peak_index + 1, filtered | length) %}
+                {% if values[i] >= required_price %}
+                  {% set forward.end_index = i %}
+                {% else %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+
+              {% set start_index = peak_index %}
+
+              {% if forward.end_index == peak_index %}
+                {% set ns =
+                  namespace(start_index=peak_index) %}
+
+                {% for i in range(peak_index - 1, -1, -1) %}
+                  {% if values[i] >= required_price %}
+                    {% set ns.start_index = i %}
+                  {% else %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+
+                {% set start_index = ns.start_index %}
+              {% endif %}
+
+              {% if filtered | length > 1 %}
+                {% set interval_duration =
+                  as_datetime(filtered[1].start)
+                  - as_datetime(filtered[0].start) %}
+              {% else %}
+                {% set interval_duration =
+                  timedelta(minutes=15) %}
+              {% endif %}
+
+              {% set start_dt =
+                as_datetime(filtered[start_index].start) %}
+
+              {% set end_dt =
+                as_datetime(filtered[forward.end_index].start)
+                + interval_duration %}
+
+              {{ (end_dt - start_dt).total_seconds() / 3600 }}
+
             {% endif %}
 
   # CALCULATES HOW THE BATTERY SHOULD DISCHARGE 12-00
@@ -5830,6 +6532,304 @@ template:
             {{ three_days_ago if three_days_ago is not none else 0 }}
           source: sensor.sem_weather_forecasts_hourly
 
+# EV CHARGE TIME
+  - trigger:
+      - trigger: state
+        entity_id: input_button.sem_search_charge_interval
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_1_ready_to_charge
+        from: "off"
+        to: "on"
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_2_ready_to_charge
+        from: "off"
+        to: "on"
+    condition:
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: template
+        value_template: >
+          {% set charge_time = states('sensor.sem_ev_charge_time') %}
+          {% if ' - ' not in charge_time %}
+            true
+          {% else %}
+            {% set times = charge_time.split(' - ') %}
+            {% set start = as_datetime(times[0]) %}
+            {% set end = as_datetime(times[1]) %}
+            {{ not (start <= now() <= end) }}
+          {% endif %}
+      - condition: state
+        entity_id: input_boolean.sem_ev_charge_active
+        state: "on"
+    sensor:
+      - name: "sem_ev_charge_time"
+        state: >
+          {% set charge_hours = states('input_number.sem_ev_charge_hours') | float(0) %}
+          {% set charge_quarters = (charge_hours * 4) | int %}
+          {% set search_mode = states('input_select.sem_ev_charge_search_mode') %}
+
+          {% set today_prices = state_attr('sensor.sem_nordpool_active', 'today') or [] %}
+          {% set tomorrow_prices = state_attr('sensor.sem_nordpool_active', 'tomorrow') or [] %}
+          {% set tomorrow_valid = state_attr('sensor.sem_nordpool_active', 'tomorrow_valid') == true %}
+
+          {% if today_prices | length == 0 or charge_quarters <= 0 %}
+            unavailable
+          {% else %}
+
+            {% set now_dt = now() %}
+            {% set today_date = now_dt.date() %}
+            {% set tomorrow_date = (now_dt + timedelta(days=1)).date() %}
+            {% set current_quarter = now_dt.hour * 4 + (now_dt.minute // 15) %}
+
+            {% set ns = namespace(
+              cheapest_price=None,
+              cheapest_quarter=0,
+              cheapest_day=today_date
+            ) %}
+
+            {# ==========================================================
+              LÄGE 1 – BILLIGASTE FRAMTIDA
+              Söker det absolut billigaste fönstret idag + imorgon
+            ========================================================== #}
+
+            {% if search_mode == 'Billigaste framtida' %}
+
+              {# IDAG #}
+              {% for i in range(current_quarter, 96 - charge_quarters + 1) %}
+
+                {% set total = namespace(value=0) %}
+
+                {% for j in range(i, i + charge_quarters) %}
+                  {% set total.value = total.value + (today_prices[j] | float(0)) %}
+                {% endfor %}
+
+                {% set avg_price = total.value / charge_quarters %}
+
+                {% if ns.cheapest_price is none or avg_price < ns.cheapest_price %}
+                  {% set ns.cheapest_price = avg_price %}
+                  {% set ns.cheapest_quarter = i %}
+                  {% set ns.cheapest_day = today_date %}
+                {% endif %}
+
+              {% endfor %}
+
+
+              {# IMORGON #}
+              {% if tomorrow_valid %}
+
+                {% for i in range(0, 96 - charge_quarters + 1) %}
+
+                  {% set total = namespace(value=0) %}
+
+                  {% for j in range(i, i + charge_quarters) %}
+                    {% set total.value = total.value + (tomorrow_prices[j] | float(0)) %}
+                  {% endfor %}
+
+                  {% set avg_price = total.value / charge_quarters %}
+
+                  {% if ns.cheapest_price is none or avg_price < ns.cheapest_price %}
+                    {% set ns.cheapest_price = avg_price %}
+                    {% set ns.cheapest_quarter = i %}
+                    {% set ns.cheapest_day = tomorrow_date %}
+                  {% endif %}
+
+                {% endfor %}
+
+              {% endif %}
+
+
+              {# Skapa valt startdatum #}
+              {% if ns.cheapest_price is not none %}
+
+                {% set start_hour = ns.cheapest_quarter // 4 %}
+                {% set start_minute = (ns.cheapest_quarter % 4) * 15 %}
+
+                {% set start_dt = now_dt.replace(
+                  year=ns.cheapest_day.year,
+                  month=ns.cheapest_day.month,
+                  day=ns.cheapest_day.day,
+                  hour=start_hour,
+                  minute=start_minute,
+                  second=0,
+                  microsecond=0
+                ) %}
+
+                {% set end_dt = start_dt + timedelta(minutes=charge_quarters * 15) %}
+
+                {{ start_dt.isoformat() }} - {{ end_dt.isoformat() }}
+
+              {% else %}
+                unavailable
+              {% endif %}
+
+
+            {# ==========================================================
+              LÄGE 2 - LADDAD SENAST
+              Hitta billigaste fönstret som hinner bli klart före deadline
+            ========================================================== #}
+
+            {% elif search_mode == 'Laddad senast' %}
+
+              {% set deadline_time = states('input_datetime.sem_ev_charge_deadline') %}
+
+              {% if deadline_time in ['', 'unknown', 'unavailable'] %}
+
+                unavailable
+
+              {% else %}
+
+                {% set deadline_parts = deadline_time.split(':') %}
+                {% set deadline_hour = deadline_parts[0] | int %}
+                {% set deadline_minute = deadline_parts[1] | int %}
+
+                {# Deadline idag eller imorgon beroende på aktuell tid #}
+                {% set deadline_today = now_dt.replace(
+                  hour=deadline_hour,
+                  minute=deadline_minute,
+                  second=0,
+                  microsecond=0
+                ) %}
+
+                {% if deadline_today > now_dt %}
+                  {% set deadline_dt = deadline_today %}
+                {% else %}
+                  {% set deadline_dt = deadline_today + timedelta(days=1) %}
+                {% endif %}
+
+
+                {% set selected = namespace(
+                  price=None,
+                  start=None
+                ) %}
+
+
+                {# ======================================================
+                  IDAG
+                ====================================================== #}
+
+                {% for i in range(current_quarter, 96 - charge_quarters + 1) %}
+
+                  {% set candidate_hour = i // 4 %}
+                  {% set candidate_minute = (i % 4) * 15 %}
+
+                  {% set candidate_start = now_dt.replace(
+                    year=today_date.year,
+                    month=today_date.month,
+                    day=today_date.day,
+                    hour=candidate_hour,
+                    minute=candidate_minute,
+                    second=0,
+                    microsecond=0
+                  ) %}
+
+                  {% set candidate_end = candidate_start + timedelta(
+                    minutes=charge_quarters * 15
+                  ) %}
+
+                  {# Fönstret måste både börja efter nu och sluta före deadline #}
+                  {% if candidate_start >= now_dt and candidate_end <= deadline_dt %}
+
+                    {% set total = namespace(value=0) %}
+
+                    {% for j in range(i, i + charge_quarters) %}
+                      {% set total.value = total.value + (today_prices[j] | float(0)) %}
+                    {% endfor %}
+
+                    {% set avg_price = total.value / charge_quarters %}
+
+                    {% if selected.price is none or avg_price < selected.price %}
+                      {% set selected.price = avg_price %}
+                      {% set selected.start = candidate_start %}
+                    {% endif %}
+
+                  {% endif %}
+
+                {% endfor %}
+
+
+                {# ======================================================
+                  IMORGON
+                ====================================================== #}
+
+                {% if tomorrow_valid %}
+
+                  {% for i in range(0, 96 - charge_quarters + 1) %}
+
+                    {% set candidate_hour = i // 4 %}
+                    {% set candidate_minute = (i % 4) * 15 %}
+
+                    {% set candidate_start = now_dt.replace(
+                      year=tomorrow_date.year,
+                      month=tomorrow_date.month,
+                      day=tomorrow_date.day,
+                      hour=candidate_hour,
+                      minute=candidate_minute,
+                      second=0,
+                      microsecond=0
+                    ) %}
+
+                    {% set candidate_end = candidate_start + timedelta(
+                      minutes=charge_quarters * 15
+                    ) %}
+
+                    {% if candidate_start >= now_dt and candidate_end <= deadline_dt %}
+
+                      {% set total = namespace(value=0) %}
+
+                      {% for j in range(i, i + charge_quarters) %}
+                        {% set total.value = total.value + (tomorrow_prices[j] | float(0)) %}
+                      {% endfor %}
+
+                      {% set avg_price = total.value / charge_quarters %}
+
+                      {% if selected.price is none or avg_price < selected.price %}
+                        {% set selected.price = avg_price %}
+                        {% set selected.start = candidate_start %}
+                      {% endif %}
+
+                    {% endif %}
+
+                  {% endfor %}
+
+                {% endif %}
+
+
+                {# ======================================================
+                  RESULTAT
+                ====================================================== #}
+
+                {% if selected.start is not none %}
+
+                  {% set end_dt = selected.start + timedelta(
+                    minutes=charge_quarters * 15
+                  ) %}
+
+                  {{ selected.start.isoformat() }} - {{ end_dt.isoformat() }}
+
+                {% else %}
+
+                  unavailable
+
+                {% endif %}
+
+              {% endif %}
+
+            {% else %}
+
+              unavailable
+
+            {% endif %}
+
+          {% endif %}
+
   #CHECKS IF ELECTRIC PRICES ARE AVALIBLE
   - binary_sensor:
       - name: "sem_nordpool_tomorrow_prices_available"
@@ -5862,3 +6862,37 @@ template:
               | reject('in', ['unavailable', 'unknown'])
               | list
               | length == entities | length }}
+
+      # CHECKS IF EV CHARGER IS READY TO CHARGE
+      - name: sem_ev_charger_1_ready_to_charge
+        unique_id: sem_ev_charger_1_ready_to_charge
+        state: >
+          {% set charger_sensor = states('input_text.sem_ev_charger_1_status_sensor') %}
+          {% set ready_state = states('input_text.sem_ev_charger_1_connected_state') %}
+
+          {% if charger_sensor in ['', 'unknown', 'unavailable'] %}
+            false
+
+          {% elif ready_state in ['', 'unknown', 'unavailable'] %}
+            false
+
+          {% else %}
+            {{ ready_state in states(charger_sensor) }}
+          {% endif %}
+
+      # CHECKS IF EV CHARGER 2 IS READY TO CHARGE
+      - name: sem_ev_charger_2_ready_to_charge
+        unique_id: sem_ev_charger_2_ready_to_charge
+        state: >
+          {% set charger_sensor = states('input_text.sem_ev_charger_2_status_sensor') %}
+          {% set ready_state = states('input_text.sem_ev_charger_2_connected_state') %}
+
+          {% if charger_sensor in ['', 'unknown', 'unavailable'] %}
+            false
+
+          {% elif ready_state in ['', 'unknown', 'unavailable'] %}
+            false
+
+          {% else %}
+            {{ ready_state in states(charger_sensor) }}
+          {% endif %}
