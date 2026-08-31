@@ -71,3 +71,51 @@ input_text:
   
   sem_ai_agent: 
     name: AI Agent
+
+  sem_ev_charger_1_status_sensor:
+    name: Laddbox 1 - statussensor
+    icon: mdi:ev-station
+    max: 255
+
+  sem_ev_charger_1_connected_status:
+    name: Laddbox 1 - status när kabeln är ansluten
+    icon: mdi:power-plug
+    max: 100
+
+  sem_ev_charger_1_connected_state:
+    name: Laddbox 1 - ansluten men ej laddning
+    icon: mdi:power-plug-outline
+    max: 100
+
+  sem_ev_charger_2_status_sensor:
+    name: Laddbox 2 - statussensor
+    icon: mdi:ev-station
+    max: 255
+
+  sem_ev_charger_2_connected_status:
+    name: Laddbox 2 - status när kabeln är ansluten
+    icon: mdi:power-plug
+    max: 100
+
+  sem_ev_charger_2_connected_state:
+    name: Laddbox 2 - ansluten men ej laddning
+    icon: mdi:power-plug-outline
+    max: 100
+########################################################
+
+
+  sem_ev_charger_1_start:
+    name: Laddbox 1 - Start
+    max: 255
+
+  sem_ev_charger_1_stop:
+    name: Laddbox 1 - Stopp
+    max: 255
+
+  sem_ev_charger_2_start:
+    name: Laddbox 2 - Start
+    max: 255
+
+  sem_ev_charger_2_stop:
+    name: Laddbox 2 - Stopp
+    max: 255
