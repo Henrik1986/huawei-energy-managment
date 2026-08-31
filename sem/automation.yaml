@@ -417,15 +417,22 @@ automation:
                   {% set window = state_attr('sensor.sem_available_export_energy_1', 'export_window') %}
                   {% set avg_price = state_attr('sensor.sem_available_export_energy_1', 'avg_price') | float(0) %}
                   {% set required_export_price = state_attr('sensor.sem_available_export_energy_1', 'required_export_price') | float(0) %}
+                  {% set min_export_energy = 2.0 %}
 
                   {% if window %}
-                    {% set start = as_datetime(window.split(' - ')[0]) %}
-                    {% set end = as_datetime(window.split(' - ')[1]) %}
+                    {% set parts = window.split(' - ') %}
 
-                    {{ export_energy > 0
-                      and avg_price >= required_export_price
-                      and now() >= start
-                      and now() <= end }}
+                    {% if parts | length == 2 %}
+                      {% set start = as_datetime(parts[0]) %}
+                      {% set end = as_datetime(parts[1]) %}
+
+                      {{ export_energy >= min_export_energy
+                        and avg_price >= required_export_price
+                        and now() >= start
+                        and now() <= end }}
+                    {% else %}
+                        false
+                    {% endif %}
                   {% else %}
                     false
                   {% endif %}
@@ -457,15 +464,22 @@ automation:
                   {% set window = state_attr('sensor.sem_available_export_energy_2', 'export_window') %}
                   {% set avg_price = state_attr('sensor.sem_available_export_energy_2', 'avg_price') | float(0) %}
                   {% set required_export_price = state_attr('sensor.sem_available_export_energy_2', 'required_export_price') | float(0) %}
+                  {% set min_export_energy = 0.5 %}
 
                   {% if window %}
-                    {% set start = as_datetime(window.split(' - ')[0]) %}
-                    {% set end = as_datetime(window.split(' - ')[1]) %}
+                    {% set parts = window.split(' - ') %}
 
-                    {{ export_energy > 0
-                      and avg_price >= required_export_price
-                      and now() >= start
-                      and now() <= end }}
+                    {% if parts | length == 2 %}
+                      {% set start = as_datetime(parts[0]) %}
+                      {% set end = as_datetime(parts[1]) %}
+
+                      {{ export_energy > min_export_energy
+                        and avg_price >= required_export_price
+                        and now() >= start
+                        and now() <= end }}
+                    {% else %}
+                      false
+                    {% endif %}
                   {% else %}
                     false
                   {% endif %}
@@ -500,25 +514,32 @@ automation:
                   {% set active2 = false %}
 
                   {% if window1 %}
-                    {% set start1 = as_datetime(window1.split(' - ')[0]) %}
-                    {% set end1 = as_datetime(window1.split(' - ')[1]) %}
-                    {% set active1 = (
+                    {% set parts1 = window1.split(' - ') %}
+                    {% if parts1 | length == 2 %}
+                      {% set start1 = as_datetime(parts1[0]) %}
+                      {% set end1 = as_datetime(parts1[1]) %}
+
+                      {% set active1 = (
                         states('sensor.sem_available_export_energy_1') | float(0) > 0
                         and now() >= start1
                         and now() <= end1
                       ) %}
+                    {% endif %}
                   {% endif %}
 
                   {% if window2 %}
-                    {% set start2 = as_datetime(window2.split(' - ')[0]) %}
-                    {% set end2 = as_datetime(window2.split(' - ')[1]) %}
-                    {% set active2 = (
+                    {% set parts2 = window2.split(' - ') %}
+                    {% if parts2 | length == 2 %}
+                      {% set start2 = as_datetime(parts2[0]) %}
+                      {% set end2 = as_datetime(parts2[1]) %}
+
+                      {% set active2 = (
                         states('sensor.sem_available_export_energy_2') | float(0) > 0
                         and now() >= start2
                         and now() <= end2
                       ) %}
+                    {% endif %}
                   {% endif %}
-
                   {{ not (active1 or active2) }}
             sequence:
               - action: number.set_value
@@ -535,6 +556,59 @@ automation:
                   entity_id: select.batteries_working_mode
                 data:
                   option: "maximise_self_consumption"
+
+################################################################################
+  - alias: SEM - Reset export override 1 to Auto
+    mode: single
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set window = states('sensor.sem_export_window_1') %}
+          {% if window and ' - ' in window %}
+            {% set end_time = window.split(' - ')[1] | as_datetime %}
+            {{ now() >= end_time }}
+          {% else %}
+            false
+          {% endif %}
+    conditions:
+      - condition: state
+        entity_id: input_select.sem_export_override_1
+        state:
+          - "Exportera"
+          - "Exportera ej"
+    actions:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.sem_export_override_1
+        data:
+          option: "Auto"
+
+
+
+  - alias: SEM - Reset export override 2 to Auto
+    mode: single
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set window = states('sensor.sem_export_window_2') %}
+          {% if window and ' - ' in window %}
+            {% set end_time = window.split(' - ')[1] | as_datetime %}
+            {{ now() >= end_time }}
+          {% else %}
+            false
+          {% endif %}
+    conditions:
+      - condition: state
+        entity_id: input_select.sem_export_override_2
+        state: 
+          - "Exportera"
+          - "Exportera ej"
+    actions:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.sem_export_override_2
+        data:
+          option: "Auto"
 
 ################################################################################
   - alias: SEM - Control solar export based on electricity price
@@ -1453,12 +1527,179 @@ automation:
           entity_id: input_number.grid_charge_stop_2
         data:
           value: "{{ states('sensor.sem_battery_charge_from_grid_energy') | float(0) }}"
+
 ################################################################################
-  - alias: Update packages from GitHub
+  - alias: SEM - Store start and end time EV charge
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: sensor.sem_ev_charge_time
+    conditions:
+      - condition: template
+        value_template: >
+          {{ states('sensor.sem_ev_charge_time') not in ['unknown', 'unavailable', ''] }}
+    actions:
+      - delay: "00:00:03"
+      - action: input_datetime.set_datetime
+        data:
+          entity_id: input_datetime.sem_ev_charge_start
+          date: >
+            {% set times = states('sensor.sem_ev_charge_time').split(' - ') %}
+            {{ times[0][:10] }}
+          time: >
+            {% set times = states('sensor.sem_ev_charge_time').split(' - ') %}
+            {{ times[0][11:19] }}
+      - action: input_datetime.set_datetime
+        data:
+          entity_id: input_datetime.sem_ev_charge_end
+          date: >
+            {% set times = states('sensor.sem_ev_charge_time').split(' - ') %}
+            {{ times[1][:10] }}
+          time: >
+            {% set times = states('sensor.sem_ev_charge_time').split(' - ') %}
+            {{ times[1][11:19] }}
+
+################################################################################
+  - alias: SEM - Start wallbox
+    mode: single
     triggers:
       - trigger: template
         value_template: >
-          {{ now().weekday() == 6 and now().hour == 3 and now().minute == 0 }}
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set start = window.split(' - ')[0] | as_datetime | as_local %}
+            {{ now() >= start and now() < start + timedelta(minutes=1) }}
+          {% else %}
+            false
+          {% endif %}
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_1_ready_to_charge
+        from: "off"
+        to: "on"
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_2_ready_to_charge
+        from: "off"
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_smart_charge_ev
+        state: "on"
+    actions:
+      - delay:
+          seconds: 10
+      - condition: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set parts = window.split(' - ') %}
+            {% set start = parts[0] | as_datetime | as_local %}
+            {% set end = parts[1] | as_datetime | as_local %}
+            {{ start <= now() <= end }}
+          {% else %}
+            false
+          {% endif %}
+      - if:
+          - condition: state
+            entity_id: binary_sensor.sem_ev_charger_1_ready_to_charge
+            state: "on"
+        then:
+          - action: >
+              {% set entity = states('input_text.sem_ev_charger_1_start') %}
+              {% set domain = entity.split('.')[0] %}
+              {% if domain == 'button' %}
+                button.press
+              {% elif domain == 'switch' %}
+                switch.turn_on
+              {% elif domain == 'input_boolean' %}
+                input_boolean.turn_on
+              {% elif domain == 'lock' %}
+                lock.unlock
+              {% endif %}
+            target:
+              entity_id: >
+                {{ states('input_text.sem_ev_charger_1_start') }}
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+          - condition: state
+            entity_id: binary_sensor.sem_ev_charger_2_ready_to_charge
+            state: "on"
+        then:
+          - action: >
+              {% set entity = states('input_text.sem_ev_charger_2_start') %}
+              {% set domain = entity.split('.')[0] %}
+              {% if domain == 'button' %}
+                button.press
+              {% elif domain == 'switch' %}
+                switch.turn_on
+              {% elif domain == 'input_boolean' %}
+                input_boolean.turn_on
+              {% elif domain == 'lock' %}
+                lock.unlock
+              {% endif %}
+            target:
+              entity_id: >
+                {{ states('input_text.sem_ev_charger_2_start') }}
+
+################################################################################
+  - alias: SEM - Stop wallbox
+    mode: single
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set end = window.split(' - ')[1] | as_datetime | as_local %}
+            {{ now() >= end and now() < end + timedelta(minutes=1) }}
+          {% else %}
+            false
+          {% endif %}
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_smart_charge_ev
+        state: "on"
+    actions:
+      - action: >
+          {% set entity = states('input_text.sem_ev_charger_1_stop') %}
+          {% set domain = entity.split('.')[0] %}
+          {% if domain == 'button' %}
+            button.press
+          {% elif domain == 'switch' %}
+            switch.turn_off
+          {% elif domain == 'input_boolean' %}
+            input_boolean.turn_off
+          {% elif domain == 'lock' %}
+            lock.lock
+          {% endif %}
+        target:
+          entity_id: >
+            {{ states('input_text.sem_ev_charger_1_stop') }}
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+        then:
+          - action: >
+              {% set entity = states('input_text.sem_ev_charger_2_stop') %}
+              {% set domain = entity.split('.')[0] %}
+              {% if domain == 'button' %}
+                button.press
+              {% elif domain == 'switch' %}
+                switch.turn_off
+              {% elif domain == 'input_boolean' %}
+                input_boolean.turn_off
+              {% elif domain == 'lock' %}
+                lock.lock
+              {% endif %}
+            target:
+              entity_id: >
+                {{ states('input_text.sem_ev_charger_2_stop') }}
+
+
+################################################################################
+  - alias: Update packages from GitHub
+    triggers:
       - trigger: state
         entity_id: input_boolean.manual_update_packages
         to: 'on'
@@ -1481,3 +1722,16 @@ automation:
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.manual_update_packages
+
+################################################################################
+  - alias: AUTO Update packages from GitHub
+    triggers:
+      - trigger: template
+        value_template: >
+          {{ now().weekday() == 6 and now().hour == 3 and now().minute == 0 }}
+    conditions: 
+      condition: state
+      entity_id: input_boolean.sem_auto_update
+      state: 'on'
+    actions:
+      - action: shell_command.update_packages_from_github
