@@ -1,3 +1,6 @@
 timer:
   sem_manual_charge_time:
     duration: "01:00:00"
+
+  sem_manual_export_time:
+    duration: "00:30:00"
