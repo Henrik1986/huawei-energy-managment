@@ -22,3 +22,6 @@ input_button:
     
   sem_test: 
     name: TEST
+
+  sem_search_charge_interval:
+    name: Search Charge Interval
