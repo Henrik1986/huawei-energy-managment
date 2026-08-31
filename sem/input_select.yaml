@@ -29,3 +29,33 @@ input_select:
       - Vecka
       - Månad
       - År
+
+  sem_earnings: 
+    name: Earning graph
+    options: 
+      - Idag
+      - Vecka
+      - Månad
+      - År
+
+  sem_ev_charge_search_mode:
+    name: Laddningsläge
+    options:
+      - "Billigaste framtida"
+      - "Laddad senast"
+
+  sem_export_override_1:
+    name: Export override 1
+    options:
+      - Auto
+      - Exportera
+      - Exportera ej 
+    initial: Auto
+
+  sem_export_override_2:
+    name: Export override 2
+    options:
+      - Auto
+      - Exportera
+      - Exportera ej 
+    initial: Auto
