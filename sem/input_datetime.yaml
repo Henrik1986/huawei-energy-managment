@@ -1,0 +1,16 @@
+input_datetime:
+  
+  sem_ev_charge_start:
+    name: SEM EV Charge Start
+    has_date: true
+    has_time: true
+
+  sem_ev_charge_end:
+    name: SEM EV Charge End
+    has_date: true
+    has_time: true
+
+  sem_ev_charge_deadline:
+    name: Laddad senast
+    has_date: false
+    has_time: true
