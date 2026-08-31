@@ -95,3 +95,27 @@ input_boolean:
     
   sem_test: 
     name: TEST BOOLEAN
+  
+  sem_ev_charge_active:
+    name: EV charge
+
+  sem_ev_settings: 
+    name: Settings EV-charge
+
+  sem_ev_adjust_charge_time: 
+    name: Adjust Time
+
+  sem_ev_balance: 
+    name: EV Balance
+  
+  sem_override_charge:
+    name: Ändra laddningsbeslut
+
+  sem_override_export:
+    name: Change export decision 
+
+  sem_smart_charge_ev: 
+    name: Aktivera smartladdning av elbil
+
+  sem_auto_update: 
+    name: Automatisk uppdatering
