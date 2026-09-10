@@ -851,19 +851,15 @@ sections:
           main: []
           bottom: []
         cards:
+          - type: picture-elements
+            elements: []
+            image: https://download.logo.wine/logo/Huawei/Huawei-Logo.wine.png
+            style:
+              top: 5%
+              left: 5%
+              width: 3%
           - type: custom:vertical-stack-in-card
             cards:
-              - type: heading
-                icon: ''
-                heading_style: title
-                heading: Konfiguration
-              - type: picture-elements
-                elements: []
-                image: https://download.logo.wine/logo/Huawei/Huawei-Logo.wine.png
-                style:
-                  top: 5%
-                  left: 5%
-                  width: 3%
               - type: entities
                 entities:
                   - entity: input_text.sem_user_access_code
@@ -872,181 +868,189 @@ sections:
                     icon_tap_action:
                       action: nothing
               - type: markdown
-                content: >+
-                  {% set user_code = states('input_text.sem_user_access_code') |
-                  trim %}
+                content: >-
+                  Fyll i ditt användar-ID för att aktivera systemets samtliga
+                  funktioner. Saknar du en användarkod kommer systemet ändå att
+                  fungera, men batteriet laddas då endast vid lönsamma
+                  tidpunkter.
 
-                  {% set codes_raw = states('sensor.sem_sys_state') %}
 
-                  {% set codes_list = codes_raw.split(',') | map('trim') | list
-                  %}
+                  Du kan testa systemets samtliga funktioner kostnadsfritt i 30
+                  dagar med en demokod. Demokoden får du genom att välja ”Köp
+                  användarkod” under ”Mitt system”.
+          - type: markdown
+            content: >+
+              {% set user_code = states('input_text.sem_user_access_code') |
+              trim %}
 
-                  {% if user_code in codes_list %}
-                    **AnvändarID**
-                    🔑 Samtliga funktioner aktiverade
-                  {% else %}
-                    **AnvändarID**
-                    🟡 Grundfunktioner är aktiverade
-                  {% endif %}
+              {% set codes_raw = states('sensor.sem_sys_state') %}
 
+              {% set codes_list = codes_raw.split(',') | map('trim') | list %}
 
+              {% if user_code in codes_list %}
+                **AnvändarID**
+                🔑 Samtliga funktioner aktiverade
+              {% else %}
+                **AnvändarID**
+                🟡 Grundfunktioner är aktiverade
+              {% endif %}
 
-                  {# Lista över entiteter att kontrollera #}
 
-                  {% set e1 = 'sensor.batteries_state_of_capacity' %}
 
-                  {% set e2 = 'input_number.sem_batteries_end_of_discharge_soc'
-                  %}
+              {# Lista över entiteter att kontrollera #}
 
-                  {% set e3 = 'sensor.inverter_input_power' %}
+              {% set e1 = 'sensor.batteries_state_of_capacity' %}
 
-                  {% set e4 = 'sensor.power_meter_active_power' %}
+              {% set e2 = 'input_number.sem_batteries_end_of_discharge_soc' %}
 
-                  {% set e5 = 'sensor.batteries_charge_discharge_power' %}
+              {% set e3 = 'sensor.inverter_input_power' %}
 
-                  {% set e6 = 'select.batteries_working_mode' %}
+              {% set e4 = 'sensor.power_meter_active_power' %}
 
-                  {% set e7 = 'number.batteries_grid_charge_maximum_power' %}
+              {% set e5 = 'sensor.batteries_charge_discharge_power' %}
 
-                  {% set e8 = 'number.batteries_maximum_discharging_power' %}
+              {% set e6 = 'select.batteries_working_mode' %}
 
+              {% set e7 = 'number.batteries_grid_charge_maximum_power' %}
 
-                  {# Hämta states #}
+              {% set e8 = 'number.batteries_maximum_discharging_power' %}
 
-                  {% set s1 = states(e1) %}
 
-                  {% set s2 = states(e2) %}
+              {# Hämta states #}
 
-                  {% set s3 = states(e3) %}
+              {% set s1 = states(e1) %}
 
-                  {% set s4 = states(e4) %}
+              {% set s2 = states(e2) %}
 
-                  {% set s5 = states(e5) %}
+              {% set s3 = states(e3) %}
 
-                  {% set s6 = states(e6) %}
+              {% set s4 = states(e4) %}
 
-                  {% set s7 = states(e7) %}
+              {% set s5 = states(e5) %}
 
-                  {% set s8 = states(e8) %}
+              {% set s6 = states(e6) %}
 
+              {% set s7 = states(e7) %}
 
-                  {# Definiera vad som räknas som otillgängligt #}
+              {% set s8 = states(e8) %}
 
-                  {% set bad = ['unknown', 'unavailable', '', None] %}
 
+              {# Definiera vad som räknas som otillgängligt #}
 
-                  {# Räkna antal otillgängliga #}
+              {% set bad = ['unknown', 'unavailable', '', None] %}
 
-                  {% set cnt =
-                    ((s1 in bad) | int) +
-                    ((s2 in bad) | int) +
-                    ((s3 in bad) | int) +
-                    ((s4 in bad) | int) +
-                    ((s5 in bad) | int) +
-                    ((s6 in bad) | int) +
-                    ((s7 in bad) | int) +
-                    ((s8 in bad) | int)
-                  %}
 
+              {# Räkna antal otillgängliga #}
 
-                  {# Utdatat #}
+              {% set cnt =
+                ((s1 in bad) | int) +
+                ((s2 in bad) | int) +
+                ((s3 in bad) | int) +
+                ((s4 in bad) | int) +
+                ((s5 in bad) | int) +
+                ((s6 in bad) | int) +
+                ((s7 in bad) | int) +
+                ((s8 in bad) | int)
+              %}
 
-                  {% if cnt == 0 %}
 
-                  **Huawei**
+              {# Utdatat #}
 
-                  ✅ OK
+              {% if cnt == 0 %}
 
-                  {% else %}
+              **Huawei**
 
-                  **Huawei**
+              ✅ OK
 
-                  ❌ Enheter saknas eller har felaktigt namn ({{ cnt }})
+              {% else %}
 
-                  {% if s1 in bad %}- {{ e1 }}{% endif %}
+              **Huawei**
 
-                  {% if s2 in bad %}- {{ e2 }}{% endif %}
+              ❌ Enheter saknas eller har felaktigt namn ({{ cnt }})
 
-                  {% if s3 in bad %}- {{ e3 }}{% endif %}
+              {% if s1 in bad %}- {{ e1 }}{% endif %}
 
-                  {% if s4 in bad %}- {{ e4 }}{% endif %}
+              {% if s2 in bad %}- {{ e2 }}{% endif %}
 
-                  {% if s5 in bad %}- {{ e5 }}{% endif %}
+              {% if s3 in bad %}- {{ e3 }}{% endif %}
 
-                  {% if s6 in bad %}- {{ e6 }}{% endif %}
+              {% if s4 in bad %}- {{ e4 }}{% endif %}
 
-                  {% if s7 in bad %}- {{ e7 }}{% endif %}
+              {% if s5 in bad %}- {{ e5 }}{% endif %}
 
-                  {% if s8 in bad %}- {{ e8 }}{% endif %}
+              {% if s6 in bad %}- {{ e6 }}{% endif %}
 
-                  {% endif %}
+              {% if s7 in bad %}- {{ e7 }}{% endif %}
 
+              {% if s8 in bad %}- {{ e8 }}{% endif %}
 
+              {% endif %}
 
-                  {% if states('weather.smhi_home') not in ['unknown',
-                  'unavailable', ''] %}
 
-                  **SMHI**
-                    ✅ OK
-                  {% else %}
 
-                  **SMHI**
-                    ❌ weather.smhi_home saknas
-                  {% endif %}
+              {% if states('weather.smhi_home') not in ['unknown',
+              'unavailable', ''] %}
 
+              **SMHI**
+                ✅ OK
+              {% else %}
 
-                  {% if integration_entities('nordpool') | count > 0 %}
+              **SMHI**
+                ❌ weather.smhi_home saknas
+              {% endif %}
 
-                  **Nordpool**
-                    ✅ OK
-                  {% else %}
 
-                  **Nordpool**
-                    ❌ Nordpool saknas
-                  {% endif %}
+              {% if integration_entities('nordpool') | count > 0 %}
 
+              **Nordpool**
+                ✅ OK
+              {% else %}
 
-                  {% set missing = [] %}
+              **Nordpool**
+                ❌ Nordpool saknas
+              {% endif %}
 
 
-                  {% if states('sensor.sem_hacs_apexcharts_card') != 'OK' %}
-                    {% set missing = missing + ['ApexCharts Card'] %}
-                  {% endif %}
+              {% set missing = [] %}
 
 
-                  {% if states('sensor.sem_hacs_bubble_card') != 'OK' %}
-                    {% set missing = missing + ['Bubble Card'] %}
-                  {% endif %}
+              {% if states('sensor.sem_hacs_apexcharts_card') != 'OK' %}
+                {% set missing = missing + ['ApexCharts Card'] %}
+              {% endif %}
 
 
-                  {% if states('sensor.sem_hacs_energy_flow_card_plus') != 'OK'
-                  %}
-                    {% set missing = missing + ['Energy Flow Card Plus'] %}
-                  {% endif %}
+              {% if states('sensor.sem_hacs_bubble_card') != 'OK' %}
+                {% set missing = missing + ['Bubble Card'] %}
+              {% endif %}
 
 
-                  {% if states('sensor.sem_hacs_lovelace_layout_card') != 'OK'
-                  %}
-                    {% set missing = missing + ['Lovelace Layout Card'] %}
-                  {% endif %}
+              {% if states('sensor.sem_hacs_energy_flow_card_plus') != 'OK' %}
+                {% set missing = missing + ['Energy Flow Card Plus'] %}
+              {% endif %}
 
 
-                  {% if states('sensor.sem_hacs_vertical_stack_in_card') != 'OK'
-                  %}
-                    {% set missing = missing + ['Vertical Stack In Card'] %}
-                  {% endif %}
+              {% if states('sensor.sem_hacs_lovelace_layout_card') != 'OK' %}
+                {% set missing = missing + ['Lovelace Layout Card'] %}
+              {% endif %}
 
-                  **HACS**
 
-                  {{ '✅ OK' if missing | length == 0 else '❌ Saknas: ' ~
-                  (missing | join(', ')) }}
+              {% if states('sensor.sem_hacs_vertical_stack_in_card') != 'OK' %}
+                {% set missing = missing + ['Vertical Stack In Card'] %}
+              {% endif %}
 
+              **HACS**
 
+              {{ '✅ OK' if missing | length == 0 else '❌ Saknas: ' ~ (missing |
+              join(', ')) }}
 
-                  **⚠️ VARNING!**
 
-                  Detta är ett hobbyprojekt – använd på eget ansvar. 
 
+              **⚠️ VARNING!**
+
+              Detta är ett hobbyprojekt – använd på eget ansvar. 
+
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: tile
                 entity: input_button.sem_config_2
                 name: Starta konfigurationen
@@ -1190,6 +1194,8 @@ sections:
                           **Exempel <i>sensor.ditt_sensor_namn**
                         {% endif %}
                       text_only: true
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: heading
                 icon: mdi:battery
                 heading_style: title
@@ -1220,6 +1226,8 @@ sections:
 
                     Fyll i ditt Huawei batteri ID i rutan ovanför
                   {% endif %}
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: heading
                 icon: phu:huawei-solar-inverter
                 heading_style: title
@@ -1251,6 +1259,8 @@ sections:
                   Fyll i ditt Huawei inverter ID i rutan ovanför
 
                   {% endif %}
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: heading
                 heading_style: title
                 heading: Väderprognos
@@ -1289,6 +1299,8 @@ sections:
                   den.
 
                   {% endif %}
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: tile
                 entity: input_boolean.sem_activate_ai
                 name: AI
@@ -1344,6 +1356,8 @@ sections:
                           {% if not ns.found %}
                           Inga AI agenter hittades. Installera en AI-agent via integrationer. 
                           {% endif %}
+          - type: custom:vertical-stack-in-card
+            cards:
               - square: false
                 type: grid
                 cards:
@@ -1427,6 +1441,12 @@ sections:
                   fyll i rutorna ovan. 
                      
                   {% endif %}
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: heading
+                icon: ''
+                heading: Din anläggning
+                heading_style: subtitle
               - type: tile
                 entity: input_boolean.sem_solar_2
                 name: Två anläggningar
@@ -1439,10 +1459,6 @@ sections:
                 features:
                   - type: toggle
                 features_position: inline
-              - type: heading
-                icon: ''
-                heading: 'Din installation '
-                heading_style: subtitle
               - type: conditional
                 conditions:
                   - condition: state
@@ -1454,7 +1470,7 @@ sections:
                     - type: heading
                       icon: mdi:solar-panel
                       heading: Anläggning 1
-                      heading_style: subtitle
+                      heading_style: title
                     - type: conditional
                       conditions:
                         - condition: state
@@ -1538,7 +1554,7 @@ sections:
                     - type: heading
                       icon: mdi:solar-panel
                       heading: Anläggning 1
-                      heading_style: subtitle
+                      heading_style: title
                     - type: entities
                       entities:
                         - entity: input_number.sem_solar_dec
@@ -1566,7 +1582,7 @@ sections:
                     - type: heading
                       icon: mdi:solar-panel
                       heading: Anläggning 2
-                      heading_style: subtitle
+                      heading_style: title
                     - type: entities
                       entities:
                         - entity: input_number.sem_solar_dec_2
@@ -1632,6 +1648,8 @@ sections:
 
                   Det publika API:et tillåter max 12 anrop per rullande timme. I
                   denna setup görs endast ett anrop per timme.
+          - type: custom:vertical-stack-in-card
+            cards:
               - square: false
                 type: grid
                 cards:
@@ -1720,6 +1738,8 @@ sections:
                   **Laddningsvinst** anger det minsta prisskillnadskravet för
                   att laddning ska genomföras. Detta är en avgörande faktor för
                   systemets lönsamhet. Ett rimligt startvärde är 0,3 SEK/kWh.
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: heading
                 icon: ''
                 heading: Elpriser
@@ -1761,6 +1781,8 @@ sections:
                   **Påslag såld el** är det totala påslaget på din sålda el.
                   Värdet används för att beräkna din förtjänst då du exporterar
                   el. 
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: heading
                 icon: ''
                 heading_style: title
@@ -1841,6 +1863,8 @@ sections:
                     Aktivera **sälj batteriöverskott** om du vill tillåta att
                     systemet säljer överskottet i batteriet för att öka
                     lönsamheten.
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: heading
                 icon: ''
                 heading: Export av solöverskottet
@@ -1865,6 +1889,8 @@ sections:
 
                   Aktivera reglaget för att automatiskt stoppa export av solel
                   när elpriset är 0 eller lägre.
+          - type: custom:vertical-stack-in-card
+            cards:
               - square: false
                 type: grid
                 cards:
@@ -1913,12 +1939,12 @@ sections:
           main: []
           bottom: []
         cards:
+          - type: heading
+            icon: mdi:car-electric
+            heading_style: title
+            heading: Laddbox och elbil
           - type: custom:vertical-stack-in-card
             cards:
-              - type: heading
-                icon: ''
-                heading_style: title
-                heading: Laddbox och elbil
               - type: tile
                 entity: input_boolean.sem_ev_wallbox_single
                 name: En laddbox
@@ -1985,6 +2011,8 @@ sections:
 
                         Ange namnet på sensorerna som mäter effekten för dina
                         laddboxar. 
+          - type: custom:vertical-stack-in-card
+            cards:
               - type: conditional
                 conditions:
                   - condition: or
@@ -2017,6 +2045,16 @@ sections:
                   - condition: state
                     entity: input_boolean.sem_ev_charging_protection_enabled
                     state: 'off'
+                  - condition: and
+                    conditions:
+                      - condition: or
+                        conditions:
+                          - condition: state
+                            entity: input_boolean.sem_ev_wallbox_single
+                            state: 'on'
+                          - condition: state
+                            entity: input_boolean.sem_ev_wallbox_multi
+                            state: 'on'
                 card:
                   type: custom:vertical-stack-in-card
                   cards:
@@ -2039,6 +2077,9 @@ sections:
                         - condition: state
                           entity: input_boolean.sem_ev_wallbox_multi
                           state: 'off'
+                        - condition: state
+                          entity: input_boolean.sem_ev_wallbox_single
+                          state: 'on'
                       card:
                         type: entities
                         entities:
@@ -2072,149 +2113,52 @@ sections:
                           - entity: input_number.sem_battery_discharge_power_ev_limit
                           - entity: input_number.sem_battery_grid_normal_power
                             name: Laddningseffekt
-                    - type: markdown
-                      content: >-
-                        **ℹ️Information**
-
-                        I **laddbox** anger du sensorn som visar laddboxens
-                        aktuella status (t.ex. om den laddar eller är låst).
-
-
-                        Under **laddningsläge** anger du det statusvärde som
-                        motsvarar aktiv laddning av elbilen (t.ex. charging).
-
-
-                        **Urladdningseffekt** anger den effekt (kW) som
-                        batteriet ska återgå till efter att elbilen har laddats
-                        klart.
-
-
-                        Slutligen anger du **laddningseffekt**, det vill säga
-                        den maximala effekt (kW) som batteriet får ladda med
-                        från elnätet efter att elbilen har laddats klart. 
-              - type: tile
-                entity: input_boolean.sem_smart_charge_ev
-                name: Smart elbilsladdning
-                icon: mdi:car-electric
-                color: green
-                hide_state: true
-                vertical: false
-                tap_action:
-                  action: toggle
-                icon_tap_action:
-                  action: toggle
-                features:
-                  - type: toggle
-                features_position: inline
-              - type: conditional
-                conditions:
-                  - condition: state
-                    entity: input_boolean.sem_smart_charge_ev
-                    state: 'off'
-                card:
-                  type: markdown
-                  content: >-
-                    ℹ️**Information**
-
-                    Aktivera **smart elbilsladdning** om du vill att systemet
-                    ska styra när din elbil laddas. För att funktionen ska
-                    fungera behöver din laddbox kunna styras via Home Assistant.
-              - type: conditional
-                conditions:
-                  - condition: state
-                    entity: input_boolean.sem_smart_charge_ev
-                    state: 'on'
-                card:
-                  type: custom:vertical-stack-in-card
-                  cards:
                     - type: conditional
                       conditions:
-                        - condition: state
-                          entity: input_boolean.sem_ev_wallbox_single
-                          state: 'on'
+                        - condition: or
+                          conditions:
+                            - condition: state
+                              entity: input_boolean.sem_ev_wallbox_single
+                              state: 'on'
+                            - condition: state
+                              entity: input_boolean.sem_ev_wallbox_multi
+                              state: 'on'
                       card:
-                        type: custom:vertical-stack-in-card
-                        cards:
-                          - type: heading
-                            icon: mdi:ev-plug-type2
-                            heading: Laddbox 1
-                            heading_style: subtitle
-                          - type: entities
-                            entities:
-                              - entity: input_text.sem_ev_charger_1_status_sensor
-                                name: Laddbox
-                              - entity: input_text.sem_ev_charger_1_connected_status
-                                name: Inte ansluten
-                              - entity: input_text.sem_ev_charger_1_connected_state
-                                name: Ansluten, men laddar ej
-                              - entity: input_text.sem_ev_charger_1_start
-                                name: Start
-                                icon: mdi:play
-                              - entity: input_text.sem_ev_charger_1_stop
-                                name: Stopp
-                                icon: mdi:stop
-                    - type: conditional
-                      conditions:
-                        - condition: state
-                          entity: input_boolean.sem_ev_wallbox_multi
-                          state: 'on'
-                      card:
-                        type: custom:vertical-stack-in-card
-                        cards:
-                          - type: heading
-                            icon: mdi:ev-plug-type2
-                            heading: Laddbox 2
-                            heading_style: subtitle
-                          - type: entities
-                            entities:
-                              - entity: input_text.sem_ev_charger_2_status_sensor
-                                name: Laddbox
-                              - entity: input_text.sem_ev_charger_2_connected_status
-                                name: Inte ansluten
-                              - entity: input_text.sem_ev_charger_2_connected_state
-                                name: Ansluten, men laddar ej
-                              - entity: input_text.sem_ev_charger_2_start
-                                name: Start
-                                icon: mdi:play
-                              - entity: input_text.sem_ev_charger_2_stop
-                                name: Stopp
-                                icon: mdi:stop
-                    - type: conditional
-                      conditions:
-                        - condition: state
-                          entity: input_boolean.sem_ev_wallbox_single
-                          state: 'on'
-                      card:
-                        type: custom:vertical-stack-in-card
-                        cards:
-                          - type: markdown
-                            content: >-
-                              ℹ️ **Information**
+                        type: markdown
+                        content: >-
+                          **ℹ️Information**
+
+                          I **laddbox** anger du sensorn som visar laddboxens
+                          aktuella status (t.ex. om den laddar eller är låst).
 
 
-                              I **laddbox** anger du sensorn som visar
-                              laddboxens aktuella status (t.ex. om den laddar
-                              eller är låst).
+                          Under **laddningsläge** anger du det statusvärde som
+                          motsvarar aktiv laddning av elbilen (t.ex. charging).
 
 
-                              I **inte ansluten** fyller du i vad laddboxen
-                              visar när laddkabeln <u>inte är</u> inkopplad i
-                              bilen. 
+                          **Urladdningseffekt** anger den effekt (kW) som
+                          batteriet ska återgå till efter att elbilen har
+                          laddats klart.
 
 
-                              I **ansluten, men laddar ej** anger du vad
-                              laddboxen visar när laddkabeln <u>är inkopplad</u>
-                              i bilen men laddar ej. 
-
-
-                              Ange enheten som startar laddningen i **start**
-                              och slutligen den enheten som stoppar laddningen i
-                              **stopp**.
+                          Slutligen anger du **laddningseffekt**, det vill säga
+                          den maximala effekt (kW) som batteriet får ladda med
+                          från elnätet efter att elbilen har laddats klart. 
               - type: conditional
                 conditions:
                   - condition: state
                     entity: input_boolean.sem_ev_charging_protection_enabled
                     state: 'on'
+                  - condition: and
+                    conditions:
+                      - condition: or
+                        conditions:
+                          - condition: state
+                            entity: input_boolean.sem_ev_wallbox_single
+                            state: 'on'
+                          - condition: state
+                            entity: input_boolean.sem_ev_wallbox_multi
+                            state: 'on'
                 card:
                   type: custom:vertical-stack-in-card
                   cards:
@@ -2230,6 +2174,26 @@ sections:
                       features:
                         - type: toggle
                       features_position: inline
+                    - type: conditional
+                      conditions:
+                        - condition: state
+                          entity: input_boolean.sem_ev_integrated
+                          state: 'on'
+                      card:
+                        type: custom:vertical-stack-in-card
+                        cards:
+                          - type: heading
+                            icon: mdi:car-electric
+                            heading: Din elbil
+                            heading_style: subtitle
+                          - type: entities
+                            entities:
+                              - entity: input_text.car_battery_sensor
+                              - entity: input_number.sem_ev_charge_goal
+                                icon: mdi:battery-charging-70
+                              - entity: sensor.car_battery_level
+                                icon: mdi:car-electric
+                                name: Batterinivå Elbil
                     - type: entities
                       entities:
                         - entity: input_select.sem_ev_battery_strategy
@@ -2239,26 +2203,12 @@ sections:
                       conditions:
                         - condition: state
                           entity: input_boolean.sem_ev_integrated
-                          state: 'on'
-                      card:
-                        type: custom:vertical-stack-in-card
-                        cards:
-                          - type: entities
-                            entities:
-                              - entity: input_text.car_battery_sensor
-                              - entity: input_number.sem_ev_charge_goal
-                                icon: mdi:battery-charging-70
-                              - entity: sensor.car_battery_level
-                                icon: mdi:car-electric
-                                name: Batterinivå Elbil
-                    - type: conditional
-                      conditions:
-                        - condition: state
-                          entity: input_boolean.sem_ev_integrated
                           state: 'off'
                       card:
                         type: markdown
                         content: >
+                          ℹ️**Information**
+
                           Välj önskad strategi då elbilen och hembatteriet
                           laddas samtidigt.  
 
@@ -2281,6 +2231,8 @@ sections:
                         cards:
                           - type: markdown
                             content: >-
+                              ℹ️**Information**
+
                               Välj önskad strategi då elbilen och hembatteriet
                               laddas samtidigt.  
 
@@ -2301,6 +2253,512 @@ sections:
                               laddas till laddningsnivån du anger. Därefter
                               delar elbilen och batteriet på tillgänglig
                               effekt. 
+          - type: custom:vertical-stack-in-card
+            cards:
+              - type: conditional
+                conditions:
+                  - condition: or
+                    conditions:
+                      - condition: state
+                        entity: input_boolean.sem_ev_wallbox_multi
+                        state: 'on'
+                      - condition: state
+                        entity: input_boolean.sem_ev_wallbox_single
+                        state: 'on'
+                card:
+                  type: tile
+                  entity: input_boolean.sem_smart_charge_ev
+                  name: Smart elbilsladdning
+                  icon: mdi:car-electric
+                  color: green
+                  hide_state: true
+                  vertical: false
+                  tap_action:
+                    action: toggle
+                  icon_tap_action:
+                    action: toggle
+                  features:
+                    - type: toggle
+                  features_position: inline
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_smart_charge_ev
+                    state: 'off'
+                  - condition: and
+                    conditions:
+                      - condition: or
+                        conditions:
+                          - condition: state
+                            entity: input_boolean.sem_ev_wallbox_single
+                            state: 'on'
+                          - condition: state
+                            entity: input_boolean.sem_ev_wallbox_multi
+                            state: 'on'
+                card:
+                  type: markdown
+                  content: >-
+                    ℹ️**Information**
+
+                    Aktivera **smart elbilsladdning** om du vill att systemet
+                    ska styra när din elbil laddas. För att funktionen ska
+                    fungera behöver din laddbox kunna styras via Home Assistant.
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity: input_boolean.sem_smart_charge_ev
+                    state: 'on'
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: conditional
+                      conditions:
+                        - condition: or
+                          conditions:
+                            - condition: state
+                              entity: input_boolean.sem_ev_wallbox_single
+                              state: 'on'
+                            - condition: state
+                              entity: input_boolean.sem_ev_wallbox_multi
+                              state: 'on'
+                      card:
+                        type: custom:vertical-stack-in-card
+                        cards:
+                          - type: heading
+                            icon: mdi:ev-plug-type2
+                            heading: Laddbox 1
+                            heading_style: subtitle
+                          - type: entities
+                            entities:
+                              - entity: input_select.sem_ev_charger_1
+                                name: Välj laddbox
+                              - entity: input_text.sem_ev_charger_1_status_sensor
+                                name: Laddbox
+                              - entity: input_text.sem_ev_charger_1_connected_status
+                                name: Inte ansluten
+                              - entity: input_text.sem_ev_charger_1_connected_state
+                                name: Ansluten, men laddar ej
+                              - entity: input_text.sem_ev_charger_1_start
+                                name: Start-enhet
+                                icon: mdi:play
+                              - entity: input_text.sem_ev_charger_1_stop
+                                name: Stopp-enhet
+                                icon: mdi:stop
+                          - type: conditional
+                            conditions:
+                              - condition: state
+                                entity: input_select.sem_ev_charger_1
+                                state: Annan laddbox
+                            card:
+                              type: markdown
+                              content: >-
+                                ℹ️ **Information - Annan laddbox**
+
+
+                                I **laddbox** anger du sensorn som visar
+                                laddboxens aktuella status (t.ex. om den laddar
+                                eller är låst).
+
+
+                                I **inte ansluten** fyller du i vad laddboxen
+                                visar när laddkabeln <u>inte är</u> inkopplad i
+                                bilen. 
+
+
+                                I **ansluten, men laddar ej** anger du vad
+                                laddboxen visar när laddkabeln <u>är
+                                inkopplad</u> i bilen men laddar ej. 
+
+
+                                Ange enheten som startar laddningen i
+                                **start-enhet** och slutligen den enheten som
+                                stoppar laddningen i **stopp-enhet**.
+                          - type: conditional
+                            conditions:
+                              - condition: state
+                                entity: input_select.sem_ev_charger_1
+                                state: Pulsar Max
+                            card:
+                              type: markdown
+                              content: >-
+                                ℹ️ **Information - Pulsar Max**
+
+
+                                I **laddbox** anger du sensorn som visar
+                                laddboxens aktuella status (t.ex. om den laddar
+                                eller är låst).
+
+
+                                I **inte ansluten** fyller du i vad laddboxen
+                                visar när laddkabeln <u>inte är</u> inkopplad i
+                                bilen. 
+
+
+                                I **ansluten, men laddar ej** anger du vad
+                                laddboxen visar när laddkabeln <u>är
+                                inkopplad</u> i bilen men laddar ej. 
+
+
+                                  {% set wallbox_locks = integration_entities('wallbox')
+                                      | select('match', '^lock\.')
+                                      | list %}
+
+                                  {% if wallbox_locks | count == 1 %}
+
+                                  Systemet har hittat följande start-enhet:
+                                **`{{ wallbox_locks[0] }}`**
+
+
+                                >  ⚠️ **Viktigt:** För att detta ska fungera
+                                måste **automatisk låsning** vara aktiverad i
+                                Wallbox-appen.
+                                  {% elif wallbox_locks | count > 1 %}
+
+                                  Systemet hittade flera möjliga start-enheter:
+                                {% for entity in wallbox_locks %}
+
+                                - `{{ entity }}`
+
+                                {% endfor %}
+
+                                  Välj den start-enhet som tillhör den laddbox du vill styra.
+
+                                  ⚠️ **Viktigt:** För att detta ska fungera måste **automatisk låsning** vara aktiverad i Wallbox-appen.
+                                  {% else %}
+
+                                  Systmet kunde inte hitta någon start-enhet från Wallbox-integrationen.
+
+                                  Kontrollera att din Wallbox är korrekt integrerad i Home Assistant.
+
+                                ⚠️ **Viktigt:** Automatisk låsning måste även
+                                vara aktiverad i Wallbox-appen för att SEM ska
+                                kunna använda lock-enheten för att styra
+                                laddningen.
+                                  {% endif %}
+
+                                  
+                                {% set wallbox_switches =
+                                integration_entities('wallbox')
+                                    | select('match', '^switch\.')
+                                    | select('search', 'pausa_ateruppta')
+                                    | list %}
+
+                                {% if wallbox_switches | count == 1 %}
+
+
+                                Systemet har hittat följande stopp-enhet:
+
+                                `{{ wallbox_switches[0] }}`
+
+
+                                {% elif wallbox_switches | count > 1 %}
+
+
+                                Systemet hittade flera möjliga stopp-enheter:
+
+                                {% for entity in wallbox_switches %}
+
+                                - `{{ entity }}`
+
+                                {% endfor %}
+
+
+                                Välj den stopp-enhet som tillhör den laddbox du
+                                vill styra.
+
+
+                                {% else %}
+
+
+                                Systemet kunde inte hitta någon stopp-enhet från
+                                Wallbox-integrationen.
+
+
+                                Kontrollera att din Wallbox är korrekt
+                                integrerad i Home Assistant.
+
+
+                                {% endif %}
+                          - type: conditional
+                            conditions:
+                              - condition: state
+                                entity: input_select.sem_ev_charger_1
+                                state: Easee
+                            card:
+                              type: markdown
+                              content: >-
+                                {% set charger_switches = namespace(entities=[])
+                                %}
+
+
+                                {% for entity in integration_entities('easee')
+                                    | select('match', '^switch\.') %}
+
+                                  {% if 'laddboxen_aktiverad' in entity
+                                      or 'charger_enabled' in entity
+                                      or 'charger_activated' in entity %}
+                                    {% set charger_switches.entities =
+                                        charger_switches.entities + [entity] %}
+                                  {% endif %}
+
+                                {% endfor %}
+
+
+                                ### 🔌 Konfigurera Easee-laddbox
+
+
+                                För att den smarta laddningen ska fungera
+                                behöver du använda **samma laddbox** som både
+                                **start-enhet** och **stopp-enhet**.
+
+
+                                Välj den laddbox du vill styra från listan över
+                                hittade Easee-switchar:
+
+
+                                {% for entity in charger_switches.entities %}
+
+                                - `{{ entity }}`
+
+                                {% endfor %}
+
+
+                                > ⚠️ **Viktigt:** Switchens läge måste vara
+                                **avaktiverat (OFF)** när den smarta laddningen
+                                ska styra laddboxen.  
+
+                                > Om switchen är aktiverad (ON) kommer
+                                laddningen att starta direkt när laddkabeln
+                                ansluts, vilket gör att den smarta laddningen
+                                inte kan styra när laddningen ska börja.
+
+
+                                **Start-enhet:** välj switchen för den laddbox
+                                du vill styra.  
+
+                                **Stopp-enhet:** välj samma switch.
+                    - type: conditional
+                      conditions:
+                        - condition: state
+                          entity: input_boolean.sem_ev_wallbox_multi
+                          state: 'on'
+                      card:
+                        type: custom:vertical-stack-in-card
+                        cards:
+                          - type: heading
+                            icon: mdi:ev-plug-type2
+                            heading: Laddbox 2
+                            heading_style: subtitle
+                          - type: entities
+                            entities:
+                              - entity: input_select.sem_ev_charger_2
+                                name: Välj laddbox
+                              - entity: input_text.sem_ev_charger_2_status_sensor
+                                name: Laddbox
+                              - entity: input_text.sem_ev_charger_2_connected_status
+                                name: Inte ansluten
+                              - entity: input_text.sem_ev_charger_2_connected_state
+                                name: Ansluten, men laddar ej
+                              - entity: input_text.sem_ev_charger_2_start
+                                name: Start-enhet
+                                icon: mdi:play
+                              - entity: input_text.sem_ev_charger_2_stop
+                                name: Stopp-enhet
+                                icon: mdi:stop
+                          - type: conditional
+                            conditions:
+                              - condition: state
+                                entity: input_select.sem_ev_charger_2
+                                state: Annan laddbox
+                            card:
+                              type: markdown
+                              content: >-
+                                ℹ️ **Information - Annan laddbox**
+
+
+                                I **laddbox** anger du sensorn som visar
+                                laddboxens aktuella status (t.ex. om den laddar
+                                eller är låst).
+
+
+                                I **inte ansluten** fyller du i vad laddboxen
+                                visar när laddkabeln <u>inte är</u> inkopplad i
+                                bilen. 
+
+
+                                I **ansluten, men laddar ej** anger du vad
+                                laddboxen visar när laddkabeln <u>är
+                                inkopplad</u> i bilen men laddar ej. 
+
+
+                                Ange enheten som startar laddningen i
+                                **start-enhet** och slutligen den enheten som
+                                stoppar laddningen i **stopp-enhet**.
+                          - type: conditional
+                            conditions:
+                              - condition: state
+                                entity: input_select.sem_ev_charger_2
+                                state: Pulsar Max
+                            card:
+                              type: markdown
+                              content: >-
+                                ℹ️ **Information - Pulsar max**
+
+
+                                I **laddbox** anger du sensorn som visar
+                                laddboxens aktuella status (t.ex. om den laddar
+                                eller är låst).
+
+
+                                I **inte ansluten** fyller du i vad laddboxen
+                                visar när laddkabeln <u>inte är</u> inkopplad i
+                                bilen. 
+
+
+                                I **ansluten, men laddar ej** anger du vad
+                                laddboxen visar när laddkabeln <u>är
+                                inkopplad</u> i bilen men laddar ej. 
+
+
+                                  {% set wallbox_locks = integration_entities('wallbox')
+                                      | select('match', '^lock\.')
+                                      | list %}
+
+                                  {% if wallbox_locks | count == 1 %}
+
+                                  Systemet har hittat följande start-enhet:
+                                **`{{ wallbox_locks[0] }}`**
+
+                                  ⚠️ **Viktigt:** För att detta ska fungera måste **automatisk låsning** vara aktiverad i Wallbox-appen.
+                                  {% elif wallbox_locks | count > 1 %}
+
+                                  Systemet hittade flera möjliga start-enheter:
+                                {% for entity in wallbox_locks %}
+
+                                - `{{ entity }}`
+
+                                {% endfor %}
+
+                                  Välj den start-enhet som tillhör den laddbox du vill styra.
+
+                                > ⚠️ **Viktigt:** För att detta ska fungera
+                                måste **automatisk låsning** vara aktiverad i
+                                Wallbox-appen.
+                                  {% else %}
+
+                                  Systmet kunde inte hitta någon start-enhet från Wallbox-integrationen.
+
+                                  Kontrollera att din Wallbox är korrekt integrerad i Home Assistant.
+
+                                > ⚠️ **Viktigt:** Automatisk låsning måste även
+                                vara aktiverad i Wallbox-appen för att SEM ska
+                                kunna använda lock-enheten för att styra
+                                laddningen.
+                                  {% endif %}
+
+                                  
+                                {% set wallbox_switches =
+                                integration_entities('wallbox')
+                                    | select('match', '^switch\.')
+                                    | select('search', 'pausa_ateruppta')
+                                    | list %}
+
+                                {% if wallbox_switches | count == 1 %}
+
+
+                                Systemet har hittat följande stopp-enhet:
+
+                                `{{ wallbox_switches[0] }}`
+
+
+                                {% elif wallbox_switches | count > 1 %}
+
+
+                                Systemet hittade flera möjliga stopp-enheter:
+
+                                {% for entity in wallbox_switches %}
+
+                                - `{{ entity }}`
+
+                                {% endfor %}
+
+
+                                Välj den stopp-enhet som tillhör den laddbox du
+                                vill styra.
+
+
+                                {% else %}
+
+
+                                Systemet kunde inte hitta någon stopp-enhet från
+                                Wallbox-integrationen.
+
+
+                                Kontrollera att din Wallbox är korrekt
+                                integrerad i Home Assistant.
+
+
+                                {% endif %}
+                          - type: conditional
+                            conditions:
+                              - condition: state
+                                entity: input_select.sem_ev_charger_2
+                                state: Easee
+                            card:
+                              type: markdown
+                              content: >-
+                                {% set charger_switches = namespace(entities=[])
+                                %}
+
+
+                                {% for entity in integration_entities('easee')
+                                    | select('match', '^switch\.') %}
+
+                                  {% if 'laddboxen_aktiverad' in entity
+                                      or 'charger_enabled' in entity
+                                      or 'charger_activated' in entity %}
+                                    {% set charger_switches.entities =
+                                        charger_switches.entities + [entity] %}
+                                  {% endif %}
+
+                                {% endfor %}
+
+
+                                ### 🔌 Konfigurera Easee-laddbox
+
+
+                                För att den smarta laddningen ska fungera
+                                behöver du använda **samma laddbox** som både
+                                **start-enhet** och **stopp-enhet**.
+
+
+                                Välj den laddbox du vill styra från listan över
+                                hittade Easee-switchar:
+
+
+                                {% for entity in charger_switches.entities %}
+
+                                - `{{ entity }}`
+
+                                {% endfor %}
+
+
+                                > ⚠️ **Viktigt:** Switchens läge måste vara
+                                **avaktiverat (OFF)** när den smarta laddningen
+                                ska styra laddboxen.  
+
+                                > Om switchen är aktiverad (ON) kommer
+                                laddningen att starta direkt när laddkabeln
+                                ansluts, vilket gör att den smarta laddningen
+                                inte kan styra när laddningen ska börja.
+
+
+                                **Start-enhet:** välj switchen för den laddbox
+                                du vill styra.  
+
+                                **Stopp-enhet:** välj samma switch.
+          - type: custom:vertical-stack-in-card
+            cards:
               - square: false
                 type: grid
                 cards:
@@ -2368,20 +2826,23 @@ sections:
 
                   Detta gör du genom att köra om hela konfigurationen. Ändringar
                   startar **INTE** om systemets inlärningsprocess på sju dagar. 
-              - type: tile
-                entity: input_boolean.sem_step_5
-                name: Avsluta konfigurationen
-                icon: mdi:arrow-right
-                color: disabled
-                hide_state: true
-                vertical: true
-                tap_action:
-                  action: navigate
-                  navigation_path: /lovelace/smart-energy-system
-                icon_tap_action:
-                  action: navigate
-                  navigation_path: /lovelace/smart-energy-system
-                features_position: bottom
+          - type: tile
+            entity: input_boolean.sem_step_5
+            name: Avsluta konfigurationen
+            icon: mdi:arrow-right
+            color: disabled
+            hide_state: true
+            vertical: true
+            tap_action:
+              action: navigate
+              navigation_path: /lovelace/smart-energy-system
+            icon_tap_action:
+              action: navigate
+              navigation_path: /lovelace/smart-energy-system
+            features_position: bottom
+            grid_options:
+              columns: 12
+              rows: 2
   - type: grid
     cards:
       - type: custom:bubble-card
@@ -2929,6 +3390,9 @@ sections:
               aktuella förutsättningar. Det innebär att beslut kan förändras
               över tid när förutsättningarna ändras. Ett beslut som är optimalt
               just nu behöver inte vara det bästa alternativet längre fram.
+          - type: custom:bubble-card
+            card_type: separator
+            rows: '0.01'
           - type: markdown
             content: >
               {% set sensor_1 = states('sensor.sem_battery_use_interval_1') %}
@@ -2986,9 +3450,6 @@ sections:
                 🔋 **Prioterad batteridrift: Ingen framtida batterianvändning planerad.**
 
               {% endif %}
-          - type: custom:bubble-card
-            card_type: separator
-            rows: '0.05'
           - type: custom:vertical-stack-in-card
             cards:
               - type: custom:vertical-stack-in-card
@@ -3171,6 +3632,14 @@ sections:
 
                       👤 Beslut av användaren
 
+
+                      {% elif override == 'ladda fullt' %}
+
+                      Laddningsbeslut: 🟢 Ladda batteriet fullt
+
+
+                      👤 Beslut av användaren
+
                       {% else %}
 
                       ⚪ Laddningsbeslut: Okänt
@@ -3264,6 +3733,10 @@ sections:
                         
                         👤 Beslut av användaren
 
+                      {% elif override == 'ladda fullt' %}
+                        Laddningsbeslut: 🟢 Ladda batteriet fullt
+
+                        👤 Beslut av användaren
                       {% else %}
 
                         **Laddningsbeslut: ⚪ Okänt**
@@ -3385,49 +3858,68 @@ sections:
 
                               {% set sensor = 'sensor.sem_battery_charge_energy_1a_2' %}
 
-                              {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
-                              {% set peak = state_attr(sensor, 'peak') | float(0) %}
-                              {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
-
                               {% set battery_capacity =
                                 state_attr(sensor, 'battery_capacity') | float(0) %}
 
                               {% set usable_capacity =
                                 state_attr(sensor, 'usable_capacity') | float(0) %}
 
-                              {% set solar_surplus =
-                                state_attr(sensor, 'estimated_remaining_solar_surplus') | float(0) %}
-
-                              {% set pre_ok =
-                                state_attr(sensor, 'pre_peak_profit') is true %}
-
-                              {% set peak_ok =
-                                state_attr(sensor, 'peak_profit') is true %}
-
-                              {% set post_ok =
-                                state_attr(sensor, 'post_peak_profit') is true %}
-
-                              {% set total_kwh =
-                                (pre_peak if pre_ok else 0) +
-                                (peak if peak_ok else 0) +
-                                (post_peak if post_ok else 0)
-                              %}
-
-                              {% set capped_total =
-                                [total_kwh, usable_capacity] | min %}
-
-                              {% set after_battery =
-                                [capped_total - battery_capacity, 0] | max %}
-
-                              {% set final_need =
-                                [after_battery - solar_surplus, 0] | max %}
+                              {% set override = states('input_select.sem_battery_charge_override_1a_2') %}
 
 
-                              ➕ Beräknat energi-/laddningbehov: {{ capped_total | round(2) }} kWh  
-                              ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
-                              ➖ Förväntat solöverskott: {{ solar_surplus | round(2) }} kWh  
-                              🟰 Planerad laddning: {{ final_need | round(2) }} kWh
+                              {% if override == 'Ladda fullt' %}
 
+                                {% set charge_needed =
+                                  [usable_capacity - battery_capacity, 0] | max %}
+
+                                🔋 Batteriets maxkapacitet: {{ usable_capacity | round(2) }} kWh  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+
+                              {% else %}
+
+                                {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
+                                {% set peak = state_attr(sensor, 'peak') | float(0) %}
+                                {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
+
+                                {% set extra =
+                                  state_attr(sensor, 'extra') | float(0) %}
+
+                                {% set solar_surplus =
+                                  state_attr(sensor, 'estimated_remaining_solar_surplus') | float(0) %}
+
+                                {% set pre_ok =
+                                  state_attr(sensor, 'pre_peak_profit') is true %}
+
+                                {% set peak_ok =
+                                  state_attr(sensor, 'peak_profit') is true %}
+
+                                {% set post_ok =
+                                  state_attr(sensor, 'post_peak_profit') is true %}
+
+                                {% set total_kwh =
+                                  (pre_peak if pre_ok else 0) +
+                                  (peak if peak_ok else 0) +
+                                  (post_peak if post_ok else 0) +
+                                  extra
+                                %}
+
+                                {% set capped_total =
+                                  [total_kwh, usable_capacity] | min %}
+
+                                {% set after_battery =
+                                  [capped_total - battery_capacity, 0] | max %}
+
+                                {% set final_need =
+                                  [after_battery - solar_surplus, 0] | max %}
+
+
+                                ➕ Beräknat energi-/laddningsbehov: {{ capped_total | round(2) }} kWh (Tillägg: {{ extra | round(2) }} kWh)  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                ➖ Förväntat solöverskott: {{ solar_surplus | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ final_need | round(2) }} kWh
+
+                              {% endif %}
 
 
                             {#
@@ -3439,42 +3931,62 @@ sections:
 
                               {% set sensor = 'sensor.sem_battery_charge_energy_2_1b' %}
 
-                              {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
-                              {% set peak = state_attr(sensor, 'peak') | float(0) %}
-                              {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
-
                               {% set usable_capacity =
                                 state_attr(sensor, 'usable_capacity') | float(0) %}
 
                               {% set battery_capacity =
                                 state_attr(sensor, 'battery_capacity') | float(0) %}
 
-                              {% set pre_ok =
-                                state_attr(sensor, 'pre_peak_profit') is true %}
-
-                              {% set peak_ok =
-                                state_attr(sensor, 'peak_profit') is true %}
-
-                              {% set post_ok =
-                                state_attr(sensor, 'post_peak_profit') is true %}
-
-                              {% set total_kwh =
-                                (pre_peak if pre_ok else 0) +
-                                (peak if peak_ok else 0) +
-                                (post_peak if post_ok else 0)
-                              %}
-
-                              {% set capped_total =
-                                [total_kwh, usable_capacity] | min %}
-
-                              {% set charge_needed =
-                                [capped_total - battery_capacity, 0] | max %}
+                              {% set override =
+                                states('input_select.sem_battery_charge_override_2_1b') %}
 
 
-                              ➕ Beräknat energi-/laddningsbehov: {{ capped_total | round(2) }} kWh  
-                              ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh 
-                              🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+                              {% if override == 'Ladda fullt' %}
 
+                                {% set charge_needed =
+                                  [usable_capacity - battery_capacity, 0] | max %}
+
+                                🔋 Batteriets kapacitet: {{ usable_capacity | round(2) }} kWh  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+
+                              {% else %}
+
+                                {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
+                                {% set peak = state_attr(sensor, 'peak') | float(0) %}
+                                {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
+
+                                {% set extra =
+                                  state_attr(sensor, 'extra') | float(0) %}
+
+                                {% set pre_ok =
+                                  state_attr(sensor, 'pre_peak_profit') is true %}
+
+                                {% set peak_ok =
+                                  state_attr(sensor, 'peak_profit') is true %}
+
+                                {% set post_ok =
+                                  state_attr(sensor, 'post_peak_profit') is true %}
+
+                                {% set total_kwh =
+                                  (pre_peak if pre_ok else 0) +
+                                  (peak if peak_ok else 0) +
+                                  (post_peak if post_ok else 0) +
+                                  extra
+                                %}
+
+                                {% set capped_total =
+                                  [total_kwh, usable_capacity] | min %}
+
+                                {% set charge_needed =
+                                  [capped_total - battery_capacity, 0] | max %}
+
+
+                                ➕ Beräknat energi-/laddningsbehov: {{ capped_total | round(2) }} kWh (Tillägg: {{ extra | round(2) }} kWh)  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+
+                              {% endif %}
 
                             {% endif %}
                         - type: heading
@@ -3489,7 +4001,8 @@ sections:
                             beslut kan till exempel vara användbart vid
                             övergången mellan årstider, när systemets
                             automatiska inställningar inte längre ger önskat
-                            resultat.
+                            resultat. Du kan öka laddningsbehovet genom att ange
+                            ett **tillägg.**
                         - type: tile
                           entity: input_select.sem_battery_charge_override_2_1b
                           name: Laddningsbeslut
@@ -3503,6 +4016,16 @@ sections:
                             action: none
                           features:
                             - type: select-options
+                          features_position: inline
+                        - type: tile
+                          entity: input_number.sem_extra_2
+                          name: Tillägg
+                          icon: mdi:battery-arrow-up
+                          hide_state: true
+                          vertical: false
+                          features:
+                            - style: buttons
+                              type: numeric-input
                           features_position: inline
                   - type: conditional
                     conditions:
@@ -3605,49 +4128,68 @@ sections:
 
                               {% set sensor = 'sensor.sem_battery_charge_energy_1a_2' %}
 
-                              {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
-                              {% set peak = state_attr(sensor, 'peak') | float(0) %}
-                              {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
-
                               {% set battery_capacity =
                                 state_attr(sensor, 'battery_capacity') | float(0) %}
 
                               {% set usable_capacity =
                                 state_attr(sensor, 'usable_capacity') | float(0) %}
 
-                              {% set solar_surplus =
-                                state_attr(sensor, 'estimated_remaining_solar_surplus') | float(0) %}
-
-                              {% set pre_ok =
-                                state_attr(sensor, 'pre_peak_profit') is true %}
-
-                              {% set peak_ok =
-                                state_attr(sensor, 'peak_profit') is true %}
-
-                              {% set post_ok =
-                                state_attr(sensor, 'post_peak_profit') is true %}
-
-                              {% set total_kwh =
-                                (pre_peak if pre_ok else 0) +
-                                (peak if peak_ok else 0) +
-                                (post_peak if post_ok else 0)
-                              %}
-
-                              {% set capped_total =
-                                [total_kwh, usable_capacity] | min %}
-
-                              {% set after_battery =
-                                [capped_total - battery_capacity, 0] | max %}
-
-                              {% set final_need =
-                                [after_battery - solar_surplus, 0] | max %}
+                              {% set override = states('input_select.sem_battery_charge_override_1a_2') %}
 
 
-                              ➕ Beräknat energi-/laddningbehov: {{ capped_total | round(2) }} kWh  
-                              ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
-                              ➖ Förväntat solöverskott: {{ solar_surplus | round(2) }} kWh  
-                              🟰 Planerad laddning: {{ final_need | round(2) }} kWh
+                              {% if override == 'Ladda fullt' %}
 
+                                {% set charge_needed =
+                                  [usable_capacity - battery_capacity, 0] | max %}
+
+                                🔋 Batteriets maxkapacitet: {{ usable_capacity | round(2) }} kWh  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+
+                              {% else %}
+
+                                {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
+                                {% set peak = state_attr(sensor, 'peak') | float(0) %}
+                                {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
+
+                                {% set extra =
+                                  state_attr(sensor, 'extra') | float(0) %}
+
+                                {% set solar_surplus =
+                                  state_attr(sensor, 'estimated_remaining_solar_surplus') | float(0) %}
+
+                                {% set pre_ok =
+                                  state_attr(sensor, 'pre_peak_profit') is true %}
+
+                                {% set peak_ok =
+                                  state_attr(sensor, 'peak_profit') is true %}
+
+                                {% set post_ok =
+                                  state_attr(sensor, 'post_peak_profit') is true %}
+
+                                {% set total_kwh =
+                                  (pre_peak if pre_ok else 0) +
+                                  (peak if peak_ok else 0) +
+                                  (post_peak if post_ok else 0) +
+                                  extra
+                                %}
+
+                                {% set capped_total =
+                                  [total_kwh, usable_capacity] | min %}
+
+                                {% set after_battery =
+                                  [capped_total - battery_capacity, 0] | max %}
+
+                                {% set final_need =
+                                  [after_battery - solar_surplus, 0] | max %}
+
+
+                                ➕ Beräknat energi-/laddningsbehov: {{ capped_total | round(2) }} kWh (Tillägg: {{ extra | round(2) }} kWh)  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                ➖ Förväntat solöverskott: {{ solar_surplus | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ final_need | round(2) }} kWh
+
+                              {% endif %}
 
 
                             {#
@@ -3659,42 +4201,62 @@ sections:
 
                               {% set sensor = 'sensor.sem_battery_charge_energy_2_1b' %}
 
-                              {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
-                              {% set peak = state_attr(sensor, 'peak') | float(0) %}
-                              {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
-
                               {% set usable_capacity =
                                 state_attr(sensor, 'usable_capacity') | float(0) %}
 
                               {% set battery_capacity =
                                 state_attr(sensor, 'battery_capacity') | float(0) %}
 
-                              {% set pre_ok =
-                                state_attr(sensor, 'pre_peak_profit') is true %}
-
-                              {% set peak_ok =
-                                state_attr(sensor, 'peak_profit') is true %}
-
-                              {% set post_ok =
-                                state_attr(sensor, 'post_peak_profit') is true %}
-
-                              {% set total_kwh =
-                                (pre_peak if pre_ok else 0) +
-                                (peak if peak_ok else 0) +
-                                (post_peak if post_ok else 0)
-                              %}
-
-                              {% set capped_total =
-                                [total_kwh, usable_capacity] | min %}
-
-                              {% set charge_needed =
-                                [capped_total - battery_capacity, 0] | max %}
+                              {% set override =
+                                states('input_select.sem_battery_charge_override_2_1b') %}
 
 
-                              ➕ Beräknat energi-/laddningsbehov: {{ capped_total | round(2) }} kWh  
-                              ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh 
-                              🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+                              {% if override == 'Ladda fullt' %}
 
+                                {% set charge_needed =
+                                  [usable_capacity - battery_capacity, 0] | max %}
+
+                                🔋 Batteriets kapacitet: {{ usable_capacity | round(2) }} kWh  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+
+                              {% else %}
+
+                                {% set pre_peak = state_attr(sensor, 'pre_peak') | float(0) %}
+                                {% set peak = state_attr(sensor, 'peak') | float(0) %}
+                                {% set post_peak = state_attr(sensor, 'post_peak') | float(0) %}
+
+                                {% set extra =
+                                  state_attr(sensor, 'extra') | float(0) %}
+
+                                {% set pre_ok =
+                                  state_attr(sensor, 'pre_peak_profit') is true %}
+
+                                {% set peak_ok =
+                                  state_attr(sensor, 'peak_profit') is true %}
+
+                                {% set post_ok =
+                                  state_attr(sensor, 'post_peak_profit') is true %}
+
+                                {% set total_kwh =
+                                  (pre_peak if pre_ok else 0) +
+                                  (peak if peak_ok else 0) +
+                                  (post_peak if post_ok else 0) +
+                                  extra
+                                %}
+
+                                {% set capped_total =
+                                  [total_kwh, usable_capacity] | min %}
+
+                                {% set charge_needed =
+                                  [capped_total - battery_capacity, 0] | max %}
+
+
+                                ➕ Beräknat energi-/laddningsbehov: {{ capped_total | round(2) }} kWh (Tillägg: {{ extra | round(2) }} kWh)  
+                                ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
+                                🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
+
+                              {% endif %}
 
                             {% endif %}
                         - type: heading
@@ -3709,7 +4271,8 @@ sections:
                             beslut kan till exempel vara användbart vid
                             övergången mellan årstider, när systemets
                             automatiska inställningar inte längre ger önskat
-                            resultat.
+                            resultat. Du kan öka laddningsbehovet genom att ange
+                            ett **tillägg.**
                         - type: tile
                           entity: input_select.sem_battery_charge_override_1a_2
                           name: Laddningsbeslut
@@ -3722,6 +4285,16 @@ sections:
                             action: none
                           features:
                             - type: select-options
+                          features_position: inline
+                        - type: tile
+                          entity: input_number.sem_extra_1
+                          name: Tillägg
+                          icon: mdi:battery-arrow-up
+                          hide_state: true
+                          vertical: false
+                          features:
+                            - style: buttons
+                              type: numeric-input
                           features_position: inline
           - type: markdown
             content: >
@@ -4028,16 +4601,12 @@ sections:
                       heading_style: subtitle
                     - type: markdown
                       content: >
-                        Väljer du **Auto** följer systemet automatiskt sitt eget
-                        beslut om export av överskottsel. Om du gör ett manuellt
-                        val återställs **Auto** när den manuella exporttiden är
-                        slut.
-
-
-                        Ett manuellt beslut kan vara användbart om du vill
-                        **spara överskottselen i batteriet** i stället för att
-                        exportera den, eller om du vill **sälja mer
-                        överskottsel** än vad systemet har planerat.
+                        Väljer du **Auto** följer systemet automatiskt sitt
+                        beslut om export. Vid ett manuellt val återställs Auto
+                        när exportfönstret är slut. Manuella val kan användas
+                        för att spara överskottsel i batteriet eller exportera
+                        mer än systemet rekommenderar. Du kan även lägga till
+                        extra kWh, som återställs inför nästa exportfönster.
                     - type: tile
                       entity: input_select.sem_export_override_1
                       name: Exportbeslut
@@ -4049,6 +4618,20 @@ sections:
                         action: none
                       features:
                         - type: select-options
+                      features_position: inline
+                    - type: tile
+                      entity: input_number.sem_battery_extra_export_1
+                      name: Tillägg
+                      icon: mdi:battery-arrow-up
+                      hide_state: true
+                      vertical: false
+                      tap_action:
+                        action: none
+                      icon_tap_action:
+                        action: none
+                      features:
+                        - type: numeric-input
+                          style: buttons
                       features_position: inline
               - type: conditional
                 conditions:
@@ -4177,11 +4760,14 @@ sections:
                           {% set peak_price = state_attr(sensor_2, 'peak_price') | float(0) %}
                           {% set avg_price = state_attr(sensor_2, 'avg_price') | float(0) %}
                           {% set final_decision = state_attr(sensor_2, 'final_decision') | bool(false) %}
+                          {% set extra = states('input_number.sem_battery_extra_export_2') | float(0) %}
+
 
 
                           📈 Högst pris: {{ peak_price | round(3) }} SEK/kWh  
-                          💰 Exportmedelpris: {{ avg_price | round(3) }} SEK/kWh  
-                          ➕ Beräknad export: {{ export_energy | round(2) }} kWh  
+                          💰 Exportmedelpris: {{ avg_price | round(3) }} SEK/kWh 
+                          ➕ Tillägg: {{ extra | round(3) }} kWh 
+                          🟰 Planerad export: {{ export_energy  | round(2) }} kWh  
 
 
                         {% else %}
@@ -4194,17 +4780,13 @@ sections:
                       heading: Exportbeslut
                       heading_style: subtitle
                     - type: markdown
-                      content: >
-                        Väljer du **Auto** följer systemet automatiskt sitt eget
-                        beslut om export av överskottsel. Om du gör ett manuellt
-                        val återställs **Auto** när den manuella exporttiden är
-                        slut.
-
-
-                        Ett manuellt beslut kan vara användbart om du vill
-                        **spara överskottselen i batteriet** i stället för att
-                        exportera den, eller om du vill **sälja mer
-                        överskottsel** än vad systemet har planerat.
+                      content: >-
+                        Väljer du **Auto** följer systemet automatiskt sitt
+                        beslut om export. Vid ett manuellt val återställs Auto
+                        när exportfönstret är slut. Manuella val kan användas
+                        för att spara överskottsel i batteriet eller exportera
+                        mer än systemet rekommenderar. Du kan även lägga till
+                        extra kWh, som återställs inför nästa exportfönster.
                     - type: tile
                       entity: input_select.sem_export_override_2
                       name: Exportbeslut
@@ -4216,6 +4798,20 @@ sections:
                         action: none
                       features:
                         - type: select-options
+                      features_position: inline
+                    - type: tile
+                      entity: input_number.sem_battery_extra_export_2
+                      name: Tillägg
+                      icon: mdi:battery-arrow-up
+                      hide_state: true
+                      vertical: false
+                      tap_action:
+                        action: none
+                      icon_tap_action:
+                        action: none
+                      features:
+                        - type: numeric-input
+                          style: buttons
                       features_position: inline
           - type: markdown
             content: >
@@ -5032,8 +5628,11 @@ sections:
                   för att se den senaste releasen.
 
 
-                  Aktiverar du **automatisk uppdatering** kommer systemet att
-                  säkerställa att du alltid har den senaste versionen.
+                  Aktiverar du **automatisk uppdatering** ser systemet till att
+                  du alltid har den senaste versionen. När du aktiverar
+                  funktionen godkänner du att systemet automatiskt laddar ner
+                  nya versioner och startar om Home Assistant efter att
+                  uppdateringen har genomförts.
           - type: conditional
             conditions:
               - condition: state
@@ -5359,7 +5958,7 @@ sections:
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
-                icon: ''
+                icon: mdi:transmission-tower-import
                 heading_style: subtitle
                 heading: 'Ladda manuellt '
               - type: entities
@@ -5394,33 +5993,9 @@ sections:
                   hand. Välj laddningseffekt och tid för att sen aktivera
                   laddningen genom reglaget på **ladda nu**.
               - type: heading
-                icon: ''
+                icon: mdi:transmission-tower-export
+                heading: Exportera manuellt
                 heading_style: subtitle
-                heading: Extra kWh
-              - type: entities
-                entities:
-                  - entity: input_number.extra_1
-                    name: Tillfälle 1 (9-16)
-                    icon: mdi:battery-plus
-                    secondary_info: none
-                    tap_action:
-                      action: nothing
-                    icon_tap_action:
-                      action: nothing
-                  - entity: input_number.extra_2
-                    name: Tillfälle 2 (23-05)
-                    icon: mdi:battery-plus
-                    tap_action:
-                      action: nothing
-                    icon_tap_action:
-                      action: nothing
-              - type: markdown
-                content: >-
-                  **ℹ️Information**
-
-                  Under **extra kWh** kan du lägga till extra kWh på ett
-                  laddningstillfälle. Detta kan vara användbart om du vill ladda
-                  mer än vad systemet föreslår. 
       - type: custom:bubble-card
         card_type: pop-up
         hash: '#system_plan'
