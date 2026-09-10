@@ -11,6 +11,7 @@ input_select:
     options:
       - Auto
       - Ladda
+      - Ladda fullt
       - Ladda ej 
     initial: Auto
 
@@ -19,6 +20,7 @@ input_select:
     options:
       - Auto
       - Ladda
+      - Ladda fullt
       - Ladda ej 
     initial: Auto
       
@@ -49,7 +51,8 @@ input_select:
     options:
       - Auto
       - Exportera
-      - Exportera ej 
+      - Exportera allt 
+      - Exportera ej
     initial: Auto
 
   sem_export_override_2:
@@ -57,5 +60,20 @@ input_select:
     options:
       - Auto
       - Exportera
-      - Exportera ej 
+      - Exportera allt 
+      - Exportera ej
     initial: Auto
+
+  sem_ev_charger_1:
+    name: EV Charger 1
+    options: 
+      - Annan laddbox
+      - Pulsar Max
+#      - Easee
+
+  sem_ev_charger_2:
+    name: EV Charger 2
+    options: 
+      - Annan laddbox
+      - Pulsar Max
+#      - Easee
