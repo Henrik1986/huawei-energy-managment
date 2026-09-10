@@ -1778,19 +1778,19 @@ automation:
   - alias: AUTO Update packages from GitHub
     triggers:
       - trigger: template
-         value_template: >
-           {% set latest = states('sensor.sem_github_latest_release') %}
-           {% set installed = states('sensor.sem_version') %}
-           {{ latest not in ['unknown', 'unavailable', 'none', ''] and
-             installed not in ['unknown', 'unavailable', 'none', ''] and
-             latest != installed }}
-    conditions: 
-      condition: state
-      entity_id: input_boolean.sem_auto_update
-      state: 'on'
+        value_template: >
+          {% set latest = states('sensor.sem_github_latest_release') %}
+          {% set installed = states('sensor.sem_version') %}
+          {{ latest not in ['unknown', 'unavailable', 'none', ''] and
+            installed not in ['unknown', 'unavailable', 'none', ''] and
+            latest != installed }}
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_auto_update
+        state: 'on'
     actions:
       - action: shell_command.update_packages_from_github
       - delay: "00:02:00"
-       - action: input_button.press
-         target:
-           entity_id: input_button.sem_restart_ha
+      - action: input_button.press
+        target:
+          entity_id: input_button.sem_restart_ha
