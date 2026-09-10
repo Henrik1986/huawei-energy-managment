@@ -198,19 +198,35 @@ input_number:
     step: 0.01
     mode: box
   
-  extra_1:
-    name: "Extra tillägg 1"
+  sem_extra_1:
+    name: "Extra laddningstillägg 1"
     min: 0
-    max: 10
-    step: 0.1
+    max: 100
+    step: 0.5
     mode: box
     unit_of_measurement: "kWh"
 
-  extra_2:
-    name: "Extra tillägg 2"
+  sem_extra_2:
+    name: "Extra laddningstillägg 2"
     min: 0
-    max: 10
-    step: 0.1
+    max: 100
+    step: 0.5
+    mode: box
+    unit_of_measurement: "kWh"
+
+  sem_battery_extra_export_1:
+    name: "Extra exporttillägg 1"
+    min: 0
+    max: 100
+    step: 0.5
+    mode: box
+    unit_of_measurement: "kWh"
+
+  sem_battery_extra_export_2:
+    name: "Extra exporttillägg 2"
+    min: 0
+    max: 100
+    step: 0.5
     mode: box
     unit_of_measurement: "kWh"
 
