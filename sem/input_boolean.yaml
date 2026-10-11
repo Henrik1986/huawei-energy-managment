@@ -119,3 +119,30 @@ input_boolean:
 
   sem_auto_update: 
     name: Automatisk uppdatering
+    
+  sem_battery_setup:
+    name: Battery setup
+    
+  sem_battery_charge_now:
+    name: Battery charge now
+    
+  sem_battery_smart:
+    name: Battery smart
+
+  sem_battery_mix:
+    name: Battery mix
+  
+  sem_battery_solar_more_info:
+    name: Battery solar more info
+
+  sem_battery_solar_smart:
+    name: Battery solar smart
+
+  sem_grid_setup:
+    name: Grid setup
+    
+  sem_house_more_info:
+    name: House more info
+    
+  sem_update_notification: 
+    name: New Update Notify
