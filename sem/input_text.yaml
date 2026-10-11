@@ -87,6 +87,11 @@ input_text:
     icon: mdi:power-plug-outline
     max: 100
 
+  sem_ev_charger_1_finished_state:
+    name: Laddbox 1 - slutförd laddning
+    icon: mdi:battery-charging-100
+    max: 100
+
   sem_ev_charger_2_status_sensor:
     name: Laddbox 2 - statussensor
     icon: mdi:ev-station
@@ -101,6 +106,26 @@ input_text:
     name: Laddbox 2 - ansluten men ej laddning
     icon: mdi:power-plug-outline
     max: 100
+
+  sem_ev_charger_2_finished_state:
+    name: Laddbox 2 - slutförd laddning
+    icon: mdi:battery-charging-100
+    max: 100
+
+  sem_ev_easee_id:
+    name: Easee laddbox ID 1
+    icon: mdi:identifier
+    max: 255
+
+  sem_ev_easee_id_2:
+    name: Easee laddbox ID 2
+    icon: mdi:identifier
+    max: 255
+
+  sem_ev_easee_confirmation:
+    name: Easee konfiguration
+    max: 255
+
 ########################################################
 
 
