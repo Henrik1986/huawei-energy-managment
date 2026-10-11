@@ -30,6 +30,15 @@ utility_meter:
     cycle: daily
     unique_id: sem_export
 
+##### COST #####
+# TOTAL GRID IMPORT COST DAILY
+  sem_grid_import_cost_daily:
+    source: sensor.sem_grid_import_cost_total
+    cycle: daily
+    unique_id: sem_grid_import_cost_daily
+
+
+
 ##### SAVINGS #####
 # TOTAL SAVINGS DAILY
   sem_savings_daily:
@@ -115,3 +124,27 @@ utility_meter:
     source: sensor.sem_solar_to_house_energy
     cycle: quarter-hourly
     unique_id: sem_solar_to_house_energy_quarter
+
+
+#############GRAFER#############
+
+  sem_battery_charge_energy_graph_daily:
+    source: sensor.sem_battery_charge_energy_graph
+    cycle: daily
+    unique_id: sem_battery_charge_energy_graph_daily
+
+  sem_battery_discharge_energy_graph_graph_daily:
+    source: sensor.sem_battery_discharge_energy_graph
+    cycle: daily
+    unique_id: sem_battery_discharge_energy_graph_graph_daily
+
+  sem_solar_exported_energy_daily:
+    source: sensor.sem_solar_exported_energy
+    cycle: daily
+    unique_id: sem_solar_exported_energy_daily
+
+  sem_battery_to_house_energy_daily:
+    source: sensor.sem_battery_to_house_energy
+    cycle: daily
+    unique_id: sem_battery_to_house_energy_daily
+    
