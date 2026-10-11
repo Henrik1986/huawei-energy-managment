@@ -25,3 +25,6 @@ input_button:
 
   sem_search_charge_interval:
     name: Search Charge Interval
+
+  sem_ev_easee_configure: 
+    name: Configure Easee Wallbox
