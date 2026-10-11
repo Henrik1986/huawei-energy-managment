@@ -1,16 +1,18 @@
 automation:
 
 ################################################################################
-  - alias: SEM - Reload NordPool at 14:30
+  - alias: SEM - Reload NordPool at 14:30 and at midnight
     mode: single
     triggers:
       - trigger: time
         at: "14:30:00"
-    conditions:
-      - condition: template
-        value_template: >
-          {% set entity = states('input_text.sem_nordpool_sensor_inofficial') %}
-          {{ entity not in ['unknown', 'unavailable', '', None] }}
+      - trigger: time
+        at: "00:00:00"
+#    conditions:
+#      - condition: template
+#        value_template: >
+#          {% set entity = states('input_text.sem_nordpool_sensor_inofficial') %}
+#          {{ entity not in ['unknown', 'unavailable', '', None] }}
     actions:
       - action: homeassistant.reload_config_entry
         target:
@@ -101,6 +103,10 @@ automation:
             {% else %}
               false
             {% endif %}
+        - trigger: template
+          value_template: >
+            {% set need = states('sensor.sem_battery_charge_energy_1a_2') %}
+            {{ is_number(need) and need | float <= 0 }}
     condition:
         - condition: state
           entity_id: input_boolean.sem_manual_charge
@@ -230,6 +236,10 @@ automation:
           {% else %}
             false
           {% endif %}
+      - trigger: template
+        value_template: >
+          {% set need = states('sensor.sem_battery_charge_energy_2_1b') %}
+          {{ is_number(need) and need | float <= 0 }}
     condition:
       - condition: state
         entity_id: input_boolean.sem_manual_charge
@@ -366,7 +376,7 @@ automation:
         data:
           device_id: "{{ states('input_text.sem_device_id') }}"
           periods: "00:00-23:59/1234567/+"
-      - delay: 00:01:00
+      - delay: 00:00:20
       - action: select.select_option
         target:
           entity_id: select.batteries_working_mode
@@ -413,6 +423,10 @@ automation:
     triggers:
         - trigger: time_pattern
           minutes: "/5"  
+        - trigger: template
+          value_template: >
+            {% set available = states('sensor.sem_available_export_energy_1') %}
+            {{ is_number(available) and available | float <= 0 }}
     condition:
         - condition: state
           entity_id: input_boolean.sem_manual_charge
@@ -444,11 +458,8 @@ automation:
                 state: "off"
               - condition: template
                 value_template: >
-                  {% set export_energy = states('sensor.sem_available_export_energy_1') | float(0) %}
                   {% set window = state_attr('sensor.sem_available_export_energy_1', 'export_window') %}
-                  {% set avg_price = state_attr('sensor.sem_available_export_energy_1', 'avg_price') | float(0) %}
-                  {% set required_export_price = state_attr('sensor.sem_available_export_energy_1', 'required_export_price') | float(0) %}
-                  {% set min_export_energy = 2.0 %}
+                  {% set final_decision = state_attr('sensor.sem_available_export_energy_1', 'final_decision') | bool(false) %}
 
                   {% if window %}
                     {% set parts = window.split(' - ') %}
@@ -457,16 +468,20 @@ automation:
                       {% set start = as_datetime(parts[0]) %}
                       {% set end = as_datetime(parts[1]) %}
 
-                      {{ export_energy >= min_export_energy
-                        and avg_price >= required_export_price
+                      {{
+                        final_decision
                         and now() >= start
-                        and now() <= end }}
+                        and now() <= end
+                      }}
                     {% else %}
-                        false
+                      false
                     {% endif %}
                   {% else %}
                     false
                   {% endif %}
+              - condition: template
+                value_template: >
+                  {{ states('sensor.sem_available_export_energy_1') | float(0) >= 1 }}
             sequence:
               - action: input_boolean.turn_on
                 target:
@@ -491,11 +506,8 @@ automation:
                 state: "off"
               - condition: template
                 value_template: >
-                  {% set export_energy = states('sensor.sem_available_export_energy_2') | float(0) %}
                   {% set window = state_attr('sensor.sem_available_export_energy_2', 'export_window') %}
-                  {% set avg_price = state_attr('sensor.sem_available_export_energy_2', 'avg_price') | float(0) %}
-                  {% set required_export_price = state_attr('sensor.sem_available_export_energy_2', 'required_export_price') | float(0) %}
-                  {% set min_export_energy = 0.5 %}
+                  {% set final_decision = state_attr('sensor.sem_available_export_energy_2', 'final_decision') | bool(false) %}
 
                   {% if window %}
                     {% set parts = window.split(' - ') %}
@@ -504,10 +516,11 @@ automation:
                       {% set start = as_datetime(parts[0]) %}
                       {% set end = as_datetime(parts[1]) %}
 
-                      {{ export_energy > min_export_energy
-                        and avg_price >= required_export_price
+                      {{
+                        final_decision
                         and now() >= start
-                        and now() <= end }}
+                        and now() <= end
+                      }}
                     {% else %}
                       false
                     {% endif %}
@@ -541,6 +554,9 @@ automation:
                   {% set window1 = state_attr('sensor.sem_available_export_energy_1', 'export_window') %}
                   {% set window2 = state_attr('sensor.sem_available_export_energy_2', 'export_window') %}
 
+                  {% set final_decision1 = state_attr('sensor.sem_available_export_energy_1', 'final_decision') | bool %}
+                  {% set final_decision2 = state_attr('sensor.sem_available_export_energy_2', 'final_decision') | bool %}
+
                   {% set active1 = false %}
                   {% set active2 = false %}
 
@@ -552,6 +568,7 @@ automation:
 
                       {% set active1 = (
                         states('sensor.sem_available_export_energy_1') | float(0) > 0
+                        and final_decision1
                         and now() >= start1
                         and now() <= end1
                       ) %}
@@ -566,11 +583,13 @@ automation:
 
                       {% set active2 = (
                         states('sensor.sem_available_export_energy_2') | float(0) > 0
+                        and final_decision2
                         and now() >= start2
                         and now() <= end2
                       ) %}
                     {% endif %}
                   {% endif %}
+
                   {{ not (active1 or active2) }}
             sequence:
               - action: number.set_value
@@ -1254,7 +1273,7 @@ automation:
   - alias: "SEM - Battery use between 12-00"
     triggers:
       - trigger: time_pattern
-        minutes: "/15" 
+        minutes: "/5" 
     condition:
       - condition: template
         value_template: >
@@ -1291,7 +1310,22 @@ automation:
                     {% set soc = states('sensor.batteries_state_of_capacity') | float(0) %}
                     {% set capacity = state_attr('sensor.sem_battery_charge_energy_1a_2', 'usable_capacity') | float(0) %}
                   {% set current_kwh = soc / 100 * capacity %}
-                    {{ now_ok and required > 0 and current_kwh + 0.5 <= required }}
+                    {{ now_ok and required > 0 and current_kwh + 0.25 <= required }}
+                  {% endif %}
+              - condition: template
+                value_template: >
+                  {% set raw = states('sensor.sem_battery_charge_window_cheapest_1a_active') %}
+
+                  {% if ' - ' not in raw %}
+                    true
+                  {% else %}
+                    {% set charge_end = as_datetime(raw.split(' - ')[1]) %}
+
+                    {% if charge_end.year == 1900 %}
+                      true
+                    {% else %}
+                      {{ now() >= charge_end }}
+                    {% endif %}
                   {% endif %}
               - condition: state
                 entity_id: input_boolean.sem_battery_save
@@ -1336,7 +1370,7 @@ automation:
   - alias: "SEM - Battery use between 00-12"
     triggers:
       - trigger: time_pattern
-        minutes: "/15" 
+        minutes: "/5" 
     condition:
       - condition: template
         value_template: >
@@ -1373,7 +1407,22 @@ automation:
                     {% set soc = states('sensor.batteries_state_of_capacity') | float(0) %}
                     {% set capacity = state_attr('sensor.sem_battery_charge_energy_2_1b', 'usable_capacity') | float(0) %}
                   {% set current_kwh = soc / 100 * capacity %}
-                    {{ now_ok and required > 0 and current_kwh + 0.5 <= required }}
+                    {{ now_ok and required > 0 and current_kwh + 0.25 <= required }}
+                  {% endif %}
+              - condition: template
+                value_template: >
+                  {% set raw = states('sensor.sem_battery_charge_window_cheapest_2_active') %}
+
+                  {% if ' - ' not in raw %}
+                    true
+                  {% else %}
+                    {% set charge_end = as_datetime(raw.split(' - ')[1]) %}
+
+                    {% if charge_end.year == 1900 %}
+                      true
+                    {% else %}
+                      {{ now() >= charge_end }}
+                    {% endif %}
                   {% endif %}
               - condition: state
                 entity_id: input_boolean.sem_battery_save
@@ -1496,6 +1545,109 @@ automation:
             {% set total_capacity = states('input_number.sem_battery_total_capacity_kwh') | float(14) %}
             {{ [(states('input_number.sem_battery_grid_kwh') | float + states('sensor.sem_battery_grid_delta') | float), total_capacity - (states('input_number.sem_battery_solar_kwh') | float)] | min | round(2) }}
 ################################################################################
+  - alias: SEM - Calibrate battery mix
+    mode: single
+    triggers:
+      - trigger: time_pattern
+        hours: "/1"
+        minutes: "0"
+        seconds: "30"
+
+    actions:
+
+      # --- SPARA AKTUELLA VÄRDEN FÖRE KALIBRERING ---
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_solar_calibration
+        data:
+          value: "{{ states('input_number.sem_battery_solar_kwh') | float(0) }}"
+
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_grid_calibration
+        data:
+          value: "{{ states('input_number.sem_battery_grid_kwh') | float(0) }}"
+
+      # --- SPARA AKTUELL BATTERIENERGI ---
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_calibration_actual
+        data:
+          value: >
+            {{ state_attr(
+                'sensor.sem_battery_charge_energy_1a_2',
+                'battery_capacity'
+              ) | float(0) }}
+
+      # --- SPARA DIFFERENSEN ---
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_calibration_difference
+        data:
+          value: >
+            {{
+              (
+                state_attr(
+                  'sensor.sem_battery_charge_energy_1a_2',
+                  'battery_capacity'
+                ) | float(0)
+                -
+                states('input_number.sem_battery_solar_kwh') | float(0)
+                -
+                states('input_number.sem_battery_grid_kwh') | float(0)
+              ) | round(2)
+            }}
+
+      # --- KALIBRERA ENDAST OM SKILLNADEN ÄR MINST 0,20 kWh ---
+      - condition: template
+        value_template: >
+          {{
+            (
+              state_attr(
+                'sensor.sem_battery_charge_energy_1a_2',
+                'battery_capacity'
+              ) | float(0)
+              -
+              states('input_number.sem_battery_solar_kwh') | float(0)
+              -
+              states('input_number.sem_battery_grid_kwh') | float(0)
+            ) | abs >= 0.20
+          }}
+
+      # --- JUSTERA SOLARANDELEN ---
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_solar_kwh
+        data:
+          value: >
+            {% set solar = states('input_number.sem_battery_solar_calibration') | float(0) %}
+            {% set grid = states('input_number.sem_battery_grid_calibration') | float(0) %}
+            {% set actual = states('input_number.sem_battery_calibration_actual') | float(0) %}
+            {% set total = solar + grid %}
+            {% if total > 0 %}
+              {{ (actual * solar / total) | round(2) }}
+            {% else %}
+              0
+            {% endif %}
+
+      # --- JUSTERA GRIDANDELEN ---
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_grid_kwh
+        data:
+          value: >
+            {% set solar = states('input_number.sem_battery_solar_calibration') | float(0) %}
+            {% set grid = states('input_number.sem_battery_grid_calibration') | float(0) %}
+            {% set actual = states('input_number.sem_battery_calibration_actual') | float(0) %}
+            {% set total = solar + grid %}
+            {% if total > 0 %}
+              {{ (actual * grid / total) | round(2) }}
+            {% else %}
+              0
+            {% endif %}
+################################################################################
+
+
   - alias: SEM - Store start values window 1a
     mode: single
     triggers:
@@ -1590,7 +1742,7 @@ automation:
             {% set times = states('sensor.sem_ev_charge_time').split(' - ') %}
             {{ times[1][11:19] }}
 
-################################################################################
+##############################MANUAL AND WALLBOX ##################################################
   - alias: SEM - Start wallbox
     mode: single
     triggers:
@@ -1625,6 +1777,20 @@ automation:
           {% else %}
             false
           {% endif %}
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Pulsar Max"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Pulsar Max"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Annan laddbox"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Annan laddbox"
     actions:
       - delay:
           seconds: 10
@@ -1683,7 +1849,7 @@ automation:
               entity_id: >
                 {{ states('input_text.sem_ev_charger_2_start') }}
 
-################################################################################
+
   - alias: SEM - Stop wallbox
     mode: single
     triggers:
@@ -1710,6 +1876,20 @@ automation:
           {% else %}
             false
           {% endif %}
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Pulsar Max"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Pulsar Max"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Annan laddbox"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Annan laddbox"
     actions:
       - action: >
           {% set entity = states('input_text.sem_ev_charger_1_stop') %}
@@ -1746,6 +1926,227 @@ automation:
             target:
               entity_id: >
                 {{ states('input_text.sem_ev_charger_2_stop') }}
+
+#############################EASEE###################################################
+  - alias: SEM - Start Easee wallbox
+    mode: single
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set start = window.split(' - ')[0] | as_datetime | as_local %}
+            {{ now() >= start and now() < start + timedelta(minutes=1) }}
+          {% else %}
+            false
+          {% endif %}
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_1_ready_to_charge
+        from: "off"
+        to: "on"
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_2_ready_to_charge
+        from: "off"
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_smart_charge_ev
+        state: "on"
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Easee"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Easee"
+    actions:
+      - delay:
+          seconds: 10
+      - condition: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set parts = window.split(' - ') %}
+            {% set start = parts[0] | as_datetime | as_local %}
+            {% set end = parts[1] | as_datetime | as_local %}
+            {{ start <= now() <= end }}
+          {% else %}
+            false
+          {% endif %}
+      # Easee Wallbox 1
+      - if:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Easee"
+          - condition: state
+            entity_id: binary_sensor.sem_ev_charger_1_ready_to_charge
+            state: "on"
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: >
+                {{ states('input_number.sem_ev_easee_max_current') | int }}
+              current_p2: >
+                {{ states('input_number.sem_ev_easee_max_current') | int }}
+              current_p3: >
+                {{ states('input_number.sem_ev_easee_max_current') | int }}
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id') | trim }}
+      # Easee Wallbox 2
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Easee"
+          - condition: state
+            entity_id: binary_sensor.sem_ev_charger_2_ready_to_charge
+            state: "on"
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: >
+                {{ states('input_number.sem_ev_easee_max_current') | int }}
+              current_p2: >
+                {{ states('input_number.sem_ev_easee_max_current') | int }}
+              current_p3: >
+                {{ states('input_number.sem_ev_easee_max_current') | int }}
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id_2') | trim }}
+
+
+  - alias: SEM - Stop Easee
+    mode: single
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set end = window.split(' - ')[1] | as_datetime | as_local %}
+            {{ now() >= end and now() < end + timedelta(minutes=1) }}
+          {% else %}
+            false
+          {% endif %}
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_smart_charge_ev
+        state: "on"
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Easee"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Easee"
+    actions:
+      # Easee Wallbox 1
+      - if:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Easee"
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: 0
+              current_p2: 0
+              current_p3: 0
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id') | trim }}
+      # Easee Wallbox 2
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Easee"
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: 0
+              current_p2: 0
+              current_p3: 0
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id_2') | trim }}
+
+
+  - alias: SEM - Konfigurera Easee
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_button.sem_ev_easee_configure
+    actions:
+      # Easee Wallbox 1
+      - if:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Easee"
+          - condition: template
+            value_template: >
+              {{ states('input_text.sem_ev_easee_id') | trim != '' }}
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: 0
+              current_p2: 0
+              current_p3: 0
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id') | trim }}
+      # Easee Wallbox 2
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Easee"
+          - condition: template
+            value_template: >
+              {{ states('input_text.sem_ev_easee_id_2') | trim != '' }}
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: 0
+              current_p2: 0
+              current_p3: 0
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id_2') | trim }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sem_ev_easee_confirmation
+        data:
+          value: "Easee-konfiguration genomförd"
+
+
 
 
 ################################################################################
@@ -1789,8 +2190,14 @@ automation:
         entity_id: input_boolean.sem_auto_update
         state: 'on'
     actions:
+       - action: input_boolean.turn_on
+         target:
+           entity_id: input_boolean.sem_update_notification
       - action: shell_command.update_packages_from_github
       - delay: "00:02:00"
       - action: input_button.press
         target:
           entity_id: input_button.sem_restart_ha
+
+
+
