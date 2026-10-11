@@ -97,3 +97,59 @@ sql:
     unit_of_measurement: "kWh/h"
 
 
+  - name: "SEM Solar Actual"
+    unique_id: sem_solar_actual
+    query: >
+      WITH hourly AS (
+        SELECT
+          start_ts,
+          state,
+          LAG(state) OVER (ORDER BY start_ts) AS previous_state
+        FROM statistics
+        INNER JOIN statistics_meta
+          ON statistics.metadata_id = statistics_meta.id
+        WHERE statistics_meta.statistic_id = 'sensor.sem_solar_production'
+          AND start_ts >= strftime(
+            '%s',
+            date('now', 'localtime', '-1 day')
+          )
+          AND start_ts < strftime(
+            '%s',
+            date('now', 'localtime', '+1 day')
+          )
+      ),
+      daily AS (
+        SELECT
+          start_ts,
+          ROUND(
+            MAX(state - previous_state, 0) * 1000,
+            0
+          ) AS actual_wh
+        FROM hourly
+        WHERE start_ts >= strftime(
+          '%s',
+          date('now', 'localtime')
+        )
+          AND previous_state IS NOT NULL
+          AND state IS NOT NULL
+      )
+      SELECT
+        COALESCE(
+          json_group_array(
+            json_object(
+              'date',
+              strftime(
+                '%Y-%m-%dT%H:%M:%S',
+                start_ts,
+                'unixepoch',
+                'localtime'
+              ),
+              'values',
+              actual_wh
+            )
+          ),
+          '[]'
+        ) AS sem
+      FROM daily;
+    column: "sem"
+
