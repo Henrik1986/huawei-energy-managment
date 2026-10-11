@@ -83,7 +83,71 @@ sensor:
     unique_id: sem_solar_export_earnings_total
     source: sensor.sem_solar_export_earnings
     round: 2
-    method: trapezoidal   
+    method: trapezoidal
+
+  # TOTAL GRID IMPORT COST SEK
+  - platform: integration
+    name: sem_grid_import_cost_total
+    unique_id: sem_grid_import_cost_total
+    source: sensor.sem_grid_import_cost
+    round: 2
+    method: trapezoidal
+
+  # TOTAL BATTERY CHARGED KWH
+  - platform: integration
+    source: sensor.sem_battery_charge_power
+    name: SEM Battery Charged Energy
+    unique_id: sem_battery_charged_energy
+    round: 3
+    method: left
+
+  # TOTAL BATTERY DISCHARGED KWH
+  - platform: integration
+    source: sensor.sem_battery_discharge_power
+    name: SEM Battery Discharged Energy
+    unique_id: sem_battery_discharged_energy
+    round: 3
+    method: left
+
+##########################GRAFER###################################
+  - platform: integration
+    source: sensor.sem_battery_charge_power_graph
+    name: sem_battery_charge_energy_graph
+    unique_id: sem_battery_charge_energy_graph
+    round: 3
+    method: left
+
+  - platform: integration
+    source: sensor.sem_battery_discharge_power_graph
+    name: sem_battery_discharge_energy_graph
+    unique_id: sem_battery_discharge_energy_graph
+    round: 3
+    method: left
+
+  - platform: integration
+    source: sensor.sem_solar_export_power
+    name: sem_solar_exported_energy
+    unique_id: sem_solar_exported_energy
+    round: 3
+    method: left
+
+#EXPORT KWH NEGATIVE VALUE
+  - platform: integration
+    source: sensor.sem_export_power_graph
+    name: sem_export_power_graph_energy
+    unique_id: sem_export_power_graph_energy
+    round: 3
+    method: left
+
+#BATTERY TO HOUSE KWH
+  - platform: integration
+    source: sensor.sem_battery_to_house_power
+    name: sem_battery_to_house_energy
+    unique_id: sem_battery_to_house_energy
+    round: 3
+    method: left
+
+####################################################################
 
   # LATEST GITHUB RELEASE
   - platform: rest
@@ -91,16 +155,3 @@ sensor:
     resource: https://raw.githubusercontent.com/Henrik1986/huawei-energy-managment/main/sem/github_version.json
     value_template: "{{ value_json.version }}"
     scan_interval: 21600 # var 6:e timme
-
-
-
-        
-
-          
-          
-          
-          
-          
-          
-          
-          
