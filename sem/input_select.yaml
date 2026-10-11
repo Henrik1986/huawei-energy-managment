@@ -67,13 +67,15 @@ input_select:
   sem_ev_charger_1:
     name: EV Charger 1
     options: 
-      - Annan laddbox
+      - Välj laddbox
       - Pulsar Max
-#      - Easee
+      - Easee
+      - Annan laddbox
 
   sem_ev_charger_2:
     name: EV Charger 2
     options: 
-      - Annan laddbox
+      - Välj laddbox
       - Pulsar Max
-#      - Easee
+      - Easee
+      - Annan laddbox
