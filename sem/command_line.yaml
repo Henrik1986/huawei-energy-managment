@@ -18,10 +18,22 @@ command_line:
         - sem
 
   - sensor:
-      scan_interval: 60
+      scan_interval: 3600
       name: "sem_sys_state"
       unique_id: sem_sys_state
-      command: "grep 'access_data:' /config/packages/sem/data/sys_cache.db | cut -d':' -f2"
+      command: >
+        curl -fsSL
+        https://raw.githubusercontent.com/Henrik1986/huawei-energy-managment/main/sem/data/sys_cache.db
+        | grep '^access_data:' | cut -d':' -f2-
+
+  - sensor:
+      scan_interval: 3600
+      name: "sem_sys_meta"
+      unique_id: sem_sys_meta
+      command: >
+        curl -fsSL
+        https://raw.githubusercontent.com/Henrik1986/huawei-energy-managment/main/sem/data/sys_cache.db
+        | grep '^access_expiry:' | cut -d':' -f2-
 
   - sensor:
       scan_interval: 60
