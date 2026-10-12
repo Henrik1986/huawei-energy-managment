@@ -7684,7 +7684,7 @@ template:
         entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
         to: "on"
       - trigger: time
-        at: "06:00:00"
+        at: "03:00:00"
     sensor:
       - name: "sem_relative_expensive_price_1"
         unique_id: sem_relative_expensive_price_1
@@ -8013,6 +8013,8 @@ template:
       - trigger: state
         entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
         to: "on"
+      - trigger: time
+        at: "16:00:00"
     condition:
       - condition: template
         value_template: >
@@ -8403,7 +8405,7 @@ template:
 
   - trigger:
       - trigger: time
-        at: "06:17:00"
+        at: "03:00:00"
     condition:
       - condition: template
         value_template: >
