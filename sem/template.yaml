@@ -2754,8 +2754,12 @@ template:
         unique_id: sem_available_export_energy_1
         unit_of_measurement: "kWh"
         state: >
+      # CALCULATE SURPLUS (EXPORT) ENERGY MORGON
+      - name: sem_available_export_energy_1
+        unique_id: sem_available_export_energy_1
+        unit_of_measurement: "kWh"
+        state: >
           {% set override = states('input_select.sem_export_override_1') %}
-
           {% set energy_available_after_house_need = state_attr('sensor.sem_available_export_energy_1', 'energy_available_after_house_need') | float(0) %}
           {% set grid_energy_raw = state_attr('sensor.sem_available_export_energy_1', 'grid_energy_during_battery_wait') | float(0) %}
           {% set grid_wait_cost = state_attr('sensor.sem_available_export_energy_1', 'grid_wait_cost') | float(0) %}
@@ -2763,47 +2767,34 @@ template:
           {% set battery_kwh = state_attr('sensor.sem_available_export_energy_1', 'battery_kwh') | float(0) %}
           {% set extra = states('input_number.sem_battery_extra_export_1') | float(0) %}
           {% set safety_margin = state_attr('sensor.sem_available_export_energy_1', 'safety_margin') | float(0) %}
-
           {% if override == 'Exportera allt' %}
-
-            {{ battery_kwh | round(2) }}
-
+            {{ [battery_kwh, 0] | max | round(2) }}
           {% elif override == 'Exportera ej' %}
-
             0
-
           {% else %}
-
             {% set export_price = state_attr('sensor.sem_export_window_1', 'avg_price') | float(0) %}
             {% set export_addon = states('input_number.sem_export_addon') | float(0) %}
             {% set next_charge_price = state_attr('sensor.sem_battery_charge_energy_1a_2', 'avg_window') | float(0) %}
             {% set grid_fees = states('input_number.sem_grid_fees') | float(0) %}
             {% set battery_efficiency = 0.951 %}
-
             {% set base_raw_export = energy_available_after_house_need + future_solar_surplus_today + extra - safety_margin %}
-            {% set base_export = [base_raw_export, 0] | max %}
+            {% set base_export = [[base_raw_export, 0] | max, battery_kwh] | min %}
             {% set wait_raw_export = energy_available_after_house_need + grid_energy_raw + future_solar_surplus_today + extra - safety_margin %}
-            {% set wait_export = [wait_raw_export, 0] | max %}
-
+            {% set wait_export = [[wait_raw_export, 0] | max, battery_kwh] | min %}
             {% set base_revenue = base_export * (export_price + export_addon) %}
             {% set base_recharge_cost = (base_export / battery_efficiency) * (next_charge_price + grid_fees) %}
             {% set base_profit = (base_revenue - base_recharge_cost) if base_revenue > 0 else 0 %}
-
             {% set wait_revenue = wait_export * (export_price + export_addon) %}
             {% set wait_recharge_cost = (wait_export / battery_efficiency) * (next_charge_price + grid_fees) %}
             {% set wait_profit = (wait_revenue - wait_recharge_cost) if wait_revenue > 0 else 0 %}
-
             {% if wait_profit - base_profit - grid_wait_cost >= 1 %}
               {% set grid_energy_selected = grid_energy_raw %}
             {% else %}
               {% set grid_energy_selected = 0 %}
             {% endif %}
-
             {% set raw_available_export = energy_available_after_house_need + grid_energy_selected + future_solar_surplus_today + extra - safety_margin %}
-            {% set final_available_export = [raw_available_export, 0] | max %}
-
+            {% set final_available_export = [[raw_available_export, 0] | max, battery_kwh] | min %}
             {{ final_available_export | round(2) }}
-
           {% endif %}
         attributes:
           raw_export: >
@@ -7693,7 +7684,7 @@ template:
         entity_id: binary_sensor.sem_nordpool_tomorrow_prices_available
         to: "on"
       - trigger: time
-        at: "00:10:00"
+        at: "06:00:00"
     sensor:
       - name: "sem_relative_expensive_price_1"
         unique_id: sem_relative_expensive_price_1
@@ -8412,7 +8403,7 @@ template:
 
   - trigger:
       - trigger: time
-        at: "00:05:00"
+        at: "06:17:00"
     condition:
       - condition: template
         value_template: >
