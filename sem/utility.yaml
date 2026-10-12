@@ -134,7 +134,7 @@ utility_meter:
     unique_id: sem_battery_charge_energy_graph_daily
 
   sem_battery_discharge_energy_graph_graph_daily:
-    source: sensor.sem_battery_discharge_energy
+    source: sensor.sem_battery_discharge_energy_graph
     cycle: daily
     unique_id: sem_battery_discharge_energy_graph_graph_daily
 
