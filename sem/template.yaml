@@ -2754,11 +2754,6 @@ template:
         unique_id: sem_available_export_energy_1
         unit_of_measurement: "kWh"
         state: >
-      # CALCULATE SURPLUS (EXPORT) ENERGY MORGON
-      - name: sem_available_export_energy_1
-        unique_id: sem_available_export_energy_1
-        unit_of_measurement: "kWh"
-        state: >
           {% set override = states('input_select.sem_export_override_1') %}
           {% set energy_available_after_house_need = state_attr('sensor.sem_available_export_energy_1', 'energy_available_after_house_need') | float(0) %}
           {% set grid_energy_raw = state_attr('sensor.sem_available_export_energy_1', 'grid_energy_during_battery_wait') | float(0) %}
