@@ -6941,8 +6941,7 @@ sections:
                         - entity: sensor.sem_battery_charge_energy_graph_daily
                           name: Laddat
                           icon: mdi:battery-plus
-                        - entity: >-
-                            sensor.sem_battery_discharge_energy_graph_graph_daily
+                        - entity: sensor.sem_battery_discharge_energy_daily
                           icon: mdi:battery-minus
                           name: Sålt
                         - entity: sensor.sem_battery_to_house_energy_daily
