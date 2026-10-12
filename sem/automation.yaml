@@ -2190,9 +2190,9 @@ automation:
         entity_id: input_boolean.sem_auto_update
         state: 'on'
     actions:
-       - action: input_boolean.turn_on
-         target:
-           entity_id: input_boolean.sem_update_notification
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sem_update_notification
       - action: shell_command.update_packages_from_github
       - delay: "00:02:00"
       - action: input_button.press
