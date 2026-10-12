@@ -124,6 +124,11 @@ utility_meter:
     source: sensor.sem_solar_to_house_energy
     cycle: quarter-hourly
     unique_id: sem_solar_to_house_energy_quarter
+    
+  sem_battery_discharge_energy_daily:
+    source: sensor.sem_battery_discharge_energy
+    cycle: daily
+    unique_id: sem_battery_discharge_energy_daily
 
 
 #############GRAFER#############
