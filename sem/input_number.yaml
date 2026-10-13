@@ -404,3 +404,23 @@ input_number:
     step: 1
     unit_of_measurement: A
     mode: box
+
+#############ZAPTEC####################
+  sem_ev_zaptec_max_current:
+    name: Zaptec 1 - Max laddström
+    icon: mdi:current-ac
+    min: 6
+    max: 32
+    step: 1
+    unit_of_measurement: A
+    mode: box
+
+  sem_ev_zaptec_max_current_2:
+    name: Zaptec 2 - Max laddström
+    icon: mdi:current-ac
+    min: 6
+    max: 32
+    step: 1
+    unit_of_measurement: A
+    mode: box
+#########################################
