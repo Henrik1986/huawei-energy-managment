@@ -1928,6 +1928,56 @@ automation:
                 {{ states('input_text.sem_ev_charger_2_stop') }}
 
 #############################EASEE###################################################
+  - alias: SEM - Konfigurera Easee
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_button.sem_ev_easee_configure
+    actions:
+      # Easee Wallbox 1
+      - if:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Easee"
+          - condition: template
+            value_template: >
+              {{ states('input_text.sem_ev_easee_id') | trim != '' }}
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: 0
+              current_p2: 0
+              current_p3: 0
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id') | trim }}
+      # Easee Wallbox 2
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Easee"
+          - condition: template
+            value_template: >
+              {{ states('input_text.sem_ev_easee_id_2') | trim != '' }}
+        then:
+          - action: easee.set_circuit_dynamic_limit
+            data:
+              current_p1: 0
+              current_p2: 0
+              current_p3: 0
+              time_to_live: 0
+              device_id: >
+                {{ states('input_text.sem_ev_easee_id_2') | trim }}
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sem_ev_easee_confirmation
+        data:
+          value: "Easee-konfiguration genomförd"
+
+
   - alias: SEM - Start Easee wallbox
     mode: single
     triggers:
@@ -2095,59 +2145,248 @@ automation:
               time_to_live: 0
               device_id: >
                 {{ states('input_text.sem_ev_easee_id_2') | trim }}
+#############################EASEE END###################################################
 
-
-  - alias: SEM - Konfigurera Easee
+#############################ZAPTEC###################################################
+  - alias: SEM - Konfigurera Zaptec
     mode: single
     triggers:
       - trigger: state
-        entity_id: input_button.sem_ev_easee_configure
+        entity_id: input_button.sem_ev_zaptec_configure
     actions:
-      # Easee Wallbox 1
+      # Zaptec laddare 1
       - if:
           - condition: state
             entity_id: input_select.sem_ev_charger_1
-            state: "Easee"
+            state: "Zaptec"
           - condition: template
             value_template: >
-              {{ states('input_text.sem_ev_easee_id') | trim != '' }}
+              {{ states('input_text.sem_ev_zaptec_current_entity') | trim != '' }}
         then:
-          - action: easee.set_circuit_dynamic_limit
+          - action: number.set_value
+            target:
+              entity_id: >
+                {{ states('input_text.sem_ev_zaptec_current_entity') | trim }}
             data:
-              current_p1: 0
-              current_p2: 0
-              current_p3: 0
-              time_to_live: 0
-              device_id: >
-                {{ states('input_text.sem_ev_easee_id') | trim }}
-      # Easee Wallbox 2
+              value: 0
+      # Zaptec laddare 2
       - if:
           - condition: state
             entity_id: input_boolean.sem_ev_wallbox_multi
             state: "on"
           - condition: state
             entity_id: input_select.sem_ev_charger_2
-            state: "Easee"
+            state: "Zaptec"
           - condition: template
             value_template: >
-              {{ states('input_text.sem_ev_easee_id_2') | trim != '' }}
+              {{ states('input_text.sem_ev_zaptec_current_entity_2') | trim != '' }}
         then:
-          - action: easee.set_circuit_dynamic_limit
+          - action: number.set_value
+            target:
+              entity_id: >
+                {{ states('input_text.sem_ev_zaptec_current_entity_2') | trim }}
             data:
-              current_p1: 0
-              current_p2: 0
-              current_p3: 0
-              time_to_live: 0
-              device_id: >
-                {{ states('input_text.sem_ev_easee_id_2') | trim }}
+              value: 0
+      # Bekräfta konfigurationen
       - action: input_text.set_value
         target:
-          entity_id: input_text.sem_ev_easee_confirmation
+          entity_id: input_text.sem_ev_zaptec_confirmation
         data:
-          value: "Easee-konfiguration genomförd"
+          value: "Zaptec-konfiguration genomförd"
 
+  - alias: SEM - Start Zaptec
+    mode: single
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set start = window.split(' - ')[0] | as_datetime | as_local %}
+            {{ now() >= start and now() < start + timedelta(minutes=1) }}
+          {% else %}
+            false
+          {% endif %}
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_1_ready_to_charge
+        from: "off"
+        to: "on"
+      - trigger: state
+        entity_id: binary_sensor.sem_ev_charger_2_ready_to_charge
+        from: "off"
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_smart_charge_ev
+        state: "on"
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Zaptec"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Zaptec"
+    actions:
+      - delay:
+          seconds: 10
+      - condition: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set parts = window.split(' - ') %}
+            {% set start = parts[0] | as_datetime | as_local %}
+            {% set end = parts[1] | as_datetime | as_local %}
+            {{ start <= now() <= end }}
+          {% else %}
+            false
+          {% endif %}
+      # Zaptec laddare 1
+      - if:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Zaptec"
+          - condition: state
+            entity_id: binary_sensor.sem_ev_charger_1_ready_to_charge
+            state: "on"
+          - condition: template
+            value_template: >
+              {{ states('input_text.sem_ev_zaptec_current_entity') | trim != '' }}
+        then:
+          - action: number.set_value
+            target:
+              entity_id: >
+                {{ states('input_text.sem_ev_zaptec_current_entity') | trim }}
+            data:
+              value: >
+                {{ states('input_number.sem_ev_zaptec_max_current') | int }}
+      # Zaptec laddare 2
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Zaptec"
+          - condition: state
+            entity_id: binary_sensor.sem_ev_charger_2_ready_to_charge
+            state: "on"
+          - condition: template
+            value_template: >
+              {{ states('input_text.sem_ev_zaptec_current_entity_2') | trim != '' }}
+        then:
+          - action: number.set_value
+            target:
+              entity_id: >
+                {{ states('input_text.sem_ev_zaptec_current_entity_2') | trim }}
+            data:
+              value: >
+                {{ states('input_number.sem_ev_zaptec_max_current_2') | int }}
 
-
+  - alias: SEM - Stop Zaptec
+    mode: single
+    triggers:
+      - trigger: template
+        value_template: >
+          {% set window = states('sensor.sem_ev_charge_window_apex') %}
+          {% if window not in ['unknown', 'unavailable', ''] and ' - ' in window %}
+            {% set end = window.split(' - ')[1] | as_datetime | as_local %}
+            {{ now() >= end and now() < end + timedelta(minutes=1) }}
+          {% else %}
+            false
+          {% endif %}
+    conditions:
+      - condition: state
+        entity_id: input_boolean.sem_smart_charge_ev
+        state: "on"
+      - condition: template
+        value_template: >
+          {% set user_code = states('input_text.sem_user_access_code') | trim %}
+          {% set codes_raw = states('sensor.sem_sys_state') %}
+          {% if user_code != '' and codes_raw %}
+            {% set codes_list = codes_raw.split(',') | map('trim') | list %}
+            {{ user_code in codes_list }}
+          {% else %}
+            false
+          {% endif %}
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Zaptec"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Zaptec"
+    actions:
+      # Zaptec laddare 1
+      - if:
+          - condition: state
+            entity_id: input_select.sem_ev_charger_1
+            state: "Zaptec"
+        then:
+          # Stoppa laddningen
+          - if:
+              - condition: template
+                value_template: >
+                  {{ states('input_text.sem_ev_zaptec_stop_entity') | trim != '' }}
+            then:
+              - action: button.press
+                target:
+                  entity_id: >
+                    {{ states('input_text.sem_ev_zaptec_stop_entity') | trim }}
+          # Sätt strömgränsen till 0 A
+          - if:
+              - condition: template
+                value_template: >
+                  {{ states('input_text.sem_ev_zaptec_current_entity') | trim != '' }}
+            then:
+              - action: number.set_value
+                target:
+                  entity_id: >
+                    {{ states('input_text.sem_ev_zaptec_current_entity') | trim }}
+                data:
+                  value: 0
+      # Zaptec laddare 2
+      - if:
+          - condition: state
+            entity_id: input_boolean.sem_ev_wallbox_multi
+            state: "on"
+          - condition: state
+            entity_id: input_select.sem_ev_charger_2
+            state: "Zaptec"
+        then:
+          # Stoppa laddningen
+          - if:
+              - condition: template
+                value_template: >
+                  {{ states('input_text.sem_ev_zaptec_stop_entity_2') | trim != '' }}
+            then:
+              - action: button.press
+                target:
+                  entity_id: >
+                    {{ states('input_text.sem_ev_zaptec_stop_entity_2') | trim }}
+          # Sätt strömgränsen till 0 A
+          - if:
+              - condition: template
+                value_template: >
+                  {{ states('input_text.sem_ev_zaptec_current_entity_2') | trim != '' }}
+            then:
+              - action: number.set_value
+                target:
+                  entity_id: >
+                    {{ states('input_text.sem_ev_zaptec_current_entity_2') | trim }}
+                data:
+                  value: 0
+#############################ZAPTEC END###################################################
 
 ################################################################################
   - alias: Update packages from GitHub
@@ -2185,10 +2424,12 @@ automation:
           {{ latest not in ['unknown', 'unavailable', 'none', ''] and
             installed not in ['unknown', 'unavailable', 'none', ''] and
             latest != installed }}
+
     conditions:
       - condition: state
         entity_id: input_boolean.sem_auto_update
         state: 'on'
+
     actions:
       - action: input_boolean.turn_on
         target:
