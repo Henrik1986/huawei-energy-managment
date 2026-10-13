@@ -144,3 +144,29 @@ input_text:
   sem_ev_charger_2_stop:
     name: Laddbox 2 - Stopp
     max: 255
+
+##################ZAPTEC####################
+  sem_ev_zaptec_current_entity:
+    name: Zaptec 1 - Entitet för laddström
+    icon: mdi:current-ac
+    max: 255
+
+  sem_ev_zaptec_current_entity_2:
+    name: Zaptec 2 - Entitet för laddström
+    icon: mdi:current-ac
+    max: 255
+
+  sem_ev_zaptec_stop_entity:
+    name: Zaptec 1 - Entitet för stopp
+    icon: mdi:stop-circle
+    max: 255
+
+  sem_ev_zaptec_stop_entity_2:
+    name: Zaptec 2 - Entitet för stopp
+    icon: mdi:stop-circle
+    max: 255
+
+  sem_ev_zaptec_confirmation:
+    name: Zaptec konfigurationsstatus
+    max: 255
+###############################################
