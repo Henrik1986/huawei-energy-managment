@@ -28,3 +28,6 @@ input_button:
 
   sem_ev_easee_configure: 
     name: Configure Easee Wallbox
+
+  sem_ev_zaptec_configure:
+    name: Configure Zaptec Wallbox
