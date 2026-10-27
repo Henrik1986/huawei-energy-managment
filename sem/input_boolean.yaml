@@ -146,3 +146,10 @@ input_boolean:
     
   sem_update_notification: 
     name: New Update Notify
+
+############ZAPTEC#########################
+  sem_ev_charger_1_charging_completed:
+    name: SEM EV Charger 1 Charging Completed
+
+  sem_ev_charger_2_charging_completed:
+    name: SEM EV Charger 2 Charging Completed
