@@ -70,7 +70,7 @@ views:
               - type: custom:apexcharts-card
                 update_interval: 1 min
                 now:
-                  show: false
+                  show: true
                   color: red
                 header:
                   show: false
@@ -82,7 +82,7 @@ views:
                     opposite: false
                     min: 0
                     max: 1
-                    show: true
+                    show: false
                     apex_config:
                       labels:
                         style:
@@ -97,7 +97,7 @@ views:
                     opposite: true
                     min: 0
                     max: 1
-                    show: true
+                    show: false
                     apex_config:
                       labels:
                         style:
@@ -397,7 +397,7 @@ views:
                 apex_config:
                   chart:
                     height: 120
-                    offsetX: 10
+                    offsetX: 0
                   stroke:
                     width: 0
                   fill:
@@ -474,7 +474,7 @@ views:
                 yaxis:
                   - id: spotpris
                     opposite: false
-                    show: true
+                    show: false
                     decimals: 1
                     min: 0
                     apex_config:
@@ -482,7 +482,7 @@ views:
                         text: Elpris (SEK/kWh)
                   - id: solar_power
                     opposite: true
-                    show: true
+                    show: false
                     apex_config:
                       title:
                         text: Solel (kWh)
@@ -534,7 +534,7 @@ views:
                   fill_raw: last
                 now:
                   show: true
-                  label: NU
+                  label: Nu
                   color: red
                 series:
                   - entity: sensor.sem_solar_forecast
@@ -1000,8 +1000,6 @@ views:
                             Laddningsbeslut: Ladda ej {% endif %}
 
                             🔋Beräknad laddning: {{ energy }} kWh  
-
-                            💰Extra superbillig laddning: {{ supercheap }} kWh  
 
                             {% if is_state('input_boolean.sem_interval_1a',
                             'on') %} ✅Status: Laddar {% else %} 💤Status:
@@ -1986,43 +1984,94 @@ views:
                   - type: heading
                     icon: ''
                     heading_style: title
-                    heading: Batteri och laddning
+                    heading: Smart batteristyrning
+                  - type: custom:vertical-stack-in-card
+                    cards:
+                      - type: heading
+                        icon: mdi:home-battery
+                        heading_style: subtitle
+                        heading: Batteriet
+                      - type: entities
+                        entities:
+                          - entity: input_number.sem_battery_total_capacity_kwh
+                            name: Total kapacitet
+                            icon: mdi:battery
+                      - type: markdown
+                        content: >-
+                          **ℹ️Information**
+
+                          **Total kapacitet** anger batteriets totala
+                          energimängd (kWh).
+                  - type: heading
+                    icon: mdi:flash
+                    heading_style: subtitle
+                    heading: Laddningseffekt
                   - type: entities
                     entities:
-                      - entity: input_number.sem_battery_total_capacity_kwh
-                        name: Total kapacitet
-                        icon: mdi:battery
                       - entity: input_number.sem_max_charge_power_window_1
-                        name: Laddningseffekt (9-16)
+                        name: 09:00-16:00
                         icon: mdi:flash
                       - entity: input_number.sem_max_charge_power_window_2
-                        name: Laddningseffekt (23-05)
+                        name: 23:00-05:00
                         icon: mdi:flash
                       - entity: input_number.sem_max_charge_manual_charging
-                        name: Manuell laddningseffekt
+                        name: Manuell
                         icon: mdi:flash
+                  - type: heading
+                    icon: mdi:flash
+                    heading_style: subtitle
+                    heading: Urladdningsseffekt
+                  - type: entities
+                    entities:
                       - entity: input_number.sem_battery_discharge_power_ev_limit
                         name: Urladdningseffekt
                         icon: mdi:flash
-                      - entity: input_number.sem_charge_profit_threshold
-                        name: Laddningsvinst
-                        icon: mdi:finance
                   - type: markdown
                     content: >-
                       **ℹ️Information**
 
-                      **Total kapacitet** anger batteriets totala energimängd
-                      (kWh).
-
 
                       **Laddnings-/urladdningseffekt** anger den maximala effekt
                       som batteriet får ladda och ladda ur med.
-
+                  - type: heading
+                    icon: mdi:creation
+                    heading_style: subtitle
+                    heading: Smart batteristyrning
+                  - type: entities
+                    entities:
+                      - entity: input_number.sem_charge_profit_threshold
+                        name: Laddningsvinst
+                        icon: mdi:chart-areaspline-variant
+                      - entity: input_number.sem_cheap_charge_price_limit
+                        name: Prisgräns
+                        icon: mdi:chart-bar
+                      - entity: input_number.sem_cheap_charge_max_kwh
+                        name: Extra (lågt pris)
+                        icon: mdi:lightning-bolt-circle
+                  - type: markdown
+                    content: >-
+                      **ℹ️Information**
 
                       **Laddningsvinst** anger det minsta prisskillnadskravet
                       för att laddning ska genomföras. Detta är en avgörande
                       faktor för systemets lönsamhet. Ett rimligt startvärde är
-                      `0,3 SEK/kWh.`
+                      `0,5 SEK/kWh.`
+
+
+                      Om medelpriset för det planerade laddningsfönstret ligger
+                      på eller under värdet i **Prisgräns** tillåts extra
+                      laddning från elnätet. Ange hur många extra kWh som ska
+                      laddas under **Extra (lågt pris)**. 
+
+
+                      Om elpriset är jämnt lågt och ingen av perioderna före,
+                      under eller efter pristoppen bedöms vara lönsam att ladda
+                      inför, kan systemet i stället fylla batteriet fullt med
+                      billig el. **Prisgräns** avgör då när fulladdning
+                      rekommenderas, så att batteriet är redo inför framtida
+                      högre elpriser. Ett rimligt startvärde är `0,2 SEK/kWh`,
+                      men beroende på var i landet du bor kan värdet behöva
+                      justeras.
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: heading
@@ -2091,8 +2140,7 @@ views:
                             - entity: input_number.sem_max_export_power
                               name: Urladdningseffekt
                               icon: mdi:flash
-                            - entity: >-
-                                input_number.sem_battery_discharge_power_ev_limit
+                            - entity: input_number.sem_battery_discharge_power_ev_limit
                               name: Återställningseffekt
                               icon: mdi:flash
                             - entity: input_number.sem_export_profit_margin
@@ -2182,7 +2230,7 @@ views:
                   - type: markdown
                     content: |
                       <center> 3 av 4 </center>
-            rows: 1.188
+            rows: 1.375
           - type: custom:bubble-card
             card_type: pop-up
             hash: '#config_5'
@@ -2345,8 +2393,7 @@ views:
                               - entity: input_text.sem_ev_charging_state
                                 name: Laddningsläge laddbox 1
                                 icon: mdi:format-list-bulleted-square
-                              - entity: >-
-                                  input_number.sem_battery_discharge_power_ev_limit
+                              - entity: input_number.sem_battery_discharge_power_ev_limit
                                 name: Urladdningseffekt
                               - entity: input_number.sem_battery_grid_normal_power
                                 name: Laddningseffekt
@@ -2368,8 +2415,7 @@ views:
                               - entity: input_text.sem_ev_charging_state_2
                                 name: Laddningsläge laddbox 2
                                 icon: mdi:format-list-bulleted-square
-                              - entity: >-
-                                  input_number.sem_battery_discharge_power_ev_limit
+                              - entity: input_number.sem_battery_discharge_power_ev_limit
                               - entity: input_number.sem_battery_grid_normal_power
                                 name: Laddningseffekt
                         - type: conditional
@@ -2607,17 +2653,13 @@ views:
                                   cards:
                                     - type: entities
                                       entities:
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_status_sensor
+                                        - entity: input_text.sem_ev_charger_1_status_sensor
                                           name: Laddbox
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_connected_status
+                                        - entity: input_text.sem_ev_charger_1_connected_status
                                           name: Inte ansluten
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_connected_state
+                                        - entity: input_text.sem_ev_charger_1_connected_state
                                           name: Ansluten, men laddar ej
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_finished_state
+                                        - entity: input_text.sem_ev_charger_1_finished_state
                                           name: Slutförd laddning
                                         - entity: input_text.sem_ev_charger_1_start
                                           name: Start-enhet
@@ -2665,17 +2707,13 @@ views:
                                   cards:
                                     - type: entities
                                       entities:
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_status_sensor
+                                        - entity: input_text.sem_ev_charger_1_status_sensor
                                           name: Laddbox
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_connected_status
+                                        - entity: input_text.sem_ev_charger_1_connected_status
                                           name: Inte ansluten
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_connected_state
+                                        - entity: input_text.sem_ev_charger_1_connected_state
                                           name: Ansluten, men laddar ej
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_finished_state
+                                        - entity: input_text.sem_ev_charger_1_finished_state
                                           name: Slutförd laddning
                                         - entity: input_text.sem_ev_charger_1_start
                                           name: Start-enhet
@@ -2801,17 +2839,13 @@ views:
                                   cards:
                                     - type: entities
                                       entities:
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_status_sensor
+                                        - entity: input_text.sem_ev_charger_1_status_sensor
                                           name: Laddbox
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_connected_status
+                                        - entity: input_text.sem_ev_charger_1_connected_status
                                           name: Inte ansluten
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_connected_state
+                                        - entity: input_text.sem_ev_charger_1_connected_state
                                           name: Ansluten, men laddar ej
-                                        - entity: >-
-                                            input_text.sem_ev_charger_1_finished_state
+                                        - entity: input_text.sem_ev_charger_1_finished_state
                                           name: Slutförd laddning
                                         - entity: input_text.sem_ev_easee_id
                                         - entity: input_number.sem_ev_easee_max_current
@@ -2908,6 +2942,180 @@ views:
                                         ansluts. Du kan när som helst återställa
                                         värdet i laddboxens app om du vill
                                         återgå till en annan smart laddlösning. 
+                              - type: conditional
+                                conditions:
+                                  - condition: state
+                                    entity: input_select.sem_ev_charger_1
+                                    state: Zaptec
+                                card:
+                                  type: custom:vertical-stack-in-card
+                                  cards:
+                                    - type: custom:vertical-stack-in-card
+                                      cards:
+                                        - type: entities
+                                          entities:
+                                            - entity: input_text.sem_ev_charger_1_status_sensor
+                                              name: Laddbox
+                                            - entity: input_text.sem_ev_charger_1_connected_status
+                                              name: Inte ansluten
+                                            - entity: input_text.sem_ev_charger_1_connected_state
+                                              name: Ansluten, men laddar ej
+                                            - entity: input_text.sem_ev_zaptec_current_entity
+                                              name: Entitet för laddström
+                                            - entity: input_text.sem_ev_zaptec_stop_entity
+                                              name: Entitet för stopp
+                                            - entity: input_number.sem_ev_zaptec_max_current
+                                              name: Max laddström
+                                            - entity: input_button.sem_ev_zaptec_configure
+                                              name: Ställ in laddbox
+                                              icon: mdi:creation
+                                        - type: markdown
+                                          content: >
+                                            {% if
+                                            states('input_text.sem_ev_zaptec_confirmation')
+                                            not in ['', 'unknown', 'unavailable'] %}
+
+                                            <b><center>✅ Konfiguration
+                                            klar</center></b>
+
+                                            {% else %}
+
+                                            <b><center>⚠️ Konfiguration ej
+                                            klar</center></b>
+
+                                            {% endif %}
+                                        - type: markdown
+                                          content: >-
+                                            ℹ️ **Information - Zaptec**
+
+
+                                            I **laddbox** anger du sensorn som visar
+                                            laddboxens aktuella status (t.ex. om den
+                                            laddar eller är låst).
+
+                                              {% set entities = integration_entities('zaptec')
+                                                | select('match', 'sensor\\..*')
+                                                | list %}
+                                              {% set status_values = [
+                                                'connected_charging',
+                                                'connected_finished',
+                                                'connected_requesting',
+                                                'disconnected'
+                                              ] %}
+                                              {% set ns = namespace(found=[]) %}
+
+                                              {% for entity in entities %}
+                                                {% if states(entity) in status_values %}
+                                                  {% set ns.found = ns.found + [entity] %}
+                                                {% endif %}
+                                              {% endfor %}
+
+                                              {% if ns.found | count > 0 %}
+                                                {% for entity in ns.found | sort %}
+                                              ℹ️**Systemet har hittat entitet för laddboxens aktuella status**
+                                              - {{ state_attr(entity, 'friendly_name') or entity }}
+                                                `{{ entity }}`
+                                                {% endfor %}
+                                              {% else %}
+                                              ⚠️ Ingen **statussensor** hittades. Kontrollera Zaptec-integrationen.
+                                              {% endif %}
+
+                                            I **inte ansluten** fyller du i vad
+                                            laddboxen visar när laddkabeln <u>inte
+                                            är</u> inkopplad i bilen. Systemet
+                                            föreslår `disconnected`.
+
+
+                                            I **ansluten, men laddar ej** anger du
+                                            vad laddboxen visar när laddkabeln <u>är
+                                            inkopplad</u> i bilen men laddar ej.
+                                            Systemet föreslår `connected_finished`.
+
+
+                                            {% set entities =
+                                            integration_entities('zaptec')
+                                              | select('match', 'number\\..*')
+                                              | list %}
+                                            {% set ns = namespace(found=[]) %}
+
+
+                                            {% for entity in entities %}
+                                              {% set name = (state_attr(entity, 'friendly_name') or entity) | lower %}
+                                              {% set id = entity | lower %}
+                                              {% set text = name ~ ' ' ~ id %}
+
+                                              {% if 'max' in text and ('laddstrom' in text or 'laddström' in text or 'charging current' in text) %}
+                                                {% set ns.found = ns.found + [entity] %}
+                                              {% endif %}
+                                            {% endfor %}
+
+
+                                            {% if ns.found | count > 0 %}
+                                              {% for entity in ns.found | sort %}
+
+                                              ℹ️**Systemet har hittat entitet för laddström** 
+                                            - {{ state_attr(entity, 'friendly_name')
+                                            or entity }}
+                                              `{{ entity }}`
+                                              {% endfor %}
+                                            {% else %}
+
+                                            ⚠️ Ingen **entitet för laddström**
+                                            hittades. Kolla din Zaptec integration.
+
+                                            {% endif %}
+                                              
+                                            {% set entities =
+                                            integration_entities('zaptec')
+                                              | select('match', 'button\\..*')
+                                              | list %}
+                                            {% set ns = namespace(found=[]) %}
+
+
+                                            {% for entity in entities %}
+                                              {% set name = (state_attr(entity, 'friendly_name') or entity) | lower %}
+                                              {% set id = entity | lower %}
+                                              {% set text = name ~ ' ' ~ id %}
+
+                                              {% if 'stoppa' in text or 'stop' in text %}
+                                                {% set ns.found = ns.found + [entity] %}
+                                              {% endif %}
+                                            {% endfor %}
+                                              
+                                              
+                                              {% if ns.found | count > 0 %}
+                                              {% for entity in ns.found | sort %}
+                                            ℹ️**Systemet har hittat entitet för
+                                            stopp**
+
+                                              - {{ state_attr(entity, 'friendly_name') or entity }}
+                                              `{{ entity }}`
+                                              {% endfor %}
+                                            {% else %}
+
+                                            ⚠️ Ingen **entitet för stopp** hittades.
+                                            Kolla din Zaptec integration. 
+
+                                            {% endif %}
+
+
+                                            Ange den högsta laddströmmen i ampere
+                                            som laddboxen får använda. Värdet anges
+                                            under **max laddström.**
+
+
+                                            Avsluta med att gör din laddbox redo för
+                                            smart laddning genom att klicka på
+                                            knappen **ställ in laddbox**.
+
+                                            > ℹ️ När du klickar på **ställ in
+                                            laddbox** sätts den tillåtna maximala
+                                            laddströmmen på din laddbox till 0 A.
+                                            Detta är nödvändigt för att laddningen
+                                            inte ska starta direkt när laddkabeln
+                                            ansluts. Du kan när som helst återställa
+                                            värdet i laddboxens app om du vill
+                                            återgå till en annan smart laddlösning. 
                         - type: conditional
                           conditions:
                             - condition: state
@@ -2934,17 +3142,13 @@ views:
                                   cards:
                                     - type: entities
                                       entities:
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_status_sensor
+                                        - entity: input_text.sem_ev_charger_2_status_sensor
                                           name: Laddbox
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_connected_status
+                                        - entity: input_text.sem_ev_charger_2_connected_status
                                           name: Inte ansluten
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_connected_state
+                                        - entity: input_text.sem_ev_charger_2_connected_state
                                           name: Ansluten, men laddar ej
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_finished_state
+                                        - entity: input_text.sem_ev_charger_2_finished_state
                                           name: Slutförd laddning
                                         - entity: input_text.sem_ev_charger_2_start
                                           name: Start-enhet
@@ -2992,17 +3196,13 @@ views:
                                   cards:
                                     - type: entities
                                       entities:
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_status_sensor
+                                        - entity: input_text.sem_ev_charger_2_status_sensor
                                           name: Laddbox
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_connected_status
+                                        - entity: input_text.sem_ev_charger_2_connected_status
                                           name: Inte ansluten
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_connected_state
+                                        - entity: input_text.sem_ev_charger_2_connected_state
                                           name: Ansluten, men laddar ej
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_finished_state
+                                        - entity: input_text.sem_ev_charger_2_finished_state
                                           name: Slutförd laddning
                                         - entity: input_text.sem_ev_charger_2_start
                                           name: Start-enhet
@@ -3128,17 +3328,13 @@ views:
                                   cards:
                                     - type: entities
                                       entities:
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_status_sensor
+                                        - entity: input_text.sem_ev_charger_2_status_sensor
                                           name: Laddbox
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_connected_status
+                                        - entity: input_text.sem_ev_charger_2_connected_status
                                           name: Inte ansluten
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_connected_state
+                                        - entity: input_text.sem_ev_charger_2_connected_state
                                           name: Ansluten, men laddar ej
-                                        - entity: >-
-                                            input_text.sem_ev_charger_2_finished_state
+                                        - entity: input_text.sem_ev_charger_2_finished_state
                                           name: Slutförd laddning
                                         - entity: input_text.sem_ev_easee_id_2
                                         - entity: input_number.sem_ev_easee_max_current
@@ -3235,6 +3431,180 @@ views:
                                         ansluts. Du kan när som helst återställa
                                         värdet i laddboxens app om du vill
                                         återgå till en annan smart laddlösning. 
+                              - type: conditional
+                                conditions:
+                                  - condition: state
+                                    entity: input_select.sem_ev_charger_2
+                                    state: Zaptec
+                                card:
+                                  type: custom:vertical-stack-in-card
+                                  cards:
+                                    - type: custom:vertical-stack-in-card
+                                      cards:
+                                        - type: entities
+                                          entities:
+                                            - entity: input_text.sem_ev_charger_2_status_sensor
+                                              name: Laddbox
+                                            - entity: input_text.sem_ev_charger_2_connected_status
+                                              name: Inte ansluten
+                                            - entity: input_text.sem_ev_charger_2_connected_state
+                                              name: Ansluten, men laddar ej
+                                            - entity: input_text.sem_ev_zaptec_current_entity_2
+                                              name: Entitet för laddström
+                                            - entity: input_text.sem_ev_zaptec_stop_entity_2
+                                              name: Entitet för stopp
+                                            - entity: input_number.sem_ev_zaptec_max_current_2
+                                              name: Max laddström
+                                            - entity: input_button.sem_ev_zaptec_configure
+                                              name: Ställ in laddbox
+                                              icon: mdi:creation
+                                        - type: markdown
+                                          content: >
+                                            {% if
+                                            states('input_text.sem_ev_zaptec_confirmation')
+                                            not in ['', 'unknown', 'unavailable'] %}
+
+                                            <b><center>✅ Konfiguration
+                                            klar</center></b>
+
+                                            {% else %}
+
+                                            <b><center>⚠️ Konfiguration ej
+                                            klar</center></b>
+
+                                            {% endif %}
+                                        - type: markdown
+                                          content: >-
+                                            ℹ️ **Information - Zaptec**
+
+
+                                            I **laddbox** anger du sensorn som visar
+                                            laddboxens aktuella status (t.ex. om den
+                                            laddar eller är låst).
+
+                                              {% set entities = integration_entities('zaptec')
+                                                | select('match', 'sensor\\..*')
+                                                | list %}
+                                              {% set status_values = [
+                                                'connected_charging',
+                                                'connected_finished',
+                                                'connected_requesting',
+                                                'disconnected'
+                                              ] %}
+                                              {% set ns = namespace(found=[]) %}
+
+                                              {% for entity in entities %}
+                                                {% if states(entity) in status_values %}
+                                                  {% set ns.found = ns.found + [entity] %}
+                                                {% endif %}
+                                              {% endfor %}
+
+                                              {% if ns.found | count > 0 %}
+                                                {% for entity in ns.found | sort %}
+                                              ℹ️**Systemet har hittat entitet för laddboxens aktuella status**
+                                              - {{ state_attr(entity, 'friendly_name') or entity }}
+                                                `{{ entity }}`
+                                                {% endfor %}
+                                              {% else %}
+                                              ⚠️ Ingen **statussensor** hittades. Kontrollera Zaptec-integrationen.
+                                              {% endif %}
+
+                                            I **inte ansluten** fyller du i vad
+                                            laddboxen visar när laddkabeln <u>inte
+                                            är</u> inkopplad i bilen. Systemet
+                                            föreslår `disconnected`.
+
+
+                                            I **ansluten, men laddar ej** anger du
+                                            vad laddboxen visar när laddkabeln <u>är
+                                            inkopplad</u> i bilen men laddar ej.
+                                            Systemet föreslår `connected_finished`.
+
+
+                                            {% set entities =
+                                            integration_entities('zaptec')
+                                              | select('match', 'number\\..*')
+                                              | list %}
+                                            {% set ns = namespace(found=[]) %}
+
+
+                                            {% for entity in entities %}
+                                              {% set name = (state_attr(entity, 'friendly_name') or entity) | lower %}
+                                              {% set id = entity | lower %}
+                                              {% set text = name ~ ' ' ~ id %}
+
+                                              {% if 'max' in text and ('laddstrom' in text or 'laddström' in text or 'charging current' in text) %}
+                                                {% set ns.found = ns.found + [entity] %}
+                                              {% endif %}
+                                            {% endfor %}
+
+
+                                            {% if ns.found | count > 0 %}
+                                              {% for entity in ns.found | sort %}
+
+                                              ℹ️**Systemet har hittat entitet för laddström** 
+                                            - {{ state_attr(entity, 'friendly_name')
+                                            or entity }}
+                                              `{{ entity }}`
+                                              {% endfor %}
+                                            {% else %}
+
+                                            ⚠️ Ingen **entitet för laddström**
+                                            hittades. Kolla din Zaptec integration.
+
+                                            {% endif %}
+                                              
+                                            {% set entities =
+                                            integration_entities('zaptec')
+                                              | select('match', 'button\\..*')
+                                              | list %}
+                                            {% set ns = namespace(found=[]) %}
+
+
+                                            {% for entity in entities %}
+                                              {% set name = (state_attr(entity, 'friendly_name') or entity) | lower %}
+                                              {% set id = entity | lower %}
+                                              {% set text = name ~ ' ' ~ id %}
+
+                                              {% if 'stoppa' in text or 'stop' in text %}
+                                                {% set ns.found = ns.found + [entity] %}
+                                              {% endif %}
+                                            {% endfor %}
+                                              
+                                              
+                                              {% if ns.found | count > 0 %}
+                                              {% for entity in ns.found | sort %}
+                                            ℹ️**Systemet har hittat entitet för
+                                            stopp**
+
+                                              - {{ state_attr(entity, 'friendly_name') or entity }}
+                                              `{{ entity }}`
+                                              {% endfor %}
+                                            {% else %}
+
+                                            ⚠️ Ingen **entitet för stopp** hittades.
+                                            Kolla din Zaptec integration. 
+
+                                            {% endif %}
+
+
+                                            Ange den högsta laddströmmen i ampere
+                                            som laddboxen får använda. Värdet anges
+                                            under **max laddström.**
+
+
+                                            Avsluta med att gör din laddbox redo för
+                                            smart laddning genom att klicka på
+                                            knappen **ställ in laddbox**.
+
+                                            > ℹ️ När du klickar på **ställ in
+                                            laddbox** sätts den tillåtna maximala
+                                            laddströmmen på din laddbox till 0 A.
+                                            Detta är nödvändigt för att laddningen
+                                            inte ska starta direkt när laddkabeln
+                                            ansluts. Du kan när som helst återställa
+                                            värdet i laddboxens app om du vill
+                                            återgå till en annan smart laddlösning. 
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: custom:bubble-card
@@ -4118,6 +4488,60 @@ views:
 
 
                                 {% endif %}
+                            - type: custom:vertical-stack-in-card
+                              cards:
+                                - square: false
+                                  type: grid
+                                  cards:
+                                    - type: conditional
+                                      conditions:
+                                        - condition: numeric_state
+                                          above: 1
+                                          entity: sensor.sem_ev_sensor_power_1
+                                      card:
+                                        type: tile
+                                        entity: input_button.sem_ev_charge_stop_1
+                                        icon: mdi:stop-circle
+                                        color: red
+                                        hide_state: true
+                                        vertical: false
+                                        tap_action:
+                                          action: toggle
+                                          confirmation:
+                                            text: Vill du avsluta laddningen?
+                                        icon_tap_action:
+                                          action: toggle
+                                          confirmation:
+                                            text: Vill du avsluta laddningen?
+                                    - type: conditional
+                                      conditions:
+                                        - condition: numeric_state
+                                          above: 1
+                                          entity: sensor.sem_ev_sensor_power_2
+                                      card:
+                                        type: tile
+                                        entity: input_button.sem_ev_charge_stop_2
+                                        icon: mdi:stop-circle
+                                        color: red
+                                        hide_state: true
+                                        vertical: false
+                                        tap_action:
+                                          action: toggle
+                                          confirmation:
+                                            text: Vill du avsluta laddningen?
+                                        icon_tap_action:
+                                          action: toggle
+                                          confirmation:
+                                            text: Vill du avsluta laddningen?
+                                  columns: 2
+                                - type: markdown
+                                  content: >-
+                                    Beroende på vilken laddbox du använder kan
+                                    det ta olika lång tid innan systemet får
+                                    bekräftelse på att laddningen har stoppats.
+                                    Stoppfunktionen fungerar som den ska, men
+                                    det kan dröja en liten stund innan systemet
+                                    registrerar att laddningen har avslutats.
                         - type: custom:vertical-stack-in-card
                           cards:
                             - type: heading
@@ -4125,47 +4549,30 @@ views:
                               heading: Nästa laddning
                               heading_style: subtitle
                             - type: markdown
-                              content: >-
+                              content: >
+
                                 {% set times =
-                                states('sensor.sem_ev_charge_time').split(' - ')
-                                %}
+                                states('sensor.sem_ev_charge_window_apex').split('
+                                - ') %}
 
 
                                 {% if times | length == 2 %}
 
+                                  {% set start = as_local(as_datetime(times[0], none)) if as_datetime(times[0], none) else none %}
+                                  {% set end = as_local(as_datetime(times[1], none)) if as_datetime(times[1], none) else none %}
 
-                                {% set start = as_datetime(times[0]) %}
-
-                                {% set end = as_datetime(times[1]) %}
-
-                                {% set now = now() %}
-
-
-                                {% if end < now %}
-
-                                ⚠️ Laddfönstret har passerat. Anslut laddkabeln
-                                till bilen för att hitta ett nytt laddfönster. 
-
-                                {% else %}
-
-
-                                📅 {{ start.strftime('%Y-%m-%d') }}
-
-                                ⏰ {{ start.strftime('%H:%M') }}–{{
-                                end.strftime('%H:%M') }}
-
-
-                                {% endif %}
-
+                                  {% if start is none or end is none %}
+                                    ⚠️ Kunde inte tolka laddfönstrets tider.
+                                  {% elif end < now() %}
+                                    ⚠️ Laddfönstret har passerat. Anslut laddkabeln till bilen för att hitta ett nytt laddfönster.
+                                  {% else %}
+                                    📅 {{ start.strftime('%Y-%m-%d') }}
+                                    ⏰ {{ start.strftime('%H:%M') }}–{{ end.strftime('%H:%M') }}
+                                  {% endif %}
 
                                 {% else %}
 
-
-                                ⚠️ Ingen laddtid hittades. Kontrollera att
-                                laddkabeln är ansluten till bilen. Om kabeln är
-                                ansluten kan du söka efter en ny laddtid under
-                                inställningar.
-
+                                  ⚠️ Ingen laddtid hittades. Kontrollera att laddkabeln är ansluten till bilen. Om kabeln är ansluten kan du söka efter en ny laddtid under inställningar.
 
                                 {% endif %}
                         - type: custom:vertical-stack-in-card
@@ -4180,15 +4587,11 @@ views:
                                     tap_action:
                                       action: toggle
                                     icon: mdi:cog
-                                    show_state: false
                                     force_icon: false
                                     fill_width: true
                                     content_layout: icon-left
                                     entity: input_boolean.sem_ev_settings
                                     show_background: true
-                                    show_attribute: false
-                                    show_last_updated: false
-                                    show_last_changed: false
                                     state_background: true
                                   - name: Ändra tid
                                     show_name: true
@@ -4196,30 +4599,22 @@ views:
                                     tap_action:
                                       action: toggle
                                     icon: mdi:clock-edit
-                                    show_state: false
                                     force_icon: false
                                     fill_width: true
                                     content_layout: icon-left
                                     entity: input_boolean.sem_ev_adjust_charge_time
                                     show_background: true
-                                    show_attribute: false
-                                    show_last_updated: false
-                                    show_last_changed: false
                                     state_background: true
                                   - show_name: true
                                     show_icon: true
                                     tap_action:
                                       action: toggle
                                     icon: mdi:scale-balance
-                                    show_state: false
                                     force_icon: false
                                     fill_width: true
                                     content_layout: icon-left
                                     entity: input_boolean.sem_ev_balance
                                     show_background: true
-                                    show_attribute: false
-                                    show_last_updated: false
-                                    show_last_changed: false
                                     state_background: true
                                     name: Balans
                               rows: 0.938
@@ -4312,6 +4707,29 @@ views:
                                       name: Starttid
                                     - entity: input_datetime.sem_ev_charge_end
                                       name: Sluttid
+                              - type: conditional
+                                conditions:
+                                  - condition: or
+                                    conditions:
+                                      - condition: state
+                                        entity: binary_sensor.sem_ev_charger_1_ready_to_charge
+                                        state: 'on'
+                                      - condition: state
+                                        entity: binary_sensor.sem_ev_charger_2_ready_to_charge
+                                        state: 'on'
+                                card:
+                                  type: tile
+                                  entity: input_button.sem_ev_charge_now
+                                  name: Ladda nu
+                                  icon: mdi:clock-fast
+                                  color: green
+                                  hide_state: true
+                                  vertical: false
+                                  tap_action:
+                                    action: toggle
+                                  features:
+                                    - type: button
+                                  features_position: inline
                               - type: markdown
                                 content: >-
                                   ℹ️ **Information**
@@ -4321,6 +4739,11 @@ views:
                                   Använd reglaget för att ändra laddningens
                                   start- och sluttid om den föreslagna tiden
                                   inte passar dina behov.
+
+
+                                  När systemet är redo och ladda kommer ikonen
+                                  **Ladda nu** komma upp. Klickar du på knappen
+                                  startar laddningen direkt. 
                         - type: conditional
                           conditions:
                             - condition: state
@@ -4374,9 +4797,9 @@ views:
 
                                     **Dela effekt**: Elbilen och hembatteriet
                                     kommer att dela på tillgänglig effekt. Har
-                                    du en lastbalanserare kommer effekten på din
-                                    laddbox gå ner. Detta kan resultera i att
-                                    laddningen pausas vid hög effekt.  
+                                    du en lastbalanserare kan effekten på din
+                                    laddbox att gå ner. Detta kan resultera i
+                                    att laddningen pausas vid hög effekt.  
                               - type: conditional
                                 conditions:
                                   - condition: state
@@ -4401,9 +4824,10 @@ views:
                                         **Dela effekt**: Elbilen och
                                         hembatteriet kommer att dela på
                                         tillgänglig effekt. Har du en
-                                        lastbalanserare kommer effekten på din
-                                        laddbox gå ner. Detta kan resultera i
-                                        att laddningen pausas vid hög effekt.  
+                                        lastbalanserare kan effekten på din
+                                        laddbox att gå ner. Detta kan resultera
+                                        i att laddningen pausas vid hög
+                                        effekt.  
 
 
                                         **Ladda elbil till en viss procent**:
@@ -4425,7 +4849,7 @@ views:
                                   state: 'off'
                           card:
                             type: markdown
-                            content: >-
+                            content: >+
                               ℹ️ **Information**
 
                               Klicka på **Inställningar** för att justera de
@@ -4435,11 +4859,13 @@ views:
 
                               Om du vill ändra det laddningsfönster som systemet
                               har hittat klickar du på **Ändra tid**. Där kan du
-                              manuellt justera laddningens start- och sluttid.
+                              manuellt justera laddningens start- och sluttid
+                              och även starta laddningen direkt.
 
 
                               Klicka på **Balans** för att justera vad systemet
                               ska priotera vid laddning. 
+
                   - type: conditional
                     conditions:
                       - condition: state
@@ -4870,7 +5296,7 @@ views:
 
                           {% endif %}
                       - type: markdown
-                        content: '---'
+                        content: ---
                         text_only: true
                       - type: custom:bubble-card
                         card_type: sub-buttons
@@ -5111,6 +5537,7 @@ views:
                                       state_attr(sensor, 'profitable_extra') | float(0)
                                       if should_charge_full else 0 %}
 
+
                                     {% set normal_total =
                                       (pre_peak if pre_ok else 0) +
                                       (peak if peak_ok else 0) +
@@ -5256,7 +5683,8 @@ views:
                                      ------------------------------------------------------- #}
 
                                   {% else %}
-
+                                    {% set cheap_extra = state_attr('sensor.sem_battery_charge_energy_2_1b', 'extra_charge_cheap_kwh') | float(0) %}
+                                    
                                     {% set normal_total =
                                       (pre_peak if pre_ok else 0) +
                                       (peak if peak_ok else 0) +
@@ -5266,8 +5694,9 @@ views:
                                     %}
 
                                     {% set total_before_battery =
-                                      normal_total + profitable_extra %}
+                                      normal_total + profitable_extra + cheap_extra %}
 
+                                    
                                     {% set capped_total = [
                                       total_before_battery,
                                       usable_capacity
@@ -5279,7 +5708,8 @@ views:
                                     ] | max %}
                                  
                                     ➕ Energi/laddningsbehov: {{ normal_total | round(2) }} kWh  
-                                    ➕ Tillägg för export: {{ profitable_extra | round(2) }} kWh  
+                                    ➕ Tillägg för export: {{ profitable_extra | round(2) }} kWh 
+                                    ➕ Superbillig laddning: {{ cheap_extra | round(2) }} kWh  
                                     ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
                                     🟰 Planerad laddning: {{ charge_needed | round(2) }} kWh
 
@@ -5538,6 +5968,8 @@ views:
                                       state_attr(sensor, 'profitable_extra') | float(0)
                                       if should_charge_full else 0 %}
 
+                                    {% set cheap_extra = state_attr('sensor.sem_battery_charge_energy_1a_2', 'extra_charge_cheap_kwh') | float(0) %}
+                                    
                                     {% set normal_total =
                                       (pre_peak if pre_ok else 0) +
                                       (peak if peak_ok else 0) +
@@ -5547,7 +5979,7 @@ views:
                                     %}
 
                                     {% set total_before_battery =
-                                      normal_total + profitable_extra %}
+                                      normal_total + profitable_extra + cheap_extra %}
 
                                     {% set capped_total = [
                                       total_before_battery,
@@ -5566,7 +5998,8 @@ views:
 
 
                                     ➕ Energi/laddningsbehov: {{ normal_total | round(2) }} kWh  
-                                    ➕ Tillägg för export: {{ profitable_extra | round(2) }} kWh  
+                                    ➕ Tillägg för export: {{ profitable_extra | round(2) }} kWh
+                                    ➕ Superbillig laddning: {{ cheap_extra | round(2) }} kWh 
                                     ➖ Energi i batteriet: {{ battery_capacity | round(2) }} kWh  
                                     ➖ Förväntat solöverskott: {{ solar_surplus | round(2) }} kWh  
                                     🟰 Planerad laddning: {{ final_need | round(2) }} kWh
@@ -5952,7 +6385,7 @@ views:
 
 
                   - type: markdown
-                    content: '---'
+                    content: ---
                     text_only: true
                   - type: conditional
                     conditions:
@@ -5970,15 +6403,11 @@ views:
                             tap_action:
                               action: toggle
                             icon: mdi:cog
-                            show_state: false
                             force_icon: false
                             fill_width: true
                             content_layout: icon-left
                             entity: input_boolean.sem_override_export
                             show_background: true
-                            show_attribute: false
-                            show_last_updated: false
-                            show_last_changed: false
                             state_background: true
                       rows: 0.938
                       hide_main_background: true
@@ -6098,7 +6527,7 @@ views:
                               💰 Exportmedelpris: {{ avg_price | round(3) }} SEK/kWh  
                               ➕ Beräknad export: {{ export_energy | round(2) }} kWh  
 
-                              Systemet kan exportera **{{ states('sensor.sem_available_export_energy_1') | float(0) | round(2) }} kWh** och få ca **{{ state_attr('sensor.sem_available_export_energy_1', 'export_revenue') | float(0) | round(2) }} kr** i intäkt.
+                              Systemet kan exportera **{{ states('sensor.sem_available_export_energy_1') | float(0) | round(2) }} kWh**, vilket beräknas att kunna ge en intäkt på **{{ state_attr('sensor.sem_available_export_energy_1', 'export_revenue') | float(0) | round(2) }} kr**. Den faktiska exportmängden styrs av vilka 15-minutersintervall som har ett tillräckligt högt elpris för att uppfylla systemets lönsamhetskrav.
 
                             {% if not
                             state_attr('sensor.sem_available_export_energy_1',
@@ -6185,7 +6614,7 @@ views:
                             kan även lägga till extra kWh, som återställs inför
                             nästa exportfönster - detta gör du vid **tillägg**.
                             Du kan även sänka din **vinstmarginal** för att
-                            tillåta export till ett lägre pris (högsta godkända
+                            tillåta export till ett lägre pris (lägsta godkända
                             vinstkravet för exportfönstret är: {{
                               (
                                 state_attr('sensor.sem_export_window_1', 'peak_price') | float(0)
@@ -6335,13 +6764,15 @@ views:
                               ➕ Tillägg: {{ extra | round(3) }} kWh 
                               🟰 Planerad export: {{ export_energy  | round(2) }} kWh 
 
-                            Systemet kan exportera **{{
+                            Systemet kan som mest exportera **{{
                             states('sensor.sem_available_export_energy_2') |
-                            float(0) | round(2) }} kWh** vilket bedöms att ge
-                            **{{
+                            float(0) | round(2) }} kWh**, vilket beräknas kunna
+                            ge en intäkt på **{{
                             state_attr('sensor.sem_available_export_energy_2',
-                            'export_revenue') | float(0) | round(2) }} kr** i
-                            intäkt. 
+                            'export_revenue') | float(0) | round(2) }} kr**. Den
+                            faktiska exportmängden styrs av vilka
+                            15-minutersintervall som har ett tillräckligt högt
+                            elpris för att uppfylla systemets lönsamhetskrav. 
 
                             {% if not
                             state_attr('sensor.sem_available_export_energy_2',
@@ -6406,7 +6837,7 @@ views:
                             kan även lägga till extra kWh, som återställs inför
                             nästa exportfönster - detta gör du vid **Tillägg**.
                             Du kan även sänka din **vinstmarginal** för att
-                            tillåta export till ett lägre pris (högsta godkända
+                            tillåta export till ett lägre pris (lägsta godkända
                             vinstkravet för exportfönstret är: {{
                               (
                                 state_attr('sensor.sem_export_window_2', 'peak_price') | float(0)
@@ -6461,13 +6892,13 @@ views:
                       {% set end = end_2 %}
                     {% endif %}
 
-                    🔋 **Prioterad batteridrift: {{ start.strftime('%H:%M') }} - {{ end.strftime('%H:%M') }}**
+                    🔋 **Prioriterad batteridrift: {{ start.strftime('%H:%M') }} - {{ end.strftime('%H:%M') }}**
 
                     Systemet arbetar alltid för att spara batteriet till periodens pristoppar.
 
                   {% elif valid_1 %}
 
-                    🔋 **Prioterad batteridrift: {{ start_1.strftime('%H:%M') }} - {{ end_1.strftime('%H:%M') }}**
+                    🔋 **Prioriterad: {{ start_1.strftime('%H:%M') }} - {{ end_1.strftime('%H:%M') }}**
 
                     Systemet analyserar regelbundet dina energimönster för att spara batteriet till periodens pristoppar. 
 
@@ -6562,7 +6993,7 @@ views:
                 entity_id:
                   - input_boolean.sem_override_charge
                   - input_boolean.sem_override_export
-            rows: 0.891
+            rows: 1
           - type: custom:bubble-card
             card_type: pop-up
             hash: '#battery'
@@ -6821,9 +7252,22 @@ views:
                         - entity: input_number.sem_manual_charge_duration
                           name: Tid
                           icon: mdi:clock-time-eight
-                        - entity: input_boolean.sem_manual_charge
-                          icon: mdi:play-circle
-                          name: Ladda nu
+                    - type: tile
+                      entity: input_boolean.sem_manual_charge
+                      name: Ladda nu
+                      icon: mdi:play
+                      show_entity_picture: false
+                      hide_state: false
+                      vertical: true
+                      tap_action:
+                        action: toggle
+                        confirmation:
+                          text: Vill du starta laddning manuellt?
+                      icon_tap_action:
+                        action: toggle
+                        confirmation:
+                          text: Vill du starta laddning manuellt?
+                      features_position: bottom
                     - type: markdown
                       content: >-
                         **ℹ️Information**
@@ -6860,7 +7304,7 @@ views:
                         ditt system**. På hemskärmens kan du se om den smarta
                         funktionen är aktiv. 
                       text_only: true
-            rows: 0.891
+            rows: 1
             close_action:
               action: perform-action
               perform_action: input_boolean.turn_off
@@ -7023,7 +7467,7 @@ views:
                             - entity: sensor.sem_battery_charge_energy_graph_daily
                               name: Laddat
                               icon: mdi:battery-plus
-                            - entity: sensor.sem_battery_discharge_energy_daily
+                            - entity: sensor.sem_battery_exported_energy_daily
                               icon: mdi:battery-minus
                               name: Sålt
                             - entity: sensor.sem_battery_to_house_energy_daily
@@ -8796,7 +9240,25 @@ views:
               - type: heading
                 icon: mdi:finance
                 heading_style: title
-                heading: Kostnad
+                heading: Kostnad (BETA)
+              - type: custom:bubble-card
+                card_type: sub-buttons
+                sub_button:
+                  bottom:
+                    - entity: sensor.sem_grid_net_cost_power
+                      show_name: true
+                      state_content: state
+                      show_background: true
+                      show_icon: true
+                      name: Aktuell kostnad
+                      icon: mdi:currency-usd
+                      force_icon: true
+                      tap_action:
+                        action: none
+                      state_background: false
+                rows: 0.938
+                hide_main_background: true
+                footer_mode: false
               - type: markdown
                 content: >-
                   Nedan visas den totala nettokostnaden för elen, där både
@@ -8808,23 +9270,53 @@ views:
                 icon: mdi:apps
                 heading: Översikt
                 heading_style: subtitle
-              - type: entities
-                entities:
-                  - entity: sensor.sem_grid_import_cost_daily
-                    name: Idag
-                    icon: mdi:calendar-today
-                  - entity: sensor.sem_earnings_weekly
-                    name: Vecka
-                    icon: mdi:calendar-week
-                  - entity: sensor.sem_earnings_monthly
-                    name: Månad
-                    icon: mdi:calendar-month
-                  - entity: sensor.sem_earnings_yearly
-                    name: År
-                    icon: mdi:calendar-multiple
-                  - entity: sensor.sem_grid_import_cost_total
-                    name: Totalt
-                    icon: mdi:all-inclusive
+              - type: custom:vertical-stack-in-card
+                cards:
+                  - type: markdown
+                    content: |
+                      <table role="presentation" width="100%">
+                        <tr>
+                          <td align="left"><b>Period</b></td>
+                          <td align="left"><b>Med</b></td>
+                          <td align="left"><b>Utan</b></td>
+                          <td align="left"><b>Besparing</b></td>
+                        </tr>
+                        <tr>
+                          <td align="left">📅 Dag</td>
+                          <td align="left">{{ states('sensor.sem_grid_net_cost_meter_daily') }} kr</td>
+                          <td align="left">{{ states('sensor.sem_cost_without_system_meter_daily') }} kr</td>
+                          <td align="left">{{ (states('sensor.sem_cost_without_system_meter_daily') | float(0) - states('sensor.sem_grid_net_cost_meter_daily') | float(0)) | round(2) }} kr</td>
+                        </tr>
+                        <tr>
+                          <td align="left">🗓️ Vecka</td>
+                          <td align="left">{{ states('sensor.sem_grid_net_cost_meter_weekly') }} kr</td>
+                          <td align="left">{{ states('sensor.sem_cost_without_system_meter_weekly') }} kr</td>
+                          <td align="left">{{ (states('sensor.sem_cost_without_system_meter_weekly') | float(0) - states('sensor.sem_grid_net_cost_meter_weekly') | float(0)) | round(2) }} kr</td>
+                        </tr>
+                        <tr>
+                          <td align="left">📆 Månad</td>
+                          <td align="left">{{ states('sensor.sem_grid_net_cost_meter_monthly') }} kr</td>
+                          <td align="left">{{ states('sensor.sem_cost_without_system_meter_monthly') }} kr</td>
+                          <td align="left">{{ (states('sensor.sem_cost_without_system_meter_monthly') | float(0) - states('sensor.sem_grid_net_cost_meter_monthly') | float(0)) | round(2) }} kr</td>
+                        </tr>
+                        <tr>
+                          <td align="left">📊 År</td>
+                          <td align="left">{{ states('sensor.sem_grid_net_cost_meter_yearly') }} kr</td>
+                          <td align="left">{{ states('sensor.sem_cost_without_system_meter_yearly') }} kr</td>
+                          <td align="left">{{ (states('sensor.sem_cost_without_system_meter_yearly') | float(0) - states('sensor.sem_grid_net_cost_meter_yearly') | float(0)) | round(2) }} kr</td>
+                        </tr>
+                        <tr>
+                          <td align="left">♾️ Totalt</td>
+                          <td align="left">{{ states('sensor.sem_grid_net_cost_meter_total') }} kr</td>
+                          <td align="left">{{ states('sensor.sem_cost_without_system_meter_total') }} kr</td>
+                          <td align="left">{{ (states('sensor.sem_cost_without_system_meter_total') | float(0) - states('sensor.sem_grid_net_cost_meter_total') | float(0)) | round(2) }} kr</td>
+                        </tr>
+                      </table>
+                  - type: markdown
+                    content: >-
+                      ℹ️ Tabellen jämför elkostnaden **med** solceller, batteri
+                      och smart energistyrning med den beräknade kostnaden
+                      **utan** solceller och batteri.
               - type: conditional
                 conditions:
                   - condition: state
@@ -8844,24 +9336,36 @@ views:
                       collection_key: energy_sem_cost_day
                     - type: statistics-graph
                       entities:
-                        - sensor.sem_grid_import_cost_total
+                        - entity: sensor.sem_grid_net_cost_meter_daily
+                          name: Med systemet
+                        - entity: sensor.sem_cost_difference_meter_daily
+                          name: Utan systemet
+                          color: light-grey
+                      days_to_show: 1
                       period: hour
-                      chart_type: bar
+                      chart_type: bar-stack
                       stat_types:
                         - change
-                      hide_legend: true
+                      hide_legend: false
+                      logarithmic_scale: false
+                      min_y_axis: 0
+                      fit_y_data: false
                       energy_date_selection: true
                       collection_key: energy_sem_cost_day
                     - type: markdown
                       content: >-
                         ℹ️**Information** 
 
+                        Grafen visar kostnaden för att köra med systemet. Toppen
+                        på stapeln visar den extra kostnad du hade haft om du
+                        inte använde systemet - alltså vad det hade kostat
+                        utöver dagens kostnad utan solceller, batteri och smart
+                        styrning.
+
+
                         Klicka på pilarna uppe till höger för att växla mellan
-                        dagar.
-
-
-                        <i>Om grafen inte visar en dag kan du justera grafen
-                        genom att klicka på kalendern uppe till vänster </i>
+                        dagar. Om grafen inte visar en dag behöver du justera
+                        grafen genom att klicka på kalendern uppe till vänster. 
                     - type: entities
                       entities:
                         - entity: input_select.sem_earnings
@@ -8885,12 +9389,17 @@ views:
                       collection_key: energy_sem_earning_week
                     - type: statistics-graph
                       entities:
-                        - entity: sensor.sem_earnings_tot
+                        - entity: sensor.sem_grid_net_cost_meter_weekly
+                          name: Med systemet
+                        - entity: sensor.sem_cost_difference_meter_weekly
+                          name: Utan systemet
+                          color: light-grey
                       period: day
-                      chart_type: bar
+                      chart_type: bar-stack
                       stat_types:
                         - change
-                      hide_legend: true
+                      hide_legend: false
+                      min_y_axis: 0
                       energy_date_selection: true
                       collection_key: energy_sem_earning_week
                     - type: markdown
@@ -8926,12 +9435,16 @@ views:
                       collection_key: energy_sem_earning_month
                     - type: statistics-graph
                       entities:
-                        - entity: sensor.sem_earnings_tot
+                        - entity: sensor.sem_grid_net_cost_meter_monthly
+                          name: Med systemet
+                        - entity: sensor.sem_cost_difference_meter_monthly
+                          name: Utan systemet
+                          color: light-grey
                       period: week
-                      chart_type: bar
+                      chart_type: bar-stack
                       stat_types:
                         - change
-                      hide_legend: true
+                      hide_legend: false
                       energy_date_selection: true
                       collection_key: energy_sem_earning_month
                     - type: markdown
@@ -8967,12 +9480,16 @@ views:
                       collection_key: energy_sem_earning_year
                     - type: statistics-graph
                       entities:
-                        - entity: sensor.sem_earnings_tot
+                        - entity: sensor.sem_grid_net_cost_meter_yearly
+                          name: Med systemet
+                        - entity: sensor.sem_cost_difference_meter_yearly
+                          name: Utan systemet
+                          color: light-grey
                       period: month
-                      chart_type: bar
+                      chart_type: bar-stack
                       stat_types:
                         - change
-                      hide_legend: true
+                      hide_legend: false
                       energy_date_selection: true
                       collection_key: energy_sem_earning_year
                     - type: markdown
@@ -8989,6 +9506,32 @@ views:
                       entities:
                         - entity: input_select.sem_earnings
                           name: Välj graf
+              - type: tile
+                entity: sensor.sem_cost_without_system_total
+                name: TEST MÄTARE
+                vertical: false
+                features_position: bottom
+              - type: tile
+                entity: sensor.sem_system_savings_total
+                name: TEST DIFF
+                vertical: false
+                features_position: bottom
+              - type: tile
+                entity: sensor.sem_grid_net_cost_power
+                name: NETTO MED SYSTEM
+                vertical: false
+                features_position: bottom
+              - type: tile
+                entity: sensor.sem_cost_difference_power
+                name: DIFF MOT UTAN SYSTEMET
+                vertical: false
+                features_position: bottom
+              - type: tile
+                entity: sensor.sem_ev_charging_cost
+                vertical: false
+                features_position: bottom
+              - type: tile
+                entity: sensor.sem_ev_cost_meter_daily
             card_layout: large
           - type: custom:bubble-card
             card_type: pop-up
@@ -9046,34 +9589,13 @@ views:
         show_name: true
         show_state: true
         show_icon: true
-        entity: sensor.sem_grid_net_cost_daily
-        name: Kostnad (Idag) (BETA)
-        tap_action:
-          action: none
-        icon: mdi:finance
-        color: blue
-      - type: entity
-        show_name: true
-        show_state: true
-        show_icon: true
-        entity: sensor.sem_earnings_daily
-        name: Förtjänst (Idag)
-        icon: mdi:finance
-        color: blue
+        entity: sensor.sem_grid_net_cost_meter_daily
+        name: Kostnad (Idag) (🧪BETA)
         tap_action:
           action: navigate
-          navigation_path: '#earnings'
-      - type: entity
-        show_name: true
-        show_state: true
-        show_icon: true
-        entity: sensor.sem_savings_daily
+          navigation_path: '#costs'
         icon: mdi:finance
         color: blue
-        name: Besparing (Idag)
-        tap_action:
-          action: navigate
-          navigation_path: '#savings'
       - type: entity
         show_name: true
         show_state: true
