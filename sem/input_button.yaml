@@ -31,3 +31,14 @@ input_button:
 
   sem_ev_zaptec_configure:
     name: Configure Zaptec Wallbox
+
+  sem_ev_charge_now: 
+    name: Start EV Charge Now
+
+  sem_ev_charge_stop_1:
+    name: Stoppa laddbox 1
+    icon: mdi:ev-station-off
+
+  sem_ev_charge_stop_2:
+    name: Stoppa laddbox 2
+    icon: mdi:ev-station-off
