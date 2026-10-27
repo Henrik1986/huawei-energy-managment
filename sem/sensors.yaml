@@ -1,10 +1,32 @@
 sensor:
-  # FOR CALCULATION OF CHARGE
+  # HOUSE KWH
   - platform: integration
     name: "sem_house_power_tot"
     source: sensor.sem_house_power
     round: 2
     method: left
+
+  # COST WITHOUT SYSTEM SEK
+  - platform: integration
+    name: "sem_cost_without_system_total"
+    source: sensor.sem_cost_without_system
+    method: left
+    round: 2
+
+  # COST EV CHARGING SEK
+  - platform: integration
+    name: "SEM EV Charging Cost Total"
+    source: sensor.sem_ev_charging_cost
+    method: left
+    round: 2
+
+
+# COST DIFFERENCE BETWEEN SMART SYSTEM AND NO SYSTEM
+  - platform: integration
+    name: "SEM Cost Difference Total"
+    source: sensor.sem_cost_difference_power
+    method: left
+    round: 2
 
   # SOLAR KWH
   - platform: integration
@@ -146,12 +168,3 @@ sensor:
     unique_id: sem_battery_to_house_energy
     round: 3
     method: left
-
-####################################################################
-
-  # LATEST GITHUB RELEASE
-  - platform: rest
-    name: "sem_github_latest_release"
-    resource: https://raw.githubusercontent.com/Henrik1986/huawei-energy-managment/main/sem/github_version.json
-    value_template: "{{ value_json.version }}"
-    scan_interval: 21600 # var 6:e timme
