@@ -70,6 +70,7 @@ input_select:
       - Välj laddbox
       - Pulsar Max
       - Easee
+      - Zaptec
       - Annan laddbox
 
   sem_ev_charger_2:
@@ -78,4 +79,5 @@ input_select:
       - Välj laddbox
       - Pulsar Max
       - Easee
+      - Zaptec
       - Annan laddbox
