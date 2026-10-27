@@ -14,3 +14,23 @@ input_datetime:
     name: Laddad senast
     has_date: false
     has_time: true
+    
+  sem_battery_window_1a_start:
+    name: SEM Battery Window 1a Start
+    has_date: true
+    has_time: true
+
+  sem_battery_window_1a_stop:
+    name: SEM Battery Window 1a Stop
+    has_date: true
+    has_time: true
+
+  sem_battery_window_2_start:
+    name: SEM Battery Window 2 Start
+    has_date: true
+    has_time: true
+
+  sem_battery_window_2_stop:
+    name: SEM Battery Window 2 Stop
+    has_date: true
+    has_time: true
