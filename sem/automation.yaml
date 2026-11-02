@@ -2875,7 +2875,10 @@ automation:
       - condition: template
         value_template: >
           {% set latest = states('sensor.sem_github_latest_release') %}
-          {% set installed = states('sensor.sem_version') %}
+          {% set installed = states('sensor.sem_version')
+            | replace('v.', '')
+            | replace('v', '') %}
+
           {{ latest not in ['unknown', 'unavailable', 'none', ''] and
              installed not in ['unknown', 'unavailable', 'none', ''] and
              latest != installed }}
