@@ -39,6 +39,10 @@ input_text:
     name: "Nordpool sensor inofficial"
     max: 100
 
+  sem_nordpool_entry_inofficial:
+    name: "Nordpool entry inofficial"
+    max: 100
+
   sem_weather_sensor:
     name: "Vädersensor (SMHI)"
     icon: mdi:weather-partly-cloudy
