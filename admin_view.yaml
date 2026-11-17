@@ -44,8 +44,6 @@ sections:
         kwh_decimals: 1
         min_flow_rate: 1
         max_flow_rate: 6
-        max_expected_energy: 2000
-        min_expected_energy: 10
         wh_kwh_threshold: 1000
         grid_options:
           columns: 60
@@ -707,7 +705,7 @@ sections:
             entity: sensor.sem_house_power
             name: Huset
             icon: mdi:home
-            color: blue-grey
+            color: blue
             show_entity_picture: false
             hide_state: false
             vertical: false
@@ -762,7 +760,7 @@ sections:
                   entity: sensor.sem_ev_sensor_power
                   name: Laddbox
                   icon: mdi:ev-plug-type2
-                  color: blue
+                  color: teal
                   vertical: false
                   tap_action:
                     action: navigate
@@ -804,7 +802,7 @@ sections:
               - type: tile
                 entity: sensor.batteries_state_of_capacity
                 name: Nivå
-                icon: mdi:battery
+                icon: ''
                 color: indigo
                 show_entity_picture: false
                 hide_state: false
@@ -815,11 +813,11 @@ sections:
                   action: none
                 features_position: inline
             columns: 2
-        view_layout:
-          position: sidebar
         grid_options:
           columns: 24
           rows: auto
+        view_layout:
+          position: sidebar
       - type: heading
         heading_style: subtitle
         heading: Systemets driftplan (AI Analys)
@@ -1415,6 +1413,29 @@ sections:
                           **Exempel <i>sensor.ditt_sensor_namn**
                         {% endif %}
                       text_only: true
+                    - type: entities
+                      entities:
+                        - entity: input_text.sem_nordpool_entry_inofficial
+                          name: Nordpool entry-ID
+                    - type: markdown
+                      content: >-
+                        ℹ️Information
+
+
+                        1. Gå till **Inställningar → Enheter och tjänster →
+                        Integrationer**.
+
+                        2. Leta upp **Nord Pool** och klicka på integrationen.
+
+                        3. Klicka på de tre prickarna (⋮) och välj **Kopiera
+                        Entry ID**.
+
+
+                        Alternativt hittar du ditt `entry_id` i webbläsarens
+                        adressfält när du öppnat Nordpool-integrationen.
+
+
+                        Kopiera värdet och klistra in det i fältet ovanför. 
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -1621,7 +1642,7 @@ sections:
               - type: markdown
                 content: |
                   <center> 1 av 4 </center>
-        rows: 1.375
+        rows: 1.188
       - type: custom:bubble-card
         card_type: pop-up
         hash: '#config_3'
@@ -4105,6 +4126,37 @@ sections:
             icon: mdi:ev-plug-type2
             heading: Laddbox
             heading_style: title
+          - type: custom:bubble-card
+            card_type: sub-buttons
+            sub_button:
+              bottom:
+                - visibility:
+                    - condition: state
+                      entity_id: input_boolean.sem_ev_integrated
+                      state:
+                        - 'on'
+                  entity: sensor.car_battery_level
+                  show_name: true
+                  state_content: state
+                  name: Elbil
+                  icon: mdi:car-electric
+                  show_background: true
+                  state_background: false
+                - visibility:
+                    - condition: state
+                      entity_id: input_boolean.sem_ev_integrated
+                      state:
+                        - 'on'
+                  entity: sensor.sem_ev_charging_cost
+                  show_name: true
+                  state_content: state
+                  name: Laddkostnad
+                  icon: mdi:car-electric
+                  show_background: true
+                  state_background: false
+            rows: 0.938
+            hide_main_background: false
+            footer_mode: false
           - type: custom:vertical-stack-in-card
             cards:
               - type: conditional
@@ -9159,12 +9211,12 @@ sections:
                   state_content: state
                   show_background: true
                   show_icon: true
-                  name: Aktuell kostnad
                   icon: mdi:currency-usd
                   force_icon: true
                   tap_action:
                     action: none
                   state_background: false
+                  name: Aktuell kostnad
             rows: 0.938
             hide_main_background: true
             footer_mode: false
@@ -9180,51 +9232,139 @@ sections:
             heading_style: subtitle
           - type: custom:vertical-stack-in-card
             cards:
-              - type: markdown
-                content: |
-                  <table role="presentation" width="100%">
-                    <tr>
-                      <td align="left"><b>Period</b></td>
-                      <td align="left"><b>Med</b></td>
-                      <td align="left"><b>Utan</b></td>
-                      <td align="left"><b>Besparing</b></td>
-                    </tr>
-                    <tr>
-                      <td align="left">📅 Dag</td>
-                      <td align="left">{{ states('sensor.sem_grid_net_cost_meter_daily') }} kr</td>
-                      <td align="left">{{ states('sensor.sem_cost_without_system_meter_daily') }} kr</td>
-                      <td align="left">{{ (states('sensor.sem_cost_without_system_meter_daily') | float(0) - states('sensor.sem_grid_net_cost_meter_daily') | float(0)) | round(2) }} kr</td>
-                    </tr>
-                    <tr>
-                      <td align="left">🗓️ Vecka</td>
-                      <td align="left">{{ states('sensor.sem_grid_net_cost_meter_weekly') }} kr</td>
-                      <td align="left">{{ states('sensor.sem_cost_without_system_meter_weekly') }} kr</td>
-                      <td align="left">{{ (states('sensor.sem_cost_without_system_meter_weekly') | float(0) - states('sensor.sem_grid_net_cost_meter_weekly') | float(0)) | round(2) }} kr</td>
-                    </tr>
-                    <tr>
-                      <td align="left">📆 Månad</td>
-                      <td align="left">{{ states('sensor.sem_grid_net_cost_meter_monthly') }} kr</td>
-                      <td align="left">{{ states('sensor.sem_cost_without_system_meter_monthly') }} kr</td>
-                      <td align="left">{{ (states('sensor.sem_cost_without_system_meter_monthly') | float(0) - states('sensor.sem_grid_net_cost_meter_monthly') | float(0)) | round(2) }} kr</td>
-                    </tr>
-                    <tr>
-                      <td align="left">📊 År</td>
-                      <td align="left">{{ states('sensor.sem_grid_net_cost_meter_yearly') }} kr</td>
-                      <td align="left">{{ states('sensor.sem_cost_without_system_meter_yearly') }} kr</td>
-                      <td align="left">{{ (states('sensor.sem_cost_without_system_meter_yearly') | float(0) - states('sensor.sem_grid_net_cost_meter_yearly') | float(0)) | round(2) }} kr</td>
-                    </tr>
-                    <tr>
-                      <td align="left">♾️ Totalt</td>
-                      <td align="left">{{ states('sensor.sem_grid_net_cost_meter_total') }} kr</td>
-                      <td align="left">{{ states('sensor.sem_cost_without_system_meter_total') }} kr</td>
-                      <td align="left">{{ (states('sensor.sem_cost_without_system_meter_total') | float(0) - states('sensor.sem_grid_net_cost_meter_total') | float(0)) | round(2) }} kr</td>
-                    </tr>
-                  </table>
-              - type: markdown
-                content: >-
-                  ℹ️ Tabellen jämför elkostnaden **med** solceller, batteri och
-                  smart energistyrning med den beräknade kostnaden **utan**
-                  solceller och batteri.
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity_id: input_boolean.sem_ink_ev
+                    state:
+                      - 'off'
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: markdown
+                      content: |
+                        <table role="presentation" width="100%">
+                          <tr>
+                            <td align="left"><b>Period</b></td>
+                            <td align="left"><b>Med</b></td>
+                            <td align="left"><b>Utan</b></td>
+                            <td align="left"><b>Besparing</b></td>
+                          </tr>
+                          <tr>
+                            <td align="left">📅 Dag</td>
+                            <td align="left">{{ states('sensor.sem_grid_net_cost_meter_daily') }} kr</td>
+                            <td align="left">{{ states('sensor.sem_cost_without_system_meter_daily') }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_daily') | float(0) - states('sensor.sem_grid_net_cost_meter_daily') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">🗓️ Vecka</td>
+                            <td align="left">{{ states('sensor.sem_grid_net_cost_meter_weekly') }} kr</td>
+                            <td align="left">{{ states('sensor.sem_cost_without_system_meter_weekly') }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_weekly') | float(0) - states('sensor.sem_grid_net_cost_meter_weekly') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">📆 Månad</td>
+                            <td align="left">{{ states('sensor.sem_grid_net_cost_meter_monthly') }} kr</td>
+                            <td align="left">{{ states('sensor.sem_cost_without_system_meter_monthly') }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_monthly') | float(0) - states('sensor.sem_grid_net_cost_meter_monthly') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">📊 År</td>
+                            <td align="left">{{ states('sensor.sem_grid_net_cost_meter_yearly') }} kr</td>
+                            <td align="left">{{ states('sensor.sem_cost_without_system_meter_yearly') }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_yearly') | float(0) - states('sensor.sem_grid_net_cost_meter_yearly') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">♾️ Totalt</td>
+                            <td align="left">{{ states('sensor.sem_grid_net_cost_meter_total') }} kr</td>
+                            <td align="left">{{ states('sensor.sem_cost_without_system_meter_total') }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_total') | float(0) - states('sensor.sem_grid_net_cost_meter_total') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                        </table>
+                    - type: markdown
+                      content: >-
+                        ℹ️ Tabellen jämför elkostnaden **med** solceller,
+                        batteri och smart energistyrning med den beräknade
+                        kostnaden **utan** solceller och batteri.
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity_id: input_boolean.sem_ink_ev
+                    state:
+                      - 'on'
+                card:
+                  type: custom:vertical-stack-in-card
+                  cards:
+                    - type: markdown
+                      content: >
+                        <table role="presentation" width="100%">
+                          <tr>
+                            <td align="left"><b>Period</b></td>
+                            <td align="left"><b>Med</b></td>
+                            <td align="left"><b>Utan</b></td>
+                            <td align="left"><b>Besparing</b></td>
+                          </tr>
+                          <tr>
+                            <td align="left">📅 Dag</td>
+                            <td align="left">{{ (states('sensor.sem_grid_net_cost_meter_daily') | float(0) +
+                            states('sensor.sem_ev_cost_meter_daily') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_daily') | float(0) +
+                            states('sensor.sem_ev_cost_meter_daily') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_daily') | float(0) - states('sensor.sem_grid_net_cost_meter_daily') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">🗓️ Vecka</td>
+                                <td align="left">{{ (states('sensor.sem_grid_net_cost_meter_weekly') | float(0) + states('sensor.sem_ev_cost_meter_weekly') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_weekly') | float(0) +
+                            states('sensor.sem_ev_cost_meter_weekly') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_weekly') | float(0) - states('sensor.sem_grid_net_cost_meter_weekly') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">📆 Månad</td>
+                            <td align="left">{{ (states('sensor.sem_grid_net_cost_meter_monthly') | float(0) + states('sensor.sem_ev_cost_meter_monthly') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_monthly') | float(0) +
+                            states('sensor.sem_ev_cost_meter_monthly') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_monthly') | float(0) - states('sensor.sem_grid_net_cost_meter_monthly') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">📊 År</td>
+                        <td align="left">{{
+                        (states('sensor.sem_grid_net_cost_meter_yearly') |
+                        float(0) + states('sensor.sem_ev_cost_meter_yearly') |
+                        float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_yearly') | float(0) +
+                            states('sensor.sem_ev_cost_meter_yearly') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_yearly') | float(0) - states('sensor.sem_grid_net_cost_meter_yearly') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                          <tr>
+                            <td align="left">♾️ Totalt</td>
+                        <td align="left">{{
+                        (states('sensor.sem_grid_net_cost_meter_total') |
+                        float(0) + states('sensor.sem_ev_cost_meter_total') |
+                        float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_total') | float(0) +
+                            states('sensor.sem_ev_cost_meter_total') | float(0)) | round(2) }} kr</td>
+                            <td align="left">{{ (states('sensor.sem_cost_without_system_meter_total') | float(0) - states('sensor.sem_grid_net_cost_meter_total') | float(0)) | round(2) }} kr</td>
+                          </tr>
+                        </table>
+                    - type: markdown
+                      content: >-
+                        ℹ️ Tabellen jämför elkostnaden **med** solceller,
+                        batteri och smart energistyrning med den beräknade
+                        kostnaden **utan** solceller och batteri.
+              - type: conditional
+                conditions:
+                  - condition: state
+                    entity_id: input_boolean.sem_ev_wallbox_single
+                    state:
+                      - 'on'
+                card:
+                  type: entities
+                  entities:
+                    - entity: input_boolean.sem_ink_ev
+                      color: green
+                      name: Ink. laddbox
+                      icon: mdi:ev-plug-type2
           - type: conditional
             conditions:
               - condition: state
@@ -9242,37 +9382,76 @@ sections:
                   opening_direction: auto
                   disable_compare: false
                   collection_key: energy_sem_cost_day
-                - type: statistics-graph
-                  entities:
-                    - entity: sensor.sem_grid_net_cost_meter_daily
-                      name: Med systemet
-                    - entity: sensor.sem_cost_difference_meter_daily
-                      name: Utan systemet
-                      color: light-grey
-                  days_to_show: 1
-                  period: hour
-                  chart_type: bar-stack
-                  stat_types:
-                    - change
-                  hide_legend: false
-                  logarithmic_scale: false
-                  min_y_axis: 0
-                  fit_y_data: false
-                  energy_date_selection: true
-                  collection_key: energy_sem_cost_day
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'off'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_grid_net_cost_meter_daily
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_daily
+                        name: Utan systemet
+                        color: light-grey
+                    days_to_show: 1
+                    period: hour
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    expand_legend: false
+                    logarithmic_scale: false
+                    min_y_axis: 0
+                    fit_y_data: false
+                    energy_date_selection: true
+                    collection_key: energy_sem_cost_day
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'on'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_ev_cost_meter_daily
+                        name: Laddbox
+                        color: teal
+                      - entity: sensor.sem_grid_net_cost_meter_daily
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_daily
+                        name: Utan systemet
+                        color: light-grey
+                    days_to_show: 1
+                    period: hour
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    expand_legend: false
+                    logarithmic_scale: false
+                    min_y_axis: 0
+                    fit_y_data: false
+                    energy_date_selection: true
+                    collection_key: energy_sem_cost_day
                 - type: markdown
                   content: >-
                     ℹ️**Information** 
 
-                    Grafen visar kostnaden för att köra med systemet. Toppen på
-                    stapeln visar den extra kostnad du hade haft om du inte
-                    använde systemet - alltså vad det hade kostat utöver dagens
-                    kostnad utan solceller, batteri och smart styrning.
+                    Grafen visar den faktiska kostnaden med systemet. Den grå
+                    delen av stapeln visar hur mycket högre kostnaden hade varit
+                    utan solceller, batteri och smart styrning. Grafen
+                    uppdateras varje timme.
 
 
-                    Klicka på pilarna uppe till höger för att växla mellan
-                    dagar. Om grafen inte visar en dag behöver du justera grafen
-                    genom att klicka på kalendern uppe till vänster. 
+                    Använd pilarna uppe till höger för att växla mellan dagar.
+                    Om grafen inte visar kostnaden för en dag kan du justera
+                    detta genom att klicka på kalendern uppe till vänster 📅.
                 - type: entities
                   entities:
                     - entity: input_select.sem_earnings
@@ -9294,31 +9473,69 @@ sections:
                   opening_direction: auto
                   disable_compare: false
                   collection_key: energy_sem_earning_week
-                - type: statistics-graph
-                  entities:
-                    - entity: sensor.sem_grid_net_cost_meter_weekly
-                      name: Med systemet
-                    - entity: sensor.sem_cost_difference_meter_weekly
-                      name: Utan systemet
-                      color: light-grey
-                  period: day
-                  chart_type: bar-stack
-                  stat_types:
-                    - change
-                  hide_legend: false
-                  min_y_axis: 0
-                  energy_date_selection: true
-                  collection_key: energy_sem_earning_week
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'on'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_ev_cost_meter_weekly
+                        name: Laddbox
+                        color: teal
+                      - entity: sensor.sem_grid_net_cost_meter_weekly
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_weekly
+                        name: Utan systemet
+                        color: light-grey
+                    period: day
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    min_y_axis: 0
+                    energy_date_selection: true
+                    collection_key: energy_sem_earning_week
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'off'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_grid_net_cost_meter_weekly
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_weekly
+                        name: Utan systemet
+                        color: light-grey
+                    period: day
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    min_y_axis: 0
+                    energy_date_selection: true
+                    collection_key: energy_sem_earning_week
                 - type: markdown
                   content: >-
                     ℹ️**Information** 
 
+                    Grafen visar kostnaden för att köra med systemet. Den gråa
+                    toppen på stapeln visar den extra kostnad du hade haft om du
+                    inte använde systemet - alltså vad det hade kostat utöver
+                    dagens kostnad utan solceller, batteri och smart styrning.
+                    Grafen uppdateras timvis. 
+
+
                     Klicka på pilarna uppe till höger för att växla mellan
-                    veckor.
-
-
-                    <i>Om grafen inte visar en vecka kan du justera grafen genom
-                    att klicka på kalendern uppe till vänster </i>
+                    veckor. Om grafen inte visar en vecka behöver du justera
+                    grafen genom att klicka på kalendern uppe till vänster. 
                 - type: entities
                   entities:
                     - entity: input_select.sem_earnings
@@ -9340,20 +9557,55 @@ sections:
                   opening_direction: auto
                   disable_compare: false
                   collection_key: energy_sem_earning_month
-                - type: statistics-graph
-                  entities:
-                    - entity: sensor.sem_grid_net_cost_meter_monthly
-                      name: Med systemet
-                    - entity: sensor.sem_cost_difference_meter_monthly
-                      name: Utan systemet
-                      color: light-grey
-                  period: week
-                  chart_type: bar-stack
-                  stat_types:
-                    - change
-                  hide_legend: false
-                  energy_date_selection: true
-                  collection_key: energy_sem_earning_month
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'on'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_ev_cost_meter_monthly
+                        name: Laddbox
+                        color: teal
+                      - entity: sensor.sem_grid_net_cost_meter_monthly
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_monthly
+                        name: Utan systemet
+                        color: light-grey
+                    period: week
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    min_y_axis: 0
+                    energy_date_selection: true
+                    collection_key: energy_sem_earning_month
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'off'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_grid_net_cost_meter_monthly
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_monthly
+                        name: Utan systemet
+                        color: light-grey
+                    period: week
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    min_y_axis: 0
+                    energy_date_selection: true
+                    collection_key: energy_sem_earning_month
                 - type: markdown
                   content: >
                     ℹ️**Information** 
@@ -9385,20 +9637,55 @@ sections:
                   opening_direction: auto
                   disable_compare: false
                   collection_key: energy_sem_earning_year
-                - type: statistics-graph
-                  entities:
-                    - entity: sensor.sem_grid_net_cost_meter_yearly
-                      name: Med systemet
-                    - entity: sensor.sem_cost_difference_meter_yearly
-                      name: Utan systemet
-                      color: light-grey
-                  period: month
-                  chart_type: bar-stack
-                  stat_types:
-                    - change
-                  hide_legend: false
-                  energy_date_selection: true
-                  collection_key: energy_sem_earning_year
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'on'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_ev_cost_meter_yearly
+                        name: Laddbox
+                        color: teal
+                      - entity: sensor.sem_grid_net_cost_meter_yearly
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_yearly
+                        name: Utan systemet
+                        color: light-grey
+                    period: month
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    min_y_axis: 0
+                    energy_date_selection: true
+                    collection_key: energy_sem_earning_year
+                - type: conditional
+                  conditions:
+                    - condition: state
+                      entity_id: input_boolean.sem_ink_ev
+                      state:
+                        - 'off'
+                  card:
+                    type: statistics-graph
+                    entities:
+                      - entity: sensor.sem_grid_net_cost_meter_yearly
+                        name: Med systemet
+                        color: blue
+                      - entity: sensor.sem_extra_cost_meter_yearly
+                        name: Utan systemet
+                        color: light-grey
+                    period: month
+                    chart_type: bar-stack
+                    stat_types:
+                      - change
+                    hide_legend: false
+                    min_y_axis: 0
+                    energy_date_selection: true
+                    collection_key: energy_sem_earning_year
                 - type: markdown
                   content: >-
                     ℹ️**Information** 
@@ -9412,33 +9699,8 @@ sections:
                   entities:
                     - entity: input_select.sem_earnings
                       name: Välj graf
-          - type: tile
-            entity: sensor.sem_cost_without_system_total
-            name: TEST MÄTARE
-            vertical: false
-            features_position: bottom
-          - type: tile
-            entity: sensor.sem_system_savings_total
-            name: TEST DIFF
-            vertical: false
-            features_position: bottom
-          - type: tile
-            entity: sensor.sem_grid_net_cost_power
-            name: NETTO MED SYSTEM
-            vertical: false
-            features_position: bottom
-          - type: tile
-            entity: sensor.sem_cost_difference_power
-            name: DIFF MOT UTAN SYSTEMET
-            vertical: false
-            features_position: bottom
-          - type: tile
-            entity: sensor.sem_ev_charging_cost
-            vertical: false
-            features_position: bottom
-          - type: tile
-            entity: sensor.sem_ev_cost_meter_daily
         card_layout: large
+        rows: 0.938
       - type: custom:bubble-card
         card_type: pop-up
         hash: '#new_version'
