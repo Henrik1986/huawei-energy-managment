@@ -134,6 +134,7 @@ sql:
           AND state IS NOT NULL
       )
       SELECT
+        'OK' AS state,
         COALESCE(
           json_group_array(
             json_object(
@@ -151,5 +152,5 @@ sql:
           '[]'
         ) AS sem
       FROM daily;
-    column: "sem"
+    column: "state"
 
