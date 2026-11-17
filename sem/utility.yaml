@@ -30,70 +30,86 @@ utility_meter:
     cycle: daily
     unique_id: sem_export
 
-# COST WITHOUT SYSTEM 
+############# COST WITHOUT SYSTEM  ##################
+
+# COST SEK WITHOUT SYSTEM DAILY
   sem_cost_without_system_meter_daily:
     source: sensor.sem_cost_without_system_total
     cycle: daily
     periodically_resetting: false
     unique_id: sem_cost_without_system_meter_daily
 
+# COST SEK WITHOUT SYSTEM WEEKLY
   sem_cost_without_system_meter_weekly:
     source: sensor.sem_cost_without_system_total
     cycle: weekly
     periodically_resetting: false
     unique_id: sem_cost_without_system_meter_weekly
 
+# COST SEK WITHOUT SYSTEM MONTHLY
   sem_cost_without_system_meter_monthly:
     source: sensor.sem_cost_without_system_total
     cycle: monthly
     periodically_resetting: false
     unique_id: sem_cost_without_system_meter_monthly
 
+# COST SEK WITHOUT SYSTEM YEARLY
   sem_cost_without_system_meter_yearly:
     source: sensor.sem_cost_without_system_total
     cycle: yearly
     periodically_resetting: false
     unique_id: sem_cost_without_system_meter_yearly
 
+# COST SEK WITHOUT SYSTEM TOTAL
   sem_cost_without_system_meter_total:
     source: sensor.sem_cost_without_system_total
     periodically_resetting: false
     unique_id: sem_cost_without_system_meter_total
 
-# COST DIFFERENCE BETWEEN SYSTEM AND NO SYSTEM
-  sem_cost_difference_meter_daily:
-    source: sensor.sem_cost_difference_total
-    cycle: daily
-    periodically_resetting: false
-    unique_id: sem_cost_difference_meter_daily
+############# COST DIFFERENCE BETWEEN SYSTEM AND NO SYSTEM ##################
 
-  sem_cost_difference_meter_weekly:
-    source: sensor.sem_cost_difference_total
+# COST SEK DIFFERENCE DAILY
+  sem_extra_cost_meter_daily:
+    source: sensor.sem_extra_cost_accumulated
+    cycle: daily
+    net_consumption: true
+    periodically_resetting: false
+    unique_id: sem_extra_cost_meter_daily
+
+# COST SEK DIFFERENCE WEEKLY
+  sem_extra_cost_meter_weekly:
+    source: sensor.sem_extra_cost_accumulated
     cycle: weekly
+    net_consumption: true
     periodically_resetting: false
-    unique_id: sem_cost_difference_meter_weekly
+    unique_id: sem_extra_cost_meter_weekly
 
-  sem_cost_difference_meter_monthly:
-    source: sensor.sem_cost_difference_total
+# COST SEK DIFFERENCE MONTHLY
+  sem_extra_cost_meter_monthly:
+    source: sensor.sem_extra_cost_accumulated
     cycle: monthly
+    net_consumption: true
     periodically_resetting: false
-    unique_id: sem_cost_difference_meter_monthly
+    unique_id: sem_extra_cost_meter_monthly
 
-  sem_cost_difference_meter_yearly:
-    source: sensor.sem_cost_difference_total
+# COST SEK DIFFERENCE YEARLY
+  sem_extra_cost_meter_yearly:
+    source: sensor.sem_extra_cost_accumulated
     cycle: yearly
+    net_consumption: true
     periodically_resetting: false
-    unique_id: sem_cost_difference_meter_yearly
+    unique_id: sem_extra_cost_meter_yearly
 
-   
-# EV CHARGING COST
-  sem_ev_cost_meter_daily:
-    source: sensor.sem_ev_charging_cost_total
-    cycle: daily
+# COST SEK DIFFERENCE TOTAL
+  sem_extra_cost_meter_total:
+    source: sensor.sem_extra_cost_accumulated
+    net_consumption: true
     periodically_resetting: false
-    unique_id: sem_ev_cost_meter_daily
+    unique_id: sem_extra_cost_meter_total
 
-# NET COST
+######################### NET COST (COST - EARNINGS) ##################
+
+# NET SEK COST DAILY
   sem_grid_net_cost_meter_daily:
     source: sensor.sem_grid_net_cost_accumulated
     cycle: daily
@@ -101,6 +117,7 @@ utility_meter:
     periodically_resetting: false
     unique_id: sem_grid_net_cost_meter_daily
 
+# NET SEK COST WEEKLY
   sem_grid_net_cost_meter_weekly:
     source: sensor.sem_grid_net_cost_accumulated
     cycle: weekly
@@ -108,6 +125,7 @@ utility_meter:
     periodically_resetting: false
     unique_id: sem_grid_net_cost_meter_weekly
 
+# NET SEK COST MONTHLY
   sem_grid_net_cost_meter_monthly:
     source: sensor.sem_grid_net_cost_accumulated
     cycle: monthly
@@ -115,6 +133,7 @@ utility_meter:
     periodically_resetting: false
     unique_id: sem_grid_net_cost_meter_monthly
 
+# NET SEK COST YEARLY
   sem_grid_net_cost_meter_yearly:
     source: sensor.sem_grid_net_cost_accumulated
     cycle: yearly
@@ -122,58 +141,89 @@ utility_meter:
     periodically_resetting: false
     unique_id: sem_grid_net_cost_meter_yearly
 
+# NET SEK COST TOTAL
   sem_grid_net_cost_meter_total:
     source: sensor.sem_grid_net_cost_accumulated
     net_consumption: true
     periodically_resetting: false
     unique_id: sem_grid_net_cost_meter_total
 
+######################## EV CHARGE COST ##################
+# EV CHARGE COST SEK DAILY
+  sem_ev_cost_meter_daily:
+    source: sensor.sem_ev_charging_cost_total
+    cycle: daily
+    periodically_resetting: false
+    unique_id: sem_ev_cost_meter_daily
+
+# EV CHARGE COST SEK WEEKLY
+  sem_ev_cost_meter_weekly:
+    source: sensor.sem_ev_charging_cost_total
+    cycle: weekly
+    periodically_resetting: false
+    unique_id: sem_ev_cost_meter_weekly
+
+# EV CHARGE COST SEK MONTHLY
+  sem_ev_cost_meter_monthly:
+    source: sensor.sem_ev_charging_cost_total
+    cycle: monthly
+    periodically_resetting: false
+    unique_id: sem_ev_cost_meter_monthly
+
+# EV CHARGE COST SEK YEARLY
+  sem_ev_cost_meter_yearly:
+    source: sensor.sem_ev_charging_cost_total
+    cycle: yearly
+    periodically_resetting: false
+    unique_id: sem_ev_cost_meter_yearly
+
+# EV CHARGE COST SEK TOTAL
+  sem_ev_cost_meter_total:
+    source: sensor.sem_ev_charging_cost_total
+    cycle: yearly
+    periodically_resetting: false
+    unique_id: sem_ev_cost_meter_total
 
 ########################## COST ##########################
-  # TOTAL GRID IMPORT COST DAILY
+  # TOTAL GRID IMPORT COST SEK DAILY
   sem_grid_import_cost_daily:
     source: sensor.sem_grid_import_cost_total
     cycle: daily
     unique_id: sem_grid_import_cost_daily
 
-  # GRID IMPORT COST WEEKLY
+  # TOTAL GRID IMPORT COST SEK WEEKLY
   sem_grid_import_cost_weekly:
     source: sensor.sem_grid_import_cost_total
     cycle: weekly
     unique_id: sem_grid_import_cost_weekly
 
-  # GRID IMPORT COST MONTHLY
+  # TOTAL GRID IMPORT COST SEK MONTHLY
   sem_grid_import_cost_monthly:
     source: sensor.sem_grid_import_cost_total
     cycle: monthly
     unique_id: sem_grid_import_cost_monthly
 
-  # GRID IMPORT COST YEARLY
+  # TOTAL GRID IMPORT COST SEK YEARLY
   sem_grid_import_cost_yearly:
     source: sensor.sem_grid_import_cost_total
     cycle: yearly
     unique_id: sem_grid_import_cost_yearly
 
-  # GRID IMPORT COST TOTAL
+  # TOTAL GRID IMPORT COST SEK TOTAL
   sem_grid_import_cost_tot:
     source: sensor.sem_grid_import_cost_total
     unique_id: sem_grid_import_cost_tot
 
 
 ########################## SAVINGS ##########################
-  sem_system_savings_total:
-    source: sensor.sem_system_savings_accumulated
-    net_consumption: true
-    periodically_resetting: false
-    unique_id: sem_system_savings_total
 
-# TOTAL SAVINGS DAILY
+# TOTAL SAVINGS SEK DAILY
   sem_savings_daily:
     source: sensor.sem_savings_total
     cycle: daily
     unique_id: sem_savings_daily
 
-# TOTAL SAVINGS WEEKLY
+# TOTAL SAVINGS SEK WEEKLY
   sem_savings_weekly:
     source: sensor.sem_savings_total
     cycle: weekly
@@ -198,31 +248,31 @@ utility_meter:
 
 
 ########################## EARNINGS ##########################
-# TOTAL EARNINGS DAILY
+# TOTAL EARNINGS SEK DAILY
   sem_earnings_daily:
     source: sensor.sem_solar_export_earnings_total
     cycle: daily
     unique_id: sem_earnings_daily
 
-# TOTAL EARNINGS WEEKLY
+# TOTAL EARNINGS SEK WEEKLY
   sem_earnings_weekly:
     source: sensor.sem_solar_export_earnings_total
     cycle: weekly
     unique_id: sem_earnings_weekly
 
-# TOTAL EARNINGS MONTHLY
+# TOTAL EARNINGS SEK MONTHLY
   sem_earnings_monthly:
     source: sensor.sem_solar_export_earnings_total
     cycle: monthly
     unique_id: sem_earnings_monthly
 
-# TOTAL EARNINGS YEARLY
+# TOTAL EARNINGS SEK YEARLY
   sem_earnings_yearly:
     source: sensor.sem_solar_export_earnings_total
     cycle: yearly
     unique_id: sem_earnings_yearly
 
-# TOTAL EARNINGS TOTAL
+# TOTAL EARNINGS SEK TOTAL
   sem_earnings_tot:
     source: sensor.sem_solar_export_earnings_total
     unique_id: sem_earnings_tot
