@@ -15,16 +15,8 @@ sensor:
 
   # COST EV CHARGING SEK
   - platform: integration
-    name: "SEM EV Charging Cost Total"
+    name: "sem_ev_charging_cost_total" 
     source: sensor.sem_ev_charging_cost
-    method: left
-    round: 2
-
-
-# COST DIFFERENCE BETWEEN SMART SYSTEM AND NO SYSTEM
-  - platform: integration
-    name: "SEM Cost Difference Total"
-    source: sensor.sem_cost_difference_power
     method: left
     round: 2
 
@@ -168,6 +160,8 @@ sensor:
     unique_id: sem_battery_to_house_energy
     round: 3
     method: left
+
+####################################################################
 
   # LATEST GITHUB RELEASE
   - platform: rest
