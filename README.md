@@ -23,9 +23,9 @@ Bilden ovan visar systemets dashboard
 
 SEM installeras via **HACS (Home Assistant Community Store)** som ett custom repository.
 
-### 1. Lägg till SEM i HACS
+### 1. Lägg till SEM i Marketplace (Tidigare HACS)
 
-Öppna **HACS** i Home Assistant och gå till **Integrations**.
+Öppna **marketplace** i Home Assistant och gå till **Integrations**.
 
 1. Klicka på menyn med **tre punkter (⋮)** uppe till höger.
 
