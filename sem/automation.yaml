@@ -8,17 +8,11 @@ automation:
         at: "14:30:00"
       - trigger: time
         at: "00:00:00"
-#    conditions:
-#      - condition: template
-#        value_template: >
-#          {% set entity = states('input_text.sem_nordpool_sensor_inofficial') %}
-#          {{ entity not in ['unknown', 'unavailable', '', None] }}
     actions:
       - action: homeassistant.reload_config_entry
-        target:
-          entity_id: >
-            {{ states('input_text.sem_nordpool_sensor_inofficial') }}
-
+        data:
+          entry_id: "{{ states('input_text.sem_nordpool_entry_inofficial') }}"
+          
 ################################################################################
   - alias: SEM - Update Smart Charging When New Prices Arrive
     mode: single
@@ -1303,27 +1297,33 @@ automation:
               - condition: template
                 value_template: >
                   {% set raw = states('sensor.sem_relative_expensive_price_1') %}
-                  {% if raw not in ['unknown', 'unavailable', 'none', ''] and ' - ' in raw %}
-                    {% set start = as_datetime(raw.split(' - ')[0]) %}
-                    {% set required = state_attr('sensor.sem_relative_expensive_price_1', 'kwh_required') | float(0) %}
-                    {% set soc = states('sensor.batteries_state_of_capacity') | float(0) %}
-                    {% set capacity = state_attr('sensor.sem_battery_charge_energy_1a_2', 'usable_capacity') | float(0) %}
-                    {% set current_kwh = soc / 100 * capacity %}
-                    {{ start is not none and now() < start and required > 0 and current_kwh + 0.25 <= required }}
-                  {% else %}
-                    false
-                  {% endif %}
+                  {% set start = as_datetime(raw.split(' - ')[0]) if raw not in ['unknown', 'unavailable', 'none', ''] and ' - ' in raw else none %}
+                  {% set required = state_attr('sensor.sem_relative_expensive_price_1', 'kwh_required') | float(0) %}
+                  {% set current_kwh = state_attr('sensor.sem_battery_charge_energy_1a_2', 'battery_capacity') | float(0) %}
+
+                  {% set condition_result = start is not none
+                    and now() < start
+                    and required > 0
+                    and current_kwh <= required %}
+
+                  {{ condition_result }}
               - condition: template
                 value_template: >
-                  {% set raw = states('sensor.sem_battery_charge_window_cheapest_1a_active') %}
-                  {% if ' - ' not in raw %}
-                    true
+                  {% set charge = states('sensor.sem_battery_charge_window_cheapest_1a_active') %}
+                  {% set peak = states('sensor.sem_relative_expensive_price_1') %}
+                  {% if ' - ' not in peak %}
+                    false
                   {% else %}
-                    {% set charge_end = as_datetime(raw.split(' - ')[1]) %}
-                    {% if charge_end.year == 1900 %}
+                    {% set peak_start = as_datetime(peak.split(' - ')[0]) %}
+                    {% if ' - ' not in charge %}
                       true
                     {% else %}
-                      {{ now() >= charge_end }}
+                      {% set charge_end = as_datetime(charge.split(' - ')[1]) %}
+                      {% if charge_end is none or charge_end.year == 1900 %}
+                        true
+                      {% else %}
+                        {{ charge_end >= peak_start }}
+                      {% endif %}
                     {% endif %}
                   {% endif %}
               - condition: state
@@ -1403,24 +1403,28 @@ automation:
                   {% if raw not in ['unknown', 'unavailable', 'none', ''] and ' - ' in raw %}
                     {% set start = as_datetime(raw.split(' - ')[0]) %}
                     {% set required = state_attr('sensor.sem_relative_expensive_price_2', 'kwh_required') | float(0) %}
-                    {% set soc = states('sensor.batteries_state_of_capacity') | float(0) %}
-                    {% set capacity = state_attr('sensor.sem_battery_charge_energy_2_1b', 'usable_capacity') | float(0) %}
-                    {% set current_kwh = soc / 100 * capacity %}
-                    {{ start is not none and now() < start and required > 0 and current_kwh + 0.25 <= required }}
+                    {% set current_kwh = state_attr('sensor.sem_battery_charge_energy_2_1b', 'battery_capacity') | float(0) %}
+                    {{ start is not none and now() < start and required > 0 and current_kwh <= required }}
                   {% else %}
                     false
                   {% endif %}
               - condition: template
                 value_template: >
-                  {% set raw = states('sensor.sem_battery_charge_window_cheapest_2_active') %}
-                  {% if ' - ' not in raw %}
-                    true
+                  {% set charge = states('sensor.sem_battery_charge_window_cheapest_2_active') %}
+                  {% set peak = states('sensor.sem_relative_expensive_price_2') %}
+                  {% if ' - ' not in peak %}
+                    false
                   {% else %}
-                    {% set charge_end = as_datetime(raw.split(' - ')[1]) %}
-                    {% if charge_end.year == 1900 %}
+                    {% set peak_start = as_datetime(peak.split(' - ')[0]) %}
+                    {% if ' - ' not in charge %}
                       true
                     {% else %}
-                      {{ now() >= charge_end }}
+                      {% set charge_end = as_datetime(charge.split(' - ')[1]) %}
+                      {% if charge_end is none or charge_end.year == 1900 %}
+                        true
+                      {% else %}
+                        {{ charge_end >= peak_start }}
+                      {% endif %}
                     {% endif %}
                   {% endif %}
               - condition: state
@@ -1647,12 +1651,12 @@ automation:
               0
             {% endif %}
 ################################################################################
-# STORE CHARGE WINDOW TIMES IN INPUT_DATETIME ENTITIES
+# STORE CHARGE WINDOW TIMES IN INPUT_DATETIME ENTITIES - DAY
   - alias: SEM - Update charge window times 1a
     mode: restart
     triggers:
       - trigger: time
-        at: "18:30:00"
+        at: "06:00:00"
     conditions:
       - condition: template
         value_template: >
@@ -1684,12 +1688,12 @@ automation:
               states('sensor.sem_battery_charge_window_cheapest_1a').split(' - ')[1]
             ).strftime('%Y-%m-%d %H:%M:%S') }}
 
-# STORE CHARGE WINDOW TIMES IN INPUT_DATETIME ENTITIES
+# STORE CHARGE WINDOW TIMES IN INPUT_DATETIME ENTITIES - NIGHT
   - alias: SEM - Update charge window times 2
     mode: restart
     triggers:
       - trigger: time
-        at: "06:15:00"
+        at: "18:00:00"
     conditions:
       - condition: template
         value_template: >
@@ -2053,6 +2057,22 @@ automation:
                     target:
                       entity_id: >
                         {{ states('input_text.sem_ev_charger_1_stop') }}
+                  - delay: "00:00:10"
+                  - action: >
+                      {% set entity = states('input_text.sem_ev_charger_1_start') %}
+                      {% set domain = entity.split('.')[0] %}
+                      {% if domain == 'button' %}
+                        button.press
+                      {% elif domain == 'switch' %}
+                        switch.turn_off
+                      {% elif domain == 'input_boolean' %}
+                        input_boolean.turn_off
+                      {% elif domain == 'lock' %}
+                        lock.lock
+                      {% endif %}
+                    target:
+                      entity_id: >
+                        {{ states('input_text.sem_ev_charger_1_start') }}
               - if:
                   - condition: state
                     entity_id: input_boolean.sem_ev_wallbox_multi
@@ -2081,6 +2101,22 @@ automation:
                     target:
                       entity_id: >
                         {{ states('input_text.sem_ev_charger_2_stop') }}
+                  - delay: "00:00:10"
+                  - action: >
+                      {% set entity = states('input_text.sem_ev_charger_2_start') %}
+                      {% set domain = entity.split('.')[0] %}
+                      {% if domain == 'button' %}
+                        button.press
+                      {% elif domain == 'switch' %}
+                        switch.turn_off
+                      {% elif domain == 'input_boolean' %}
+                        input_boolean.turn_off
+                      {% elif domain == 'lock' %}
+                        lock.lock
+                      {% endif %}
+                    target:
+                      entity_id: >
+                        {{ states('input_text.sem_ev_charger_2_start') }}
           # ==================================================
           # MANUELLT STOPP: LADDBOX 1
           # ==================================================
@@ -2111,6 +2147,23 @@ automation:
                 target:
                   entity_id: >
                     {{ states('input_text.sem_ev_charger_1_stop') }}
+              - delay: "00:00:10"
+              - action: >
+                  {% set entity = states('input_text.sem_ev_charger_1_start') %}
+                  {% set domain = entity.split('.')[0] %}
+                  {% if domain == 'button' %}
+                    button.press
+                  {% elif domain == 'switch' %}
+                    switch.turn_off
+                  {% elif domain == 'input_boolean' %}
+                    input_boolean.turn_off
+                  {% elif domain == 'lock' %}
+                    lock.lock
+                  {% endif %}
+                target:
+                  entity_id: >
+                    {{ states('input_text.sem_ev_charger_1_start') }}
+      
           # ==================================================
           # MANUELLT STOPP: LADDBOX 2
           # ==================================================
@@ -2141,6 +2194,22 @@ automation:
                 target:
                   entity_id: >
                     {{ states('input_text.sem_ev_charger_2_stop') }}
+              - delay: "00:00:10"
+              - action: >
+                  {% set entity = states('input_text.sem_ev_charger_2_start') %}
+                  {% set domain = entity.split('.')[0] %}
+                  {% if domain == 'button' %}
+                    button.press
+                  {% elif domain == 'switch' %}
+                    switch.turn_off
+                  {% elif domain == 'input_boolean' %}
+                    input_boolean.turn_off
+                  {% elif domain == 'lock' %}
+                    lock.lock
+                  {% endif %}
+                target:
+                  entity_id: >
+                    {{ states('input_text.sem_ev_charger_2_start') }}
 
 
 #############################EASEE###################################################
