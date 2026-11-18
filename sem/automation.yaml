@@ -131,30 +131,29 @@ automation:
                     {% set strategy = states('input_select.sem_ev_battery_strategy') %}
                     {{ not (ev_power > 0 and strategy == 'Ladda elbil först') }}
                 - condition: template
-                  value_template: "{{ states('select.batteries_working_mode') != 'time_of_use_luna2000' }}" 
+                  value_template: "{{ states('select.sem_energy_system_sem_battery_working_mode') != 'time_of_use' }}" 
                 - condition: template
                   value_template: >
                     {{ state_attr('sensor.sem_battery_charge_energy_1a_2', 'should_charge') | bool }}
               sequence:
                   - action: number.set_value
                     target:
-                      entity_id: number.batteries_grid_charge_maximum_power
+                      entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
                     data:
                       value: > 
                         {{ (states('input_number.sem_max_charge_power_window_1') | float) * 1000 }}
                   - action: input_boolean.turn_on
                     target: 
                         entity_id: input_boolean.sem_interval_1a 
-                  - action: huawei_solar.set_tou_periods
+                  - action: sem.set_battery_time_of_use_periods
                     data:
-                        device_id: "{{ states('input_text.sem_device_id') }}"
                         periods: 00:00-23:59/1234567/+
                   - delay: 00:01:00
                   - action: select.select_option
                     target:
-                        entity_id: select.batteries_working_mode
+                        entity_id: select.sem_energy_system_sem_battery_working_mode
                     data:
-                        option: "time_of_use_luna2000"  
+                        option: "time_of_use"  
             # 2: Stop charging if decision becomes false during charge window
             - conditions:
                 - condition: template
@@ -174,14 +173,14 @@ automation:
                   value_template: >
                     {{ not (state_attr('sensor.sem_battery_charge_energy_1a_2', 'should_charge') | bool) }}                    
                 - condition: state
-                  entity_id: select.batteries_working_mode
-                  state: "time_of_use_luna2000"
+                  entity_id: select.sem_energy_system_sem_battery_working_mode
+                  state: "time_of_use"
               sequence:
                   - action: select.select_option
                     target:
-                        entity_id: select.batteries_working_mode
+                        entity_id: select.sem_energy_system_sem_battery_working_mode
                     data:
-                        option: "maximise_self_consumption"
+                        option: "self_consumption"
             # 3: Default mode Maximize self-consumption otherwise
             - conditions:
                   - condition: template
@@ -203,9 +202,9 @@ automation:
               sequence:
                   - action: select.select_option
                     target:
-                        entity_id: select.batteries_working_mode
+                        entity_id: select.sem_energy_system_sem_battery_working_mode
                     data:
-                        option: "maximise_self_consumption" 
+                        option: "self_consumption" 
                   - action: input_boolean.turn_off
                     target: 
                         entity_id: input_boolean.sem_interval_1a
@@ -264,30 +263,29 @@ automation:
                   {% set strategy = states('input_select.sem_ev_battery_strategy') %}
                   {{ not (ev_power > 0 and strategy == 'Ladda elbil först') }}
               - condition: template
-                value_template: "{{ states('select.batteries_working_mode') != 'time_of_use_luna2000' }}" 
+                value_template: "{{ states('select.sem_energy_system_sem_battery_working_mode') != 'time_of_use' }}" 
               - condition: template
                 value_template: >
                     {{ state_attr('sensor.sem_battery_charge_energy_2_1b', 'should_charge') | bool }}
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_grid_charge_maximum_power
+                  entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
                 data:
                   value: > 
                     {{ (states('input_number.sem_max_charge_power_window_2') | float) * 1000 }}
               - action: input_boolean.turn_on
                 target: 
                   entity_id: input_boolean.sem_interval_2 
-              - action: huawei_solar.set_tou_periods
+              - action: sem.set_battery_time_of_use_periods
                 data:
-                  device_id: "{{ states('input_text.sem_device_id') }}"
                   periods: 00:00-23:59/1234567/+
               - delay: 00:01:00
               - action: select.select_option
                 target:
-                  entity_id: select.batteries_working_mode
+                  entity_id: select.sem_energy_system_sem_battery_working_mode
                 data:
-                  option: "time_of_use_luna2000" 
+                  option: "time_of_use" 
             # 2: Stop charging if decision becomes false during charge window
           - conditions:
               - condition: template
@@ -307,14 +305,14 @@ automation:
                 value_template: >
                   {{ not (state_attr('sensor.sem_battery_charge_energy_2_1b', 'should_charge') | bool) }}
               - condition: state
-                entity_id: select.batteries_working_mode
-                state: "time_of_use_luna2000"
+                entity_id: select.sem_energy_system_sem_battery_working_mode
+                state: "time_of_use"
             sequence:
                 - action: select.select_option
                   target:
-                      entity_id: select.batteries_working_mode
+                      entity_id: select.sem_energy_system_sem_battery_working_mode
                   data:
-                      option: "maximise_self_consumption"
+                      option: "self_consumption"
           # 3: Default mode Maximize self-consumption otherwise
           - conditions:
               - condition: template
@@ -336,9 +334,9 @@ automation:
             sequence:
                 - action: select.select_option
                   target:
-                      entity_id: select.batteries_working_mode
+                      entity_id: select.sem_energy_system_sem_battery_working_mode
                   data:
-                      option: "maximise_self_consumption"  
+                      option: "self_consumption"  
                 - action: input_boolean.turn_off
                   target: 
                       entity_id: input_boolean.sem_interval_2
@@ -362,20 +360,19 @@ automation:
     actions:
       - action: number.set_value
         target:
-          entity_id: number.batteries_grid_charge_maximum_power
+          entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
         data:
           value: > 
             {{ (states('input_number.sem_max_charge_manual_charging') | float) * 1000 }}
-      - action: huawei_solar.set_tou_periods
+      - action: sem.set_battery_time_of_use_periods
         data:
-          device_id: "{{ states('input_text.sem_device_id') }}"
           periods: "00:00-23:59/1234567/+"
       - delay: 00:00:20
       - action: select.select_option
         target:
-          entity_id: select.batteries_working_mode
+          entity_id: select.sem_energy_system_sem_battery_working_mode
         data:
-          option: "time_of_use_luna2000"
+          option: "time_of_use"
       - action: timer.start
         target:
           entity_id: timer.sem_manual_charge_time
@@ -404,9 +401,9 @@ automation:
           entity_id: timer.sem_manual_charge_time
       - action: select.select_option
         target:
-          entity_id: select.batteries_working_mode
+          entity_id: select.sem_energy_system_sem_battery_working_mode
         data:
-          option: "maximise_self_consumption"
+          option: "self_consumption"
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.sem_manual_charge
@@ -482,15 +479,15 @@ automation:
                   entity_id: input_boolean.sem_discharge
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: >
                     {{ (states('input_number.sem_max_export_power') | float(default=1)) * 1000 }}
               - action: select.select_option
                 target:
-                  entity_id: select.batteries_working_mode
+                  entity_id: select.sem_energy_system_sem_battery_working_mode
                 data:
-                  option: "fully_fed_to_grid"
+                  option: "feed_in_priority"
           # ==========================
           # EXPORTERA BATTERI - FÖNSTER 2
           # ==========================
@@ -527,15 +524,15 @@ automation:
                   entity_id: input_boolean.sem_discharge
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: >
                     {{ (states('input_number.sem_max_export_power') | float(default=1)) * 1000 }}
               - action: select.select_option
                 target:
-                  entity_id: select.batteries_working_mode
+                  entity_id: select.sem_energy_system_sem_battery_working_mode
                 data:
-                  option: "fully_fed_to_grid"
+                  option: "feed_in_priority"
           # ==========================
           # NORMALDRIFT
           # ==========================
@@ -588,7 +585,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: >
                     {{ (states('input_number.sem_battery_discharge_power_ev_limit') | float) * 1000 }}
@@ -597,9 +594,9 @@ automation:
                   entity_id: input_boolean.sem_discharge
               - action: select.select_option
                 target:
-                  entity_id: select.batteries_working_mode
+                  entity_id: select.sem_energy_system_sem_battery_working_mode
                 data:
-                  option: "maximise_self_consumption"
+                  option: "self_consumption"
 
 ################################################################################
   - alias: SEM - Reset export override 1 to Auto
@@ -702,9 +699,8 @@ automation:
                       false
                     {% endif %}
               sequence:
-                - action: huawei_solar.set_maximum_feed_grid_power
+                - action: sem.set_grid_export_power_limit
                   data:
-                    device_id: "{{ states('input_text.sem_device_id_inverter') }}"
                     power: "300"
                 - action: input_boolean.turn_on
                   target:
@@ -727,9 +723,7 @@ automation:
                       true
                     {% endif %}
               sequence:
-                - action: huawei_solar.reset_maximum_feed_grid_power
-                  data:
-                    device_id: "{{ states('input_text.sem_device_id_inverter') }}"
+                - action: sem.reset_grid_export_power_limit
                 - action: input_boolean.turn_off
                   target:
                     entity_id: input_boolean.sem_max_export_active
@@ -815,7 +809,7 @@ automation:
                       # Stoppa ALLTID urladdning
                       - action: number.set_value
                         target:
-                          entity_id: number.batteries_maximum_discharging_power
+                          entity_id: number.sem_energy_system_sem_maximum_discharging_power
                         data:
                           value: 0                          
                       - action: input_boolean.turn_on
@@ -844,7 +838,7 @@ automation:
                               # Endast inom fönster → stoppa grid charge
                               - action: number.set_value
                                 target:
-                                  entity_id: number.batteries_grid_charge_maximum_power
+                                  entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
                                 data:
                                   value: 0
                   # ==========================================
@@ -857,12 +851,12 @@ automation:
                     sequence:
                       - action: number.set_value
                         target:
-                          entity_id: number.batteries_maximum_discharging_power
+                          entity_id: number.sem_energy_system_sem_maximum_discharging_power
                         data:
                           value: 0
                       - action: number.set_value
                         target:
-                          entity_id: number.batteries_grid_charge_maximum_power
+                          entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
                         data:
                           value: >
                             {{ (states('input_number.sem_battery_grid_normal_power') | float) * 1000 }} 
@@ -892,7 +886,7 @@ automation:
                             # Stoppa ALLTID urladdning
                             - action: number.set_value
                               target:
-                                entity_id: number.batteries_maximum_discharging_power
+                                entity_id: number.sem_energy_system_sem_maximum_discharging_power
                               data:
                                 value: 0                          
                             - action: input_boolean.turn_on
@@ -921,7 +915,7 @@ automation:
                                     # Endast inom fönster → stoppa grid charge
                                     - action: number.set_value
                                       target:
-                                        entity_id: number.batteries_grid_charge_maximum_power
+                                        entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
                                       data:
                                         value: 0
                           # Elbil uppnått mål → återställning
@@ -939,12 +933,12 @@ automation:
                                     sequence:
                                       - action: number.set_value
                                         target:
-                                          entity_id: number.batteries_maximum_discharging_power
+                                          entity_id: number.sem_energy_system_sem_maximum_discharging_power
                                         data:
                                           value: 0
                                       - action: number.set_value
                                         target:
-                                          entity_id: number.batteries_grid_charge_maximum_power
+                                          entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
                                         data:
                                           value: "{{ states('input_number.sem_battery_grid_normal_power') | float * 1000 }}"
                                       - action: input_boolean.turn_on
@@ -982,7 +976,7 @@ automation:
               # 🔹 Återställ grid charge
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_grid_charge_maximum_power
+                  entity_id: number.sem_energy_system_sem_grid_charge_maximum_power
                 data:
                   value: >
                     {{ (states('input_number.sem_battery_grid_normal_power') | float) * 1000 }} 
@@ -1005,7 +999,7 @@ automation:
                     sequence:
                       - action: number.set_value
                         target:
-                          entity_id: number.batteries_maximum_discharging_power
+                          entity_id: number.sem_energy_system_sem_maximum_discharging_power
                         data:
                           value: >
                             {{ (states('input_number.sem_battery_discharge_power_ev_limit') | float) * 1000 }}
@@ -1145,7 +1139,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: "0"
               - action: input_boolean.turn_on
@@ -1204,7 +1198,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: "{{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}"
 
@@ -1332,7 +1326,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: 0
               - action: input_boolean.turn_on
@@ -1358,7 +1352,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: >
                     {{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}
@@ -1433,7 +1427,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: 0
               - action: input_boolean.turn_on
@@ -1459,7 +1453,7 @@ automation:
             sequence:
               - action: number.set_value
                 target:
-                  entity_id: number.batteries_maximum_discharging_power
+                  entity_id: number.sem_energy_system_sem_maximum_discharging_power
                 data:
                   value: >
                     {{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}
