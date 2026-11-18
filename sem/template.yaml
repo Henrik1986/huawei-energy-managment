@@ -1093,7 +1093,7 @@ template:
             {% set battery_grid  = battery_discharge * (grid_kwh / total_kwh) %}
           {% else %}
             {% set battery_solar = 0 %}
-            % set battery_grid  = 0 %}
+            {% set battery_grid  = 0 %}
           {% endif %}
 
           {# Besparing #}
