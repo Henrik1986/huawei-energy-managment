@@ -32,7 +32,7 @@ template:
       - name: "sem_battery_mode"
         unique_id: sem_battery_mode
         state: >
-          {% set mode = states('select.sem_battery_working_mode') %}
+          {% set mode = states('select.sem_energy_system_sem_battery_working_mode') %}
           {% if mode == 'adaptive' %}
             Adaptiv
           {% elif mode == 'fixed_charge_discharge' %}
@@ -171,7 +171,7 @@ template:
         unique_id: sem_battery_time_to_full
         icon: mdi:battery-clock
         state: >
-          {% set power = states('sensor.sem_battery_power') | float(0) %}
+          {% set power = states('sensor.sem_energy_system_sem_battery_power') | float(0) %}
           {% set battery = state_attr('sensor.sem_battery_charge_energy_1a_2', 'battery_capacity') | float(0) %}
           {% set usable = state_attr('sensor.sem_battery_charge_energy_1a_2', 'usable_capacity') | float(0) %}
           {% set remaining = usable - battery %}
@@ -251,7 +251,7 @@ template:
               {{ value }}
             {% endif %}
           {% endmacro %}
-          {% set p = to_kw('sensor.sem_power_meter_active_power') | float(0) %}
+          {% set p = to_kw('sensor.sem_energy_system_sem_power_meter_active_power') | float(0) %}
           {{ (-p if p > 0 else 0) | round(2) }}
 
       # BATTERY CHARGE GRAPH
@@ -261,8 +261,8 @@ template:
         device_class: power
         state_class: measurement
         state: >
-          {% set power = states('sensor.sem_battery_power') | float(0) %}
-          {% set unit = state_attr('sensor.sem_battery_power', 'unit_of_measurement') %}
+          {% set power = states('sensor.sem_energy_system_sem_battery_power') | float(0) %}
+          {% set unit = state_attr('sensor.sem_energy_system_sem_battery_power', 'unit_of_measurement') %}
           {% if unit == 'W' %}
             {{ [power / 1000, 0] | max | round(3) }}
           {% else %}
@@ -276,8 +276,8 @@ template:
         device_class: power
         state_class: measurement
         state: >
-          {% set power = states('sensor.sem_battery_power') | float(0) %}
-          {% set unit = state_attr('sensor.sem_battery_power', 'unit_of_measurement') %}
+          {% set power = states('sensor.sem_energy_system_sem_battery_power') | float(0) %}
+          {% set unit = state_attr('sensor.sem_energy_system_sem_battery_power', 'unit_of_measurement') %}
           {% if unit == 'W' %}
             {{ [power / 1000, 0] | min | round(3) }}
           {% else %}
@@ -553,7 +553,7 @@ template:
           {% endmacro %}
 
           {# === NÄTEFFEKT (SEM system) === #}
-          {% set net_power = to_kw('sensor.sem_power_meter_active_power') | float(0) %}
+          {% set net_power = to_kw('sensor.sem_energy_system_sem_power_meter_active_power') | float(0) %}
           {% set import = -net_power if net_power < 0 else 0 %}
           {% set export = net_power if net_power > 0 else 0 %}
 
@@ -568,7 +568,7 @@ template:
           {% set solar = to_kw('sensor.sem_input_power_with_efficiency_loss_kW') | float(0) %}
 
           {# === BATTERI === #}
-          {% set batt = to_kw('sensor.sem_battery_power') | float(0) %}
+          {% set batt = to_kw('sensor.sem_energy_system_sem_battery_power') | float(0) %}
           {% set batt_out = -batt if batt < 0 else 0 %}
           {% set batt_in = batt if batt > 0 else 0 %}
 
@@ -596,7 +596,7 @@ template:
           {% endmacro %}
 
           {# === NÄTEFFEKT (SEM system) === #}
-          {% set net_power = to_kw('sensor.sem_power_meter_active_power') | float(0) %}
+          {% set net_power = to_kw('sensor.sem_energy_system_sem_power_meter_active_power') | float(0) %}
           {% set import = -net_power if net_power < 0 else 0 %}
           {% set export = net_power if net_power > 0 else 0 %}
 
@@ -611,7 +611,7 @@ template:
           {% set solar = to_kw('sensor.sem_input_power_with_efficiency_loss_kW') | float(0) %}
 
           {# === BATTERI === #}
-          {% set batt = to_kw('sensor.sem_battery_power') | float(0) %}
+          {% set batt = to_kw('sensor.sem_energy_system_sem_battery_power') | float(0) %}
           {% set batt_out = -batt if batt < 0 else 0 %}
           {% set batt_in = batt if batt > 0 else 0 %}
 
@@ -639,7 +639,7 @@ template:
               {{ value }}
             {% endif %}
           {% endmacro %}
-          {% set p = to_kw('sensor.sem_power_meter_active_power') | float(0) %}
+          {% set p = to_kw('sensor.sem_energy_system_sem_power_meter_active_power') | float(0) %}
           {{ (-p if p < 0 else 0) | round(2) }}
 
       # GRID EXPORT
@@ -658,7 +658,7 @@ template:
               {{ value }}
             {% endif %}
           {% endmacro %}
-          {% set p = to_kw('sensor.sem_power_meter_active_power') | float(0) %}
+          {% set p = to_kw('sensor.sem_energy_system_sem_power_meter_active_power') | float(0) %}
           {{ (p if p > 0 else 0) | round(2) }}
 
       # SOLAR POWER
@@ -669,7 +669,7 @@ template:
         state_class: measurement
         state: >-
           {% set inverter_rating = 10000 %}
-          {% set inpower = states('sensor.sem_inverter_input_power') | float(0) %}
+          {% set inpower = states('sensor.sem_energy_system_sem_inverter_input_power') | float(0) %}
           {% if inpower < (inverter_rating * 0.1) %}
               {{ (inpower * 0.90 / 1000) | round(2) }}
           {% elif inpower < (inverter_rating * 0.2) %}
@@ -698,7 +698,7 @@ template:
 
           {% set solar = to_kw('sensor.sem_input_power_with_efficiency_loss_kw') | float(0) %}
           {% set house = to_kw('sensor.sem_house_power_ev') | float(0) %}
-          {% set battery = to_kw('sensor.sem_battery_power') | float(0) %}
+          {% set battery = to_kw('sensor.sem_energy_system_sem_battery_power') | float(0) %}
 
           {% set battery_charge = [battery, 0] | max %}
 
@@ -735,7 +735,7 @@ template:
 
           {% set solar = to_kw('sensor.sem_input_power_with_efficiency_loss_kw') | float(0) %}
           {% set house = to_kw('sensor.sem_house_power_ev') | float(0) %}
-          {% set battery = to_kw('sensor.sem_battery_power') | float(0) %}
+          {% set battery = to_kw('sensor.sem_energy_system_sem_battery_power') | float(0) %}
 
           {# Batteriets urladdning är negativ #}
           {% set battery_discharge = [-battery, 0] | max %}
@@ -932,7 +932,7 @@ template:
         device_class: power
         state_class: measurement
         state: >
-          {% set entity = 'sensor.sem_battery_power' %}
+          {% set entity = 'sensor.sem_energy_system_sem_battery_power' %}
           {% set value = states(entity) | float(0) %}
           {% set unit = state_attr(entity, 'unit_of_measurement') | lower %}
 
@@ -948,7 +948,7 @@ template:
         device_class: power
         state_class: measurement
         state: >
-          {% set entity = 'sensor.sem_battery_power' %}
+          {% set entity = 'sensor.sem_energy_system_sem_battery_power' %}
           {% set value = states(entity) | float(0) %}
           {% set unit = state_attr(entity, 'unit_of_measurement') | lower %}
 
@@ -981,7 +981,7 @@ template:
         state: >
           {% set house = states('sensor.sem_house_power_ev') | float(0) %}
           {% set solar = states('sensor.sem_input_power_with_efficiency_loss_kw') | float(0) %}
-          {% set battery = states('sensor.sem_battery_power') | float(0) %}
+          {% set battery = states('sensor.sem_energy_system_sem_battery_power') | float(0) %}
 
           {% set battery_charge = battery if battery > 0 else 0 %}
           {% set solar_available = solar - battery_charge %}
@@ -1068,8 +1068,8 @@ template:
       - name: "sem_savings_power_battery"
         unit_of_measurement: "SEK/h"
         state: >
-          {% set raw = states('sensor.sem_battery_power') | float(0) %}
-          {% set unit = state_attr('sensor.sem_battery_power', 'unit_of_measurement') | default('W') %}
+          {% set raw = states('sensor.sem_energy_system_sem_battery_power') | float(0) %}
+          {% set unit = state_attr('sensor.sem_energy_system_sem_battery_power', 'unit_of_measurement') | default('W') %}
           {% set battery = raw / 1000 if unit == 'W' else raw %}
 
           {% set house = states('sensor.sem_house_power') | float(0) %}
@@ -1118,8 +1118,8 @@ template:
           {% set solar = raw_solar / 1000 if solar_unit == 'W' else raw_solar %}
 
           {# BATTERY #}
-          {% set raw_battery = states('sensor.sem_battery_power') | float(0) %}
-          {% set battery_unit = state_attr('sensor.sem_battery_power', 'unit_of_measurement') | default('W') %}
+          {% set raw_battery = states('sensor.sem_energy_system_sem_battery_power') | float(0) %}
+          {% set battery_unit = state_attr('sensor.sem_energy_system_sem_battery_power', 'unit_of_measurement') | default('W') %}
           {% set battery = raw_battery / 1000 if battery_unit == 'W' else raw_battery %}
 
           {# PRISER #}
@@ -3006,12 +3006,12 @@ template:
               states('input_number.sem_export_profit_margin')|float(0)
             ) | round(2) }}
           battery_soc: >
-            {{ states('sensor.sem_battery_soc') | float(0) }}
+            {{ states('sensor.sem_energy_system_sem_battery_soc') | float(0) }}
           usable_capacity: >
             {{ state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) }}
           battery_kwh: >
-            {% set soc = states('sensor.sem_battery_soc') | float(0) %}
-            {% set min_soc = states('number.sem_end_of_discharge_soc') | float(0) %}
+            {% set soc = states('sensor.sem_energy_system_sem_battery_soc') | float(0) %}
+            {% set min_soc = states('number.sem_energy_system_sem_end_of_discharge_soc') | float(0) %}
             {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_1a_2','usable_capacity') | float(0) %}
 
             {% if soc <= min_soc %}
@@ -3570,12 +3570,12 @@ template:
               states('input_number.sem_export_profit_margin')|float(0)
             ) | round(2) }}
           battery_soc: >
-            {{ states('sensor.sem_battery_soc') | float(0) }}
+            {{ states('sensor.sem_energy_system_sem_battery_soc') | float(0) }}
           usable_capacity: >
             {{ state_attr('sensor.sem_battery_charge_energy_2_1b','usable_capacity') | float(0) }}
           battery_kwh: >
-            {% set soc = states('sensor.sem_battery_soc') | float(0) %}
-            {% set min_soc = states('number.sem_end_of_discharge_soc') | float(0) %}
+            {% set soc = states('sensor.sem_energy_system_sem_battery_soc') | float(0) %}
+            {% set min_soc = states('number.sem_energy_system_sem_end_of_discharge_soc') | float(0) %}
             {% set usable_capacity = state_attr('sensor.sem_battery_charge_energy_2_1b','usable_capacity') | float(0) %}
 
             {% if soc <= min_soc %}
@@ -4235,8 +4235,8 @@ template:
           battery_capacity: >
             {# Visar aktuell laddning i kWh min SoC (dvs det som faktiskt är användbart) #}
             {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-            {% set soc = states('sensor.sem_battery_soc') | float(0) %}
-            {% set min_soc = states('number.sem_end_of_discharge_soc') | float(0) %}
+            {% set soc = states('sensor.sem_energy_system_sem_battery_soc') | float(0) %}
+            {% set min_soc = states('number.sem_energy_system_sem_end_of_discharge_soc') | float(0) %}
             {% set denom = (100 - min_soc) %}
             {% if denom <= 0 %}
                   {{ 0.0 }}
@@ -4255,7 +4255,7 @@ template:
           usable_capacity: >
             {# Total användbar kapacitet (kWh) givet min SoC #}
             {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-            {% set min_soc = states('number.sem_end_of_discharge_soc') | float(0) %}
+            {% set min_soc = states('number.sem_energy_system_sem_end_of_discharge_soc') | float(0) %}
             {% set denom = (100 - min_soc) %}
             {% if denom <= 0 %}
                   {{ 0.0 }}
@@ -5868,8 +5868,8 @@ template:
           battery_capacity: >
             {# Visar aktuell laddning i kWh min SoC (dvs det som faktiskt är användbart) #}
             {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-            {% set soc = states('sensor.sem_battery_soc') | float(0) %}
-            {% set min_soc = states('number.sem_end_of_discharge_soc') | float(0) %}
+            {% set soc = states('sensor.sem_energy_system_sem_battery_soc') | float(0) %}
+            {% set min_soc = states('number.sem_energy_system_sem_end_of_discharge_soc') | float(0) %}
             {% set denom = (100 - min_soc) %}
             {% if denom <= 0 %}
                   {{ 0.0 }}
@@ -5888,7 +5888,7 @@ template:
           usable_capacity: >
             {# Total användbar kapacitet (kWh) givet min SoC #}
             {% set capacity = states('input_number.sem_battery_total_capacity_kwh') | float(0) %}
-            {% set min_soc = states('number.sem_end_of_discharge_soc') | float(0) %}
+            {% set min_soc = states('number.sem_energy_system_sem_end_of_discharge_soc') | float(0) %}
             {% set denom = (100 - min_soc) %}
             {% if denom <= 0 %}
                   {{ 0.0 }}
@@ -6384,7 +6384,7 @@ template:
                 {% set max_charge_power_kw = states('input_number.sem_max_charge_power_window_2') | float(0) %}
                 {% set charge_energy_limit = charge_duration * max_charge_power_kw %}
 
-                {% set battery_soc = states('sensor.sem_battery_soc') | float(0) %}
+                {% set battery_soc = states('sensor.sem_energy_system_sem_battery_soc') | float(0) %}
                 {% set battery_soc = [[battery_soc, 0] | max, 100] | min %}
                 {% set usable_capacity = state_attr('sensor.sem_available_export_energy_2', 'usable_capacity') | float(13.8) %}
                 {% set battery_headroom = usable_capacity * (100 - battery_soc) / 100 %}
@@ -10503,12 +10503,12 @@ template:
       - name: sem_huawei_sensor_available_control
         state: >
           {% set entities = [
-            'sensor.sem_battery_soc',
+            'sensor.sem_energy_system_sem_battery_soc',
             'input_number.sem_batteries_end_of_discharge_soc',
-            'sensor.sem_inverter_input_power',
-            'sensor.sem_power_meter_active_power',
-            'sensor.sem_battery_power',
-            'select.sem_battery_working_mode'
+            'sensor.sem_energy_system_sem_inverter_input_power',
+            'sensor.sem_energy_system_sem_power_meter_active_power',
+            'sensor.sem_energy_system_sem_battery_power',
+            'select.sem_energy_system_sem_battery_working_mode'
           ] %}
           {{ entities
               | map('states')
