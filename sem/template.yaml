@@ -4662,7 +4662,9 @@ template:
               0
             {% else %}
               {% set day_start = as_datetime(day_window.split(' - ')[0]) %}
+              {% set day_end = as_datetime(day_window.split(' - ')[1]) %}
               {% set midnight = day_start.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1) %}
+              {% set midday = midnight + timedelta(hours=12) %}
               {# ===== REFERENSPRIS: NATT ELLER SISTA DAGSKVART ===== #}
               {% set reference = namespace(price=none) %}
               {% if is_number(night_price) %}
@@ -4711,7 +4713,6 @@ template:
                       {% if dt.date() == forecast_date %}
                         {% set key = dt.strftime('%Y-%m-%dT%H') %}
                         {% set old = sol_map.data.get(key, 0) %}
-
                         {% set sol_map.data = dict(
                           sol_map.data,
                           **{key: old + (e.get('values') | float(0) / 1000)}
@@ -4763,7 +4764,35 @@ template:
                     {% endfor %}
                     {# ===== REKOMMENDERAD EXTRALADDNING ===== #}
                     {% set available_space = [capacity - battery, 0] | max %}
-                    {% set extra = [available_space - calc.surplus, 0] | max %}
+                    {% set extra_capacity = [available_space - calc.surplus, 0] | max %}
+                    {# ===== FÖRBRUKNING FRÅN DAGFÖNSTER TILL KL 12 NÄSTA DAG ===== #}
+                    {% set consumption = namespace(total=0) %}
+                    {% set current = day_end.replace(minute=0, second=0, microsecond=0) %}
+                    {% for i in range(36) %}
+                      {% if current >= midday %}
+                        {% break %}
+                      {% endif %}
+                      {% set hour_end = current + timedelta(hours=1) %}
+                      {% set interval_start = [current, day_end] | max %}
+                      {% set interval_end = [hour_end, midday] | min %}
+                      {% set duration = (interval_end - interval_start).total_seconds() / 3600 %}
+                      {% if duration > 0 %}
+                        {% set hour = current.hour %}
+                        {% if 5 <= hour < 10 %}
+                          {% set need = k_morning %}
+                        {% elif 10 <= hour < 15 %}
+                          {% set need = k_day %}
+                        {% elif 15 <= hour < 21 %}
+                          {% set need = k_evening %}
+                        {% else %}
+                          {% set need = k_night %}
+                        {% endif %}
+                        {% set consumption.total = consumption.total + (need * duration) %}
+                      {% endif %}
+                      {% set current = hour_end %}
+                    {% endfor %}
+                    {# ===== SLUTLIG EXTRA LADDNING ===== #}
+                    {% set extra = [extra_capacity, consumption.total] | min %}
                     {{ extra | round(2) }}
                   {% endif %}
                 {% endif %}
@@ -6234,7 +6263,24 @@ template:
                         {% set ns.surplus = ns.surplus + hourly_surplus %}
                       {% endfor %}
                       {# ===== EXTRA LADDNINGSBEHOV ===== #}
-                      {% set extra = [capacity - battery - ns.surplus, 0] | max %}
+                      {% set extra_capacity = [capacity - battery - ns.surplus, 0] | max %}
+                      {# ===== FÖRBRUKNING FRAM TILL MIDNATT ===== #}
+                      {% set consumption = namespace(total=0) %}
+                      {% set start_hour = as_datetime(night_end).hour %}
+                      {% for hour in range(start_hour, 24) %}
+                        {% if 5 <= hour < 10 %}
+                          {% set need = k_morning %}
+                        {% elif 10 <= hour < 15 %}
+                          {% set need = k_day %}
+                        {% elif 15 <= hour < 21 %}
+                          {% set need = k_evening %}
+                        {% else %}
+                          {% set need = k_night %}
+                        {% endif %}
+                        {% set consumption.total = consumption.total + need %}
+                      {% endfor %}
+                      {# ===== SLUTLIG EXTRA LADDNING ===== #}
+                      {% set extra = [extra_capacity, consumption.total] | min %}
                       {{ extra | round(2) }}
                     {% endif %}
                   {% endif %}
