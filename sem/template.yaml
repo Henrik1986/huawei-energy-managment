@@ -37,11 +37,11 @@ template:
             Adaptiv
           {% elif mode == 'fixed_charge_discharge' %}
             Fast
-          {% elif mode == 'maximise_self_consumption' %}
+          {% elif mode == 'self_consumption' %}
             Självförsörjning
-          {% elif mode == 'fully_fed_to_grid' %}
+          {% elif mode == 'feed_in_priority' %}
             Export
-          {% elif mode == 'time_of_use_luna2000' %}
+          {% elif mode == 'time_of_use' %}
             Import
           {% else %}
             Okänt läge
@@ -10499,12 +10499,22 @@ template:
             {% endif %}
           {% endif %}
 
-      # CHECKS IF SEM SYSTEM IS AVAILABLE
-      - name: sem_system_available_control
+      # CHECKS IF SENSORS ARE AVALIBLE
+      - name: sem_huawei_sensor_available_control
         state: >
-          {% set helper = states('input_number.sem_batteries_end_of_discharge_soc') %}
-          {{ is_state('sensor.sem_entity_status', 'OK')
-              and helper not in ['unavailable', 'unknown', ''] }}
+          {% set entities = [
+            'sensor.sem_battery_soc',
+            'input_number.sem_batteries_end_of_discharge_soc',
+            'sensor.sem_inverter_input_power',
+            'sensor.sem_power_meter_active_power',
+            'sensor.sem_battery_power',
+            'select.sem_battery_working_mode'
+          ] %}
+          {{ entities
+              | map('states')
+              | reject('in', ['unavailable', 'unknown'])
+              | list
+              | length == entities | length }}
 
       # CHECKS IF EV CHARGER IS READY TO CHARGE
       - name: sem_ev_charger_1_ready_to_charge
