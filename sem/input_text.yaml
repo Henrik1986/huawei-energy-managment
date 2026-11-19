@@ -49,11 +49,13 @@ input_text:
     mode: text
     max: 50
 
+#RENSA NÄR NYA SYSTEMET RULLAR PÅ
   sem_device_id:
     name: Huawei Battery Device ID
     icon: mdi:identifier
     max: 50
-  
+
+#RENSA NÄR NYA SYSTEMET RULLAR PÅ
   sem_device_id_inverter:
     name: Huawei Inverter Device ID
     icon: mdi:identifier
