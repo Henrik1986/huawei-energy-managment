@@ -672,8 +672,6 @@ views:
             icon: mdi:account-eye
           - type: custom:vertical-stack-in-card
             cards:
-              - type: custom:gap-card
-                height: 10
               - type: custom:vertical-stack-in-card
                 cards:
                   - type: custom:vertical-stack-in-card
@@ -1113,17 +1111,18 @@ views:
 
                   {# Kontrollera SEM-integrationen och lokal hjälpare #}
 
-                  {% set bad = ['unknown', 'unavailable', '', None] %}
-                  {% set sem_status_entity = 'sensor.sem_entity_status' %}
-                  {% if states(sem_status_entity) in bad and states('sensor.sem_energy_system_entity_status') not in bad %}
+                  {% set bad = ['unknown', 'unavailable', '', None] %} {% set
+                  sem_status_entity = 'sensor.sem_entity_status' %} {% if
+                  states(sem_status_entity) in bad and
+                  states('sensor.sem_energy_system_entity_status') not in bad %}
                     {% set sem_status_entity = 'sensor.sem_energy_system_entity_status' %}
-                  {% endif %}
-                  {% set sem_status = states(sem_status_entity) %}
-                  {% set helper_entity = 'input_number.sem_batteries_end_of_discharge_soc' %}
-                  {% set helper_state = states(helper_entity) %}
+                  {% endif %} {% set sem_status = states(sem_status_entity) %}
+                  {% set helper_entity =
+                  'input_number.sem_batteries_end_of_discharge_soc' %} {% set
+                  helper_state = states(helper_entity) %}
 
-                  {% if sem_status == 'OK' and helper_state not in bad %}
-                  **Din solcellsanläggning**
+                  {% if sem_status == 'OK' and helper_state not in bad %} **Din
+                  solcellsanläggning**
 
                   ✅ OK
 
@@ -1133,19 +1132,16 @@ views:
 
                   ❌ Systemet är inte klart
 
-                  {% if sem_status in bad %}
-                  - {{ sem_status_entity }} saknas eller är otillgänglig
-                  {% else %}
-                  - {{ state_attr(sem_status_entity, 'status_message') or sem_status }}
-                  {% set action_required = state_attr(sem_status_entity, 'action_required') %}
-                  {% if action_required and action_required != 'Ingen åtgärd behövs.' %}
-                  - {{ action_required }}
-                  {% endif %}
-                  {% endif %}
+                  {% if sem_status in bad %} - {{ sem_status_entity }} saknas
+                  eller är otillgänglig {% else %} - {{
+                  state_attr(sem_status_entity, 'status_message') or sem_status
+                  }} {% set action_required = state_attr(sem_status_entity,
+                  'action_required') %} {% if action_required and
+                  action_required != 'Ingen åtgärd behövs.' %} - {{
+                  action_required }} {% endif %} {% endif %}
 
-                  {% if helper_state in bad %}
-                  - {{ helper_entity }} saknas eller är otillgänglig
-                  {% endif %}
+                  {% if helper_state in bad %} - {{ helper_entity }} saknas
+                  eller är otillgänglig {% endif %}
 
                   {% endif %}
 
