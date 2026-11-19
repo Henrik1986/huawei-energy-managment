@@ -1123,7 +1123,7 @@ views:
                   {% set helper_state = states(helper_entity) %}
 
                   {% if sem_status == 'OK' and helper_state not in bad %}
-                  **SEM**
+                  **Din solcellsanläggning**
 
                   ✅ OK
 
