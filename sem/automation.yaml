@@ -106,7 +106,7 @@ automation:
           entity_id: input_boolean.sem_manual_charge
           state: "off" 
         - condition: state
-          entity_id: binary_sensor.sem_huawei_sensor_available_control
+          entity_id: binary_sensor.sem_available_control
           state: "on"
     action:
         - choose:
@@ -238,7 +238,7 @@ automation:
         entity_id: input_boolean.sem_manual_charge
         state: "off"
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     action:
       - choose:
@@ -355,7 +355,7 @@ automation:
         to: "on"
     condition:
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     actions:
       - action: number.set_value
@@ -393,7 +393,7 @@ automation:
           entity_id: timer.sem_manual_charge_time
     condition: 
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     action:
       - action: timer.finish
@@ -436,7 +436,7 @@ automation:
               false
             {% endif %}
         - condition: state
-          entity_id: binary_sensor.sem_huawei_sensor_available_control
+          entity_id: binary_sensor.sem_available_control
           state: "on"
     action:
       - choose:
@@ -673,7 +673,7 @@ automation:
         entity_id: input_boolean.sem_export_limit_active
         state: 'on'
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     action:
         - choose:
@@ -777,7 +777,7 @@ automation:
             false
           {% endif %}
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
 
     action:
@@ -1090,7 +1090,7 @@ automation:
             false
           {% endif %}
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
 
     action:
@@ -1276,7 +1276,7 @@ automation:
             false
           {% endif %}
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
       - condition: time
         after: "12:00:00"
@@ -1379,7 +1379,7 @@ automation:
             false
           {% endif %}
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: 'on'
       - condition: time
         after: '00:00:00'
