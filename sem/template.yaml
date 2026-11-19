@@ -10546,7 +10546,7 @@ template:
           {% endif %}
 
       # CHECKS IF SENSORS ARE AVALIBLE
-      - name: sem_huawei_sensor_available_control
+      - name: sem_available_control
         state: >
           {% set entities = [
             'sensor.sem_energy_system_sem_battery_soc',
