@@ -26,8 +26,8 @@ sections:
             name: Batteri
             icon: mdi:battery-high
             entity:
-              consumption: sensor.batteries_day_discharge
-              production: sensor.batteries_day_charge
+              consumption: sensor.sem_energy_system_sem_battery_day_discharge
+              production: sensor.sem_energy_system_sem_battery_day_charge
           individual:
             - entity: sensor.sem_ev_charge
               name: Laddbox
@@ -671,8 +671,6 @@ sections:
         icon: mdi:account-eye
       - type: custom:vertical-stack-in-card
         cards:
-          - type: custom:gap-card
-            height: 10
           - type: custom:vertical-stack-in-card
             cards:
               - type: custom:vertical-stack-in-card
@@ -725,7 +723,7 @@ sections:
             type: grid
             cards:
               - type: tile
-                entity: sensor.power_meter_active_power
+                entity: sensor.sem_energy_system_sem_power_meter_active_power
                 name: Elnätet
                 icon: mdi:transmission-tower
                 color: red
@@ -770,7 +768,7 @@ sections:
                     navigation_path: '#wallbox'
                   features_position: inline
           - type: tile
-            entity: sensor.batteries_charge_discharge_power
+            entity: sensor.sem_energy_system_sem_battery_power
             name: Batteriet
             icon: mdi:battery-charging-100
             color: indigo
@@ -800,7 +798,7 @@ sections:
                   action: none
                 features_position: bottom
               - type: tile
-                entity: sensor.batteries_state_of_capacity
+                entity: sensor.sem_energy_system_sem_battery_soc
                 name: Nivå
                 icon: ''
                 color: indigo
@@ -1106,92 +1104,38 @@ sections:
 
 
 
-              {# Lista över entiteter att kontrollera #}
+              {# Kontrollera SEM-integrationen och lokal hjälpare #}
 
-              {% set e1 = 'sensor.batteries_state_of_capacity' %}
+              {% set bad = ['unknown', 'unavailable', '', None] %} {% set
+              sem_status_entity = 'sensor.sem_entity_status' %} {% if
+              states(sem_status_entity) in bad and
+              states('sensor.sem_energy_system_entity_status') not in bad %}
+                {% set sem_status_entity = 'sensor.sem_energy_system_entity_status' %}
+              {% endif %} {% set sem_status = states(sem_status_entity) %} {%
+              set helper_entity =
+              'input_number.sem_batteries_end_of_discharge_soc' %} {% set
+              helper_state = states(helper_entity) %}
 
-              {% set e2 = 'input_number.sem_batteries_end_of_discharge_soc' %}
-
-              {% set e3 = 'sensor.inverter_input_power' %}
-
-              {% set e4 = 'sensor.power_meter_active_power' %}
-
-              {% set e5 = 'sensor.batteries_charge_discharge_power' %}
-
-              {% set e6 = 'select.batteries_working_mode' %}
-
-              {% set e7 = 'number.batteries_grid_charge_maximum_power' %}
-
-              {% set e8 = 'number.batteries_maximum_discharging_power' %}
-
-
-              {# Hämta states #}
-
-              {% set s1 = states(e1) %}
-
-              {% set s2 = states(e2) %}
-
-              {% set s3 = states(e3) %}
-
-              {% set s4 = states(e4) %}
-
-              {% set s5 = states(e5) %}
-
-              {% set s6 = states(e6) %}
-
-              {% set s7 = states(e7) %}
-
-              {% set s8 = states(e8) %}
-
-
-              {# Definiera vad som räknas som otillgängligt #}
-
-              {% set bad = ['unknown', 'unavailable', '', None] %}
-
-
-              {# Räkna antal otillgängliga #}
-
-              {% set cnt =
-                ((s1 in bad) | int) +
-                ((s2 in bad) | int) +
-                ((s3 in bad) | int) +
-                ((s4 in bad) | int) +
-                ((s5 in bad) | int) +
-                ((s6 in bad) | int) +
-                ((s7 in bad) | int) +
-                ((s8 in bad) | int)
-              %}
-
-
-              {# Utdatat #}
-
-              {% if cnt == 0 %}
-
-              **Huawei**
+              {% if sem_status == 'OK' and helper_state not in bad %} **Din
+              solcellsanläggning**
 
               ✅ OK
 
               {% else %}
 
-              **Huawei**
+              **SEM**
 
-              ❌ Enheter saknas eller har felaktigt namn ({{ cnt }})
+              ❌ Systemet är inte klart
 
-              {% if s1 in bad %}- {{ e1 }}{% endif %}
+              {% if sem_status in bad %} - {{ sem_status_entity }} saknas eller
+              är otillgänglig {% else %} - {{ state_attr(sem_status_entity,
+              'status_message') or sem_status }} {% set action_required =
+              state_attr(sem_status_entity, 'action_required') %} {% if
+              action_required and action_required != 'Ingen åtgärd behövs.' %} -
+              {{ action_required }} {% endif %} {% endif %}
 
-              {% if s2 in bad %}- {{ e2 }}{% endif %}
-
-              {% if s3 in bad %}- {{ e3 }}{% endif %}
-
-              {% if s4 in bad %}- {{ e4 }}{% endif %}
-
-              {% if s5 in bad %}- {{ e5 }}{% endif %}
-
-              {% if s6 in bad %}- {{ e6 }}{% endif %}
-
-              {% if s7 in bad %}- {{ e7 }}{% endif %}
-
-              {% if s8 in bad %}- {{ e8 }}{% endif %}
+              {% if helper_state in bad %} - {{ helper_entity }} saknas eller är
+              otillgänglig {% endif %}
 
               {% endif %}
 
@@ -1436,71 +1380,6 @@ sections:
 
 
                         Kopiera värdet och klistra in det i fältet ovanför. 
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: mdi:battery
-                heading_style: title
-                heading: Huawei batteri ID
-              - type: entities
-                entities:
-                  - entity: input_text.sem_device_id
-                    tap_action:
-                      action: none
-                    icon_tap_action:
-                      action: none
-              - type: markdown
-                content: >
-                  {% set id = device_id('sensor.batteries_state_of_capacity') %}
-                  {% if id %} **Ditt Huawei batteri ID hittades** 
-                    Fyll i följande ID i rutan ovanför 
-                    - `{{ id }}`
-                  {% else %} 
-
-
-                  **Systemet har inte hittat ditt Huawei batteri ID.** 
-                    Säkerställ att du konfigerat Huawei intergrationen korrekt. Detta gör du via **Inställningar → Enheter och tjänster**. 
-
-                  Du hittar ditt Huawei batteri ID på följande sätt:
-                  **Utvecklarverktyg → Åtgärder   - Sök: huawei   - Välj
-                  *forcible charge*   - Gå till UI-läge   - Välj *Batteries*   -
-                  Gå till YAML-läge** 
-
-                    Fyll i ditt Huawei batteri ID i rutan ovanför
-                  {% endif %}
-          - type: custom:vertical-stack-in-card
-            cards:
-              - type: heading
-                icon: phu:huawei-solar-inverter
-                heading_style: title
-                heading: Huawei inverter ID
-              - type: entities
-                entities:
-                  - entity: input_text.sem_device_id_inverter
-                    tap_action:
-                      action: none
-                    icon_tap_action:
-                      action: none
-              - type: markdown
-                content: >
-                  {% set id = device_id('sensor.inverter_active_power') %} {% if
-                  id %} **Ditt Huawei inverter ID hittades.**
-                    Fyll i följande ID i rutan ovanför 
-                    - `{{ id }}` {% else %}
-                  **Systemet hittade inte ditt Huawei inverter ID** 
-                    Säkerställ att du konfigerat Huawei intergrationen korrekt. Detta gör du via **Inställningar → Enheter och tjänster**. 
-
-                  Du hittar ditt Huawei inverter ID på följande sätt: 
-
-                  **Utvecklarverktyg → Åtgärder → Klicka på åtgärd → Skriv
-                  huawei → Välj limit the power fed to grid → Klicka på gå till
-                  UI-läge → Välj Inverter i rullgardinen på raden inverter →
-                  Klicka på gå till YAML-läge** 
-
-
-                  Fyll i ditt Huawei inverter ID i rutan ovanför
-
-                  {% endif %}
           - type: custom:vertical-stack-in-card
             cards:
               - type: heading
@@ -3718,7 +3597,7 @@ sections:
               - type: entity
                 show_state: true
                 show_icon: true
-                entity: sensor.power_meter_active_power
+                entity: sensor.sem_energy_system_sem_power_meter_active_power
           - type: custom:bubble-card
             card_type: sub-buttons
             sub_button:
@@ -6987,7 +6866,7 @@ sections:
               - type: entity
                 show_state: true
                 show_icon: true
-                entity: sensor.batteries_charge_discharge_power
+                entity: sensor.sem_energy_system_sem_battery_power
                 icon: mdi:flash
           - type: custom:bubble-card
             card_type: sub-buttons
@@ -7001,7 +6880,7 @@ sections:
                     action: none
                   state_background: false
                   state_content: state
-                - entity: sensor.batteries_state_of_capacity
+                - entity: sensor.sem_energy_system_sem_battery_soc
                   name: Nivå
                   show_background: true
                   state_background: false
@@ -7190,11 +7069,11 @@ sections:
                   heading_style: subtitle
                 - type: entities
                   entities:
-                    - entity: select.batteries_working_mode
+                    - entity: select.sem_energy_system_sem_battery_working_mode
                       name: Arbetsläge
-                    - entity: number.batteries_maximum_discharging_power
+                    - entity: number.sem_energy_system_sem_maximum_discharging_power
                       name: Max urladdning
-                    - entity: number.batteries_grid_charge_maximum_power
+                    - entity: number.sem_energy_system_sem_grid_charge_maximum_power
                       name: Max laddning
                       icon: mdi:transmission-tower-import
                 - type: markdown
@@ -7324,7 +7203,7 @@ sections:
                 - show_name: true
                   tap_action:
                     action: none
-                  entity: sensor.batteries_charge_discharge_power
+                  entity: sensor.sem_energy_system_sem_battery_power
                   state_background: false
                   hold_action:
                     action: more-info
@@ -7335,7 +7214,7 @@ sections:
                 - show_name: true
                   tap_action:
                     action: none
-                  entity: sensor.power_meter_active_power
+                  entity: sensor.sem_energy_system_sem_power_meter_active_power
                   state_background: false
                   hold_action:
                     action: more-info
