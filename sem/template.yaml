@@ -1044,20 +1044,30 @@ template:
       - name: "sem_battery_avg_price"
         unit_of_measurement: "SEK/kWh"
         state: >
-          {# --- Hämta laddade kWh --- #}
-          {% set kwh_1 = states('sensor.sem_charge_1a') | float(0) %}
-          {% set kwh_2 = states('sensor.sem_charge_2') | float(0) %}
+          {% set kwh_1_raw = states('sensor.sem_charge_1a') %}
+          {% set kwh_2_raw = states('sensor.sem_charge_2') %}
 
-          {# --- Hämta medelpriser för respektive fönster --- #}
-          {% set price_1 = states('input_number.sem_battery_price_window_1') | float(0) %}
-          {% set price_2 = states('input_number.sem_battery_price_window_2') | float(0) %}
+          {% set price_1_raw = states('input_number.sem_battery_price_window_1') %}
+          {% set price_2_raw = states('input_number.sem_battery_price_window_2') %}
 
-          {# --- Total laddad energi --- #}
-          {% set total_kwh = kwh_1 + kwh_2 %}
+          {% set kwh_1 = kwh_1_raw | float(0) %}
+          {% set kwh_2 = kwh_2_raw | float(0) %}
+          {% set price_1 = price_1_raw | float(0) %}
+          {% set price_2 = price_2_raw | float(0) %}
 
-          {# --- Vägt medelpris --- #}
+          {# Kontrollera giltiga värden #}
+          {% set valid_1 = is_number(kwh_1_raw) and is_number(price_1_raw) and kwh_1 > 0 %}
+          {% set valid_2 = is_number(kwh_2_raw) and is_number(price_2_raw) and kwh_2 > 0 %}
+
+          {# Inkludera endast giltiga laddningsfönster #}
+          {% set energy_1 = kwh_1 if valid_1 else 0 %}
+          {% set energy_2 = kwh_2 if valid_2 else 0 %}
+
+          {% set total_kwh = energy_1 + energy_2 %}
+
+          {# Beräkna viktat medelpris #}
           {% if total_kwh > 0 %}
-            {% set avg_price = (kwh_1 * price_1 + kwh_2 * price_2) / total_kwh %}
+            {% set avg_price = (energy_1 * price_1 + energy_2 * price_2) / total_kwh %}
           {% else %}
             {% set avg_price = 0 %}
           {% endif %}
