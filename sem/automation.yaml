@@ -1284,7 +1284,7 @@ automation:
           {% endif %}
 
       - condition: state
-        entity_id: binary_sensor.sem_available_control
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
         state: "on"
 
       - condition: time
@@ -1383,7 +1383,7 @@ automation:
           {% endif %}
 
       - condition: state
-        entity_id: binary_sensor.sem_available_control
+        entity_id: binary_sensor.sem_huawei_sensor_available_control
         state: "on"
 
       - condition: time
