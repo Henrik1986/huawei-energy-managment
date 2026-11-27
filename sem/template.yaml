@@ -9268,6 +9268,9 @@ template:
         from: "on"
         to: "off"
         id: initial
+      
+      - trigger: time
+        at: "00:05:00"
 
       # Kontrollera kapacitetsökning, men endast när laddningen är av
       - trigger: template
@@ -9791,6 +9794,9 @@ template:
         from: "on"
         to: "off"
         id: initial
+
+      - trigger: time
+        at: "11:55:00"
 
       # Omvärdering när batteriets tillgängliga energi ökat minst 1 kWh och laddningen är av
       - trigger: template
