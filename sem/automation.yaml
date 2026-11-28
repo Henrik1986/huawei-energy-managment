@@ -12,8 +12,165 @@ automation:
       - action: homeassistant.reload_config_entry
         data:
           entry_id: "{{ states('input_text.sem_nordpool_entry_inofficial') }}"
+
+################################################################################
+
+  - alias: SEM - Uppdatera installationsvärden
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: input_button.sem_update_installation_values
+    conditions:
+      - condition: template
+        value_template: >
+          {% set capacity = 'input_number.sem_battery_total_capacity_kwh' %}
+          {% set charge = 'number.batteries_grid_charge_maximum_power' %}
+          {% set discharge = 'number.batteries_maximum_discharging_power' %}
+          {{
+            states(capacity) | is_number
+            and states(charge) | is_number
+            and states(discharge) | is_number
+            and states(capacity) | float(0) > 0
+            and states(charge) | float(0) > 0
+            and states(discharge) | float(0) > 0
+            and state_attr(capacity, 'unit_of_measurement') in ['Wh', 'kWh']
+            and state_attr(charge, 'unit_of_measurement') in ['W', 'kW']
+            and state_attr(discharge, 'unit_of_measurement') in ['W', 'kW']
+          }}
+    actions:
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sem_installation_status
+        data:
+          value: "Konfigurerar..."
+      - delay:
+          seconds: 2
+      # Batterikapacitet
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_total_capacity_kwh
+        data:
+          value: >
+            {% set entity = 'input_number.sem_battery_total_capacity_kwh' %}
+            {% set value = states(entity) | float %}
+            {{ value / 1000 if state_attr(entity, 'unit_of_measurement') == 'Wh' else value }}
+      # Maximal laddningseffekt från elnätet
+      - action: input_number.set_value
+        target:
+          entity_id:
+            - input_number.sem_max_charge_power_window_1
+            - input_number.sem_max_charge_power_window_2
+            - input_number.sem_max_charge_manual_charging
+        data:
+          value: >
+            {% set entity = 'number.batteries_grid_charge_maximum_power' %}
+            {% set value = states(entity) | float %}
+            {{ value / 1000 if state_attr(entity, 'unit_of_measurement') == 'W' else value }}
+      # Maximal urladdningseffekt från batteriet
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_battery_discharge_power_ev_limit
+        data:
+          value: >
+            {% set entity = 'number.batteries_maximum_discharging_power' %}
+            {% set value = states(entity) | float %}
+            {{ value / 1000 if state_attr(entity, 'unit_of_measurement') == 'W' else value }}
+      # Hämta position från Home
+      - if:
+          - condition: template
+            value_template: >
+              {{ has_value('zone.home')
+                 and state_attr('zone.home', 'latitude') is not none
+                 and state_attr('zone.home', 'longitude') is not none }}
+        then:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.sem_solar_lat
+            data:
+              value: "{{ state_attr('zone.home', 'latitude') }}"
+
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.sem_solar_lon
+            data:
+              value: "{{ state_attr('zone.home', 'longitude') }}"      
+      # Hämtar solinstrålningens dämpning
+      - action: input_number.set_value
+        target:
+          entity_id:
+            - input_number.sem_solar_damping_morning
+            - input_number.sem_solar_damping_evening
+        data:
+          value: 0
+      - delay:
+          seconds: 5
+      # Konfiguration färdig
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sem_installation_status
+        data:
+          value: "Klart!"
+      - delay:
+          seconds: 60
+      # Rensa status
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.sem_installation_status
+        data:
+          value: ""
+################################################################################
+
+  - alias: SEM - Uppdatera exportstrategi
+    triggers:
+    - trigger: state
+      entity_id: input_number.sem_export_strategy
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_export_profit_margin
+        data:
+          value: >
+            {{ (0.95 - states('input_number.sem_export_strategy') | float(5) * 0.1) | round(2) }}
+    mode: single
+################################################################################
+
+  - alias: SEM - UPDATE SEM Charging Strategy
+    triggers:
+      - trigger: state
+        entity_id: input_number.sem_charge_strategy
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_charge_profit_threshold
+        data:
+          value: >
+            {{ (0.8 - (states('input_number.sem_charge_strategy') | float(5) - 1) * 0.0722222) | round(2) }}
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_low_price_threshold
+        data:
+          value: >
+            {{ (0.9 - (states('input_number.sem_charge_strategy') | float(5) - 1) * 0.05) | round(2) }}
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_cheap_charge_price_limit
+        data:
+          value: >
+            {{ (0.04 + (states('input_number.sem_charge_strategy') | float(5) - 1) * 0.04) | round(2) }}
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.sem_cheap_charge_max_kwh
+        data:
+          value: >
+            {{ (
+              states('input_number.sem_battery_total_capacity_kwh') | float(0)
+              *
+              (10 + (states('input_number.sem_charge_strategy') | float(5) - 1) * 5) / 100
+            ) | round(2) }}
+    mode: single
           
 ################################################################################
+
   - alias: SEM - Update Smart Charging When New Prices Arrive
     mode: single
     triggers:
@@ -27,6 +184,7 @@ automation:
           entity_id: input_button.sem_update_battery_cheapest_charge
 
 ################################################################################
+
   - alias: SEM - Reset 1a_2
     mode: single
     triggers:
@@ -106,7 +264,7 @@ automation:
           entity_id: input_boolean.sem_manual_charge
           state: "off" 
         - condition: state
-          entity_id: binary_sensor.sem_huawei_sensor_available_control
+          entity_id: binary_sensor.sem_available_control
           state: "on"
     action:
         - choose:
@@ -147,7 +305,6 @@ automation:
                         entity_id: input_boolean.sem_interval_1a 
                   - action: huawei_solar.set_tou_periods
                     data:
-                        device_id: "{{ states('input_text.sem_device_id') }}"
                         periods: 00:00-23:59/1234567/+
                   - delay: 00:01:00
                   - action: select.select_option
@@ -239,7 +396,7 @@ automation:
         entity_id: input_boolean.sem_manual_charge
         state: "off"
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     action:
       - choose:
@@ -280,7 +437,6 @@ automation:
                   entity_id: input_boolean.sem_interval_2 
               - action: huawei_solar.set_tou_periods
                 data:
-                  device_id: "{{ states('input_text.sem_device_id') }}"
                   periods: 00:00-23:59/1234567/+
               - delay: 00:01:00
               - action: select.select_option
@@ -357,7 +513,7 @@ automation:
         to: "on"
     condition:
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     actions:
       - action: number.set_value
@@ -368,7 +524,6 @@ automation:
             {{ (states('input_number.sem_max_charge_manual_charging') | float) * 1000 }}
       - action: huawei_solar.set_tou_periods
         data:
-          device_id: "{{ states('input_text.sem_device_id') }}"
           periods: "00:00-23:59/1234567/+"
       - delay: 00:00:20
       - action: select.select_option
@@ -396,7 +551,7 @@ automation:
           entity_id: timer.sem_manual_charge_time
     condition: 
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     action:
       - action: timer.finish
@@ -439,7 +594,7 @@ automation:
               false
             {% endif %}
         - condition: state
-          entity_id: binary_sensor.sem_huawei_sensor_available_control
+          entity_id: binary_sensor.sem_available_control
           state: "on"
     action:
       - choose:
@@ -485,7 +640,7 @@ automation:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
                   value: >
-                    {{ (states('input_number.sem_max_export_power') | float(default=1)) * 1000 }}
+                    {{ (states('input_number.sem_battery_discharge_power_ev_limit') | float(default=1)) * 1000 }}
               - action: select.select_option
                 target:
                   entity_id: select.batteries_working_mode
@@ -530,7 +685,7 @@ automation:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
                   value: >
-                    {{ (states('input_number.sem_max_export_power') | float(default=1)) * 1000 }}
+                    {{ (states('input_number.sem_battery_discharge_power_ev_limit') | float(default=1)) * 1000 }}
               - action: select.select_option
                 target:
                   entity_id: select.batteries_working_mode
@@ -676,7 +831,7 @@ automation:
         entity_id: input_boolean.sem_export_limit_active
         state: 'on'
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
     action:
         - choose:
@@ -704,7 +859,6 @@ automation:
               sequence:
                 - action: huawei_solar.set_maximum_feed_grid_power
                   data:
-                    device_id: "{{ states('input_text.sem_device_id_inverter') }}"
                     power: "300"
                 - action: input_boolean.turn_on
                   target:
@@ -728,8 +882,6 @@ automation:
                     {% endif %}
               sequence:
                 - action: huawei_solar.reset_maximum_feed_grid_power
-                  data:
-                    device_id: "{{ states('input_text.sem_device_id_inverter') }}"
                 - action: input_boolean.turn_off
                   target:
                     entity_id: input_boolean.sem_max_export_active
@@ -783,7 +935,7 @@ automation:
             false
           {% endif %}
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
 
     action:
@@ -1096,7 +1248,7 @@ automation:
             false
           {% endif %}
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
 
     action:
@@ -1270,7 +1422,6 @@ automation:
     triggers:
       - trigger: time_pattern
         minutes: "/5"
-
     conditions:
       - condition: template
         value_template: >
@@ -1282,22 +1433,17 @@ automation:
           {% else %}
             false
           {% endif %}
-
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
-
       - condition: time
         after: "12:00:00"
         before: "23:59:59"
-
       - condition: state
         entity_id: input_boolean.sem_battery_cheap_mode
         state: "off"
-
     actions:
       - choose:
-
           # AKTIVERA BATTERISPARLÄGE UTANFÖR ANVÄNDNINGSINTERVALLET
           - conditions:
               - condition: template
@@ -1311,22 +1457,21 @@ automation:
                   {% else %}
                     false
                   {% endif %}
-
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "off"
-
+              - condition: template
+                value_template: >
+                  {{ state_attr('sensor.sem_battery_charge_energy_1a_2', 'battery_capacity') | float(0) > 0 }}
             sequence:
               - action: number.set_value
                 target:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
                   value: 0
-
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
-
           # ÅTERSTÄLL NORMAL URLADDNING INOM ANVÄNDNINGSINTERVALLET
           - conditions:
               - condition: template
@@ -1340,15 +1485,12 @@ automation:
                   {% else %}
                     false
                   {% endif %}
-
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
-
               - condition: state
                 entity_id: input_boolean.sem_ev_charging_protection_status
                 state: "off"
-
             sequence:
               - action: number.set_value
                 target:
@@ -1356,20 +1498,17 @@ automation:
                 data:
                   value: >
                     {{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}
-
               - action: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.sem_battery_save
-
     mode: single
 
-#####################################################################
+################################################################################
 
   - alias: SEM - Battery use between 00-12
     triggers:
       - trigger: time_pattern
         minutes: "/5"
-
     conditions:
       - condition: template
         value_template: >
@@ -1381,22 +1520,17 @@ automation:
           {% else %}
             false
           {% endif %}
-
       - condition: state
-        entity_id: binary_sensor.sem_huawei_sensor_available_control
+        entity_id: binary_sensor.sem_available_control
         state: "on"
-
       - condition: time
         after: "00:00:00"
         before: "12:00:00"
-
       - condition: state
         entity_id: input_boolean.sem_battery_cheap_mode
         state: "off"
-
     actions:
       - choose:
-
           # AKTIVERA BATTERISPARLÄGE UTANFÖR ANVÄNDNINGSINTERVALLET
           - conditions:
               - condition: template
@@ -1410,22 +1544,21 @@ automation:
                   {% else %}
                     false
                   {% endif %}
-
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "off"
-
+              - condition: template
+                value_template: >
+                  {{ state_attr('sensor.sem_battery_charge_energy_1a_2', 'battery_capacity') | float(0) > 0 }}
             sequence:
               - action: number.set_value
                 target:
                   entity_id: number.batteries_maximum_discharging_power
                 data:
                   value: 0
-
               - action: input_boolean.turn_on
                 target:
                   entity_id: input_boolean.sem_battery_save
-
           # ÅTERSTÄLL NORMAL URLADDNING INOM ANVÄNDNINGSINTERVALLET
           - conditions:
               - condition: template
@@ -1439,15 +1572,12 @@ automation:
                   {% else %}
                     false
                   {% endif %}
-
               - condition: state
                 entity_id: input_boolean.sem_battery_save
                 state: "on"
-
               - condition: state
                 entity_id: input_boolean.sem_ev_charging_protection_status
                 state: "off"
-
             sequence:
               - action: number.set_value
                 target:
@@ -1455,11 +1585,9 @@ automation:
                 data:
                   value: >
                     {{ states('input_number.sem_battery_discharge_power_ev_limit') | float * 1000 }}
-
               - action: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.sem_battery_save
-
     mode: single
 
 ################################################################################
