@@ -10394,7 +10394,7 @@ template:
         state: >
           {% set entities = [
             'sensor.batteries_state_of_capacity',
-            'input_number.sem_batteries_end_of_discharge_soc',
+            'number.batteries_end_of_discharge_soc',
             'sensor.inverter_input_power',
             'sensor.power_meter_active_power',
             'sensor.batteries_charge_discharge_power',
