@@ -305,6 +305,7 @@ automation:
                         entity_id: input_boolean.sem_interval_1a 
                   - action: huawei_solar.set_tou_periods
                     data:
+                        device_id: "{{ states('input_text.sem_device_id') }}"
                         periods: 00:00-23:59/1234567/+
                   - delay: 00:01:00
                   - action: select.select_option
@@ -437,6 +438,7 @@ automation:
                   entity_id: input_boolean.sem_interval_2 
               - action: huawei_solar.set_tou_periods
                 data:
+                  device_id: "{{ states('input_text.sem_device_id') }}"
                   periods: 00:00-23:59/1234567/+
               - delay: 00:01:00
               - action: select.select_option
@@ -524,6 +526,7 @@ automation:
             {{ (states('input_number.sem_max_charge_manual_charging') | float) * 1000 }}
       - action: huawei_solar.set_tou_periods
         data:
+          device_id: "{{ states('input_text.sem_device_id') }}"
           periods: "00:00-23:59/1234567/+"
       - delay: 00:00:20
       - action: select.select_option
@@ -859,6 +862,7 @@ automation:
               sequence:
                 - action: huawei_solar.set_maximum_feed_grid_power
                   data:
+                    device_id: "{{ states('input_text.sem_device_id_inverter') }}"
                     power: "300"
                 - action: input_boolean.turn_on
                   target:
@@ -882,6 +886,8 @@ automation:
                     {% endif %}
               sequence:
                 - action: huawei_solar.reset_maximum_feed_grid_power
+                  data: 
+                    device_id: "{{ states('input_text.sem_device_id_inverter') }}"
                 - action: input_boolean.turn_off
                   target:
                     entity_id: input_boolean.sem_max_export_active
